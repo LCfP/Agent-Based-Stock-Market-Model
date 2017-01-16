@@ -3,12 +3,13 @@ __author__ = 'Schasfoort, Abeshzadeh, Broek & Peters'
 
 import agents
 import functions
+import setup
 
 """
 Set-up the initial variables here
 """
-
-SIMULATIONTIMEINQUARTERS = 10
+agents = setupAgents(amountOfAgents=3, seed=...)
+parameterspace = {"simulationTime" : 10}
 
 
 """
@@ -21,7 +22,7 @@ Process overview and scheduling from the ODD
 4. Store market prices t-1 
 """
 
-for quarter in range(SIMULATIONTIMEINQUARTERS):
+for quarter in range(parameterspace["simulationTime"]):
 	# 1 update dividends
 	
 	# 2 update expected price and spread
