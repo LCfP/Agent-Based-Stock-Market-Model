@@ -8,7 +8,9 @@ import setup
 """
 Set-up the initial variables here
 """
-agents = setupAgents(amountOfAgents=3, seed=...)
+SEED = 1
+
+agents = setupAgents(amountOfAgents=3, seed=SEED)
 parameterspace = {"simulationTime" : 10}
 
 
