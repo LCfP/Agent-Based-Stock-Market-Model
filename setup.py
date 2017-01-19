@@ -2,11 +2,17 @@
 __author__ = 'Schasfoort, Abeshzadeh, Broek & Peters'
 
 import agents
-
+import random
 
 def setupAgents(amountOfAgents=3, seed):
 	"""This returns an initialized agent set"""
+	random.seed(seed)
 	agentset = []
 	for agent in range(amountOfAgents):
-		agentset.append(Trader(money=, stocks=, bidAskSpread=, memorySize=, riskAversion=, extrapolation=)) 
+		# TODO
+		agentset.append(Trader(money=initialMoney(), stocks=, bidAskSpread=, memorySize=, riskAversion=, extrapolation=)) 
 	return agentset
+	
+def initialMoney():
+	money = 10000 * random.int
+	return money
