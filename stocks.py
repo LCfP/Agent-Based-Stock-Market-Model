@@ -2,9 +2,10 @@
 __author__ = 'Schasfoort, Abeshzadeh, Broek & Peters'
 
 class Stock():
-	"""a base class for Stocks"""
-	def __init__(self, id ,firm, faceValue):
-        """Creates a new trader"""
-		self.id = id
-		self.firm = firm
-		self.faceValue = faceValue
+    """a base class for Stocks"""
+    def __init__(self, id ,firm, faceValue, amount):
+        """Creates a new stock"""
+        self.id = id
+        self.firm = firm
+        self.faceValue = faceValue
+        self.amount = amount
