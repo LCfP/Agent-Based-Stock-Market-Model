@@ -6,25 +6,23 @@ import stocks
 
 class Trader:
     """a base class for Traders"""
-    def __init__(self, id, money, stocks, bidAskSpread, memorySize, riskAversion, extrapolation):
+    def __init__(self, id, money, bidAskSpread, memorySize):
         """Creates a new trader"""
-		self.id = id
+        self.id = id 
         self.money = money
-        self.stocks = stocks
-        self.bidAskSpread = bidAskSpread
-		self.memorySize = memorySize
-		self.riskAversion = riskAversion
-		self.extrapolation	= extrapolation
-	
-	def valuateStocks(stock, valuationFunction):
-		# TODO test this function
-		npvFirm = valuationFunction(self.memorySize, stock.firm)
-		# evaluate the below calculation (currently additional stocks dillute value directly)
-		stockvalue = npvFirm / (stock.firm.bookValue / stock.faceValue)
-		return stockValue
-	
-	def transact(self, inflowItem, inflowAmount, outflowItem, outflowAmount):
-		"""This allows an agent to transact stocks and money"""
+        self.stocks = []
+        self.bidAskSpread = bidAskSpread 
+        self.memorySize = memorySize
+
+    def valuateStocks(stock, valuationFunction):
+        # TODO test this function
+        npvFirm = valuationFunction(self.memorySize, stock.firm)
+        # evaluate the below calculation (currently additional stocks dillute value directly)
+        stockvalue = npvFirm / (stock.firm.bookValue / stock.faceValue)
+        return stockValue
+    
+    def transact(self, inflowItem, inflowAmount, outflowItem, outflowAmount):
+        """This allows an agent to transact stocks and money"""
         if ((inflowItem == "stocks") & (outflowItem == "money") & (outflowAmount <= self.money)):
             self.stocks += inflowAmount
             self.money -= outflowAmount
