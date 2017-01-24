@@ -1,35 +1,40 @@
 """In this file, we define the benchmark stock market model agent classes"""
+
 __author__ = 'Schasfoort, Abeshzadeh, Broek & Peters'
 
-import functions
-import stocks
 
 class Trader:
     """a base class for Traders"""
-    def __init__(self, id, money, bidAskSpread, memorySize):
+    def __init__(self, name, money, bid_ask_spread, memory_size):
         """Creates a new trader"""
-        self.id = id 
+        self.name = name
         self.money = money
-        self.stocks = []
-        self.bidAskSpread = bidAskSpread 
-        self.memorySize = memorySize
+        self.stocks = {}
+        self.bid_ask_spread = bid_ask_spread
+        self.memory_size = memory_size
 
-    def valuateStocks(stock, valuationFunction):
+    def valuate_stocks(self, stock, valuation_function):
         # TODO test this function
-        npvFirm = valuationFunction(self.memorySize, stock.firm)
-        # evaluate the below calculation (currently additional stocks dillute value directly)
-        stockvalue = npvFirm / (stock.firm.bookValue / stock.faceValue)
-        return stockValue
+        npv_firm = valuation_function(self.memory_size, stock.firm)
+        # evaluate the below calculation (currently additional stocks dilute value directly)
+        stock_value = npv_firm / (stock.firm.bookvalue / stock.facevalue)
+        return stock_value
     
-    def transact(self, inflowItem, inflowAmount, outflowItem, outflowAmount):
+    def transact(self, inflow_item, inflow_amount, outflow_item, outflow_amount):
         """This allows an agent to transact stocks and money"""
-        if ((inflowItem == "stocks") & (outflowItem == "money") & (outflowAmount <= self.money)):
-            self.stocks += inflowAmount
-            self.money -= outflowAmount
-            print (self, "I just purchased stocks") # for debugging purposes
-        elif ((inflowItem == "money") & (outflowItem == "stocks") & (outflowAmount <= self.stocks)):
-            self.money += inflowAmount
-            self.stocks -= outflowAmount
+        if (inflow_item == "stocks") & (outflow_item == "money") & (outflow_amount <= self.money):
+            self.stocks += inflow_amount
+            self.money -= outflow_amount
+            print (self, "I just purchased stocks")  # for debugging purposes
+        elif (inflow_item == "money") & (outflow_item == "stocks") & (outflow_amount <= self.stocks):
+            self.money += inflow_amount
+            self.stocks -= outflow_amount
             print (self, "I just sold stocks")
         else: 
             print ("No transaction possible ")
+
+    def __str__(self):
+        return str(self.name)
+
+    def __repr__(self):
+        return str(self.name)
