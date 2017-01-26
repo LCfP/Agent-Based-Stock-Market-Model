@@ -3,6 +3,7 @@
 __author__ = 'Schasfoort, Abeshzadeh, Broek & Peters'
 
 import random
+import math
 
 def bounded_best_price(agentset, observablesetsize, stock, valuation_function, seed):
     """return set of matched agents"""
@@ -19,19 +20,19 @@ def bounded_best_price(agentset, observablesetsize, stock, valuation_function, s
         totalObservableSet.remove(demander)
         observableSet = [totalObservableSet[i] for i in sorted(random.sample(range(len(totalObservableSet)),
                                                                              observablesetsize))]
-        supplierAndPrice = {}
+        # Find cheapest supplier and safe the price
+        minSupplierandPrice = (None, math.inf)
+
         for supplier in observableSet:
             supplierPrice = supplier.valuate_stocks(stock=stock, valuation_function=valuation_function) \
             * (1 + (supplier.bid_ask_spread / 200))
-            supplierAndPrice[str(supplier)] = supplierPrice
 
-        min_value = min(supplierAndPrice.values())
-        min_keys = sorted([k for k in supplierAndPrice if supplierAndPrice[k] == min_value])
-        cheapestSupplier = random.choice(min_keys)
+            if supplierPrice < minSupplierandPrice[1]:
+                minSupplierandPrice = (supplier, supplierPrice)
 
-        if supplierAndPrice[cheapestSupplier] <= demanderPrice:
-            setOfMatchedAgents.append((demander, cheapestSupplier))
-
+        # If the minimum price of all suppliers is lower than the ask price, make deal with demander
+        if minSupplierandPrice[1] <= demanderPrice:
+            setOfMatchedAgents.append((demander, minSupplierandPrice[0]))
 
     return setOfMatchedAgents
     # observe random set and take highest
