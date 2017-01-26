@@ -10,6 +10,7 @@ class Trader:
         self.name = name
         self.money = money
         self.stocks = {}
+        # bid ask spread is an integer
         self.bid_ask_spread = bid_ask_spread
         self.memory_size = memory_size
 
