@@ -28,7 +28,7 @@ def setup_firms(init_book_value, init_profit, init_profit_history, seed, amount_
         firm_set.append(firms.Firm(name=firm,
                                    book_value=randomize_init_variable(init_book_value[0], init_book_value[1]),
                                    profit=randomize_init_variable(init_profit[0], init_profit[1]),
-                                   profit_history=init_profit_history,
+                                   profit_history=list(init_profit_history),
                                    # this makes sure that individual firms have a different seed every simulation
                                    seed=random.randint(0, 10000),
                                    dividend_rate=1))

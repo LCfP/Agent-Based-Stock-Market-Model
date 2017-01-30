@@ -4,7 +4,6 @@ import setup
 
 __author__ = 'Schasfoort, Abeshzadeh, Broek & Peters'
 
-
 """
 Define initial variables and parameters
 """
@@ -15,22 +14,25 @@ SEED = 1
 
 INIT_MONEY = (100, 200)
 INIT_BID_ASK = (5, 5)
-INIT_MEMORY_SIZE = (2, 3)
+INIT_MEMORY_SIZE = (1, 4)
 
 INIT_PROFIT = (200, 200)
 INIT_BOOK_VALUE = (10000, 10000)
-PROFIT_HISTORY = [150, 170, 190]
+INIT_PROFIT_HISTORY = [150, 170, 190]
 
 INIT_FACE_VALUE = 50
+
+parameter_space = {"simulationTime": 10}
 
 """
 Setup 
 """
 agents = setup.setup_agents(init_money=INIT_MONEY, init_bid_ask_spread=INIT_BID_ASK, init_memory_size=INIT_MEMORY_SIZE,
                             seed=SEED, amount_of_agents=AMOUNT_OF_AGENTS)
-firms = setup.setup_firms(init_book_value=INIT_BOOK_VALUE, init_profit=INIT_PROFIT, init_profit_history=PROFIT_HISTORY,
+firms = setup.setup_firms(init_book_value=INIT_BOOK_VALUE, init_profit=INIT_PROFIT, init_profit_history=INIT_PROFIT_HISTORY,
                           seed=SEED, amount_of_firms=AMOUNT_OF_FIRMS)
 stocks = setup.setup_stocks(firms, face_value=INIT_FACE_VALUE)
+
 # distribute the initial stocks to the agents equally 1 per 1 until non left. (slow)
 for stock in stocks:
     amount = stock.amount
@@ -44,15 +46,15 @@ for stock in stocks:
             amount += -distribute_to_agent
             if amount == 0:
                 break
-
-parameter_space = {"simulationTime": 10}
+"""
+Print set-up
+"""
 for agent in agents:
-    print(repr(agent) + " has " + str(agent.money) + "$ and stocks:")
-    print(agent.stocks)
+    print("Trader" + repr(agent) + " has $ " + str(agent.money) + "and stocks:", agent.stocks, "and memory of ", agent.memory_size, " finally the bid-ask spread size is ", agent.bid_ask_spread)
 for firm in firms:
-    print(repr(firm) + " has a book value of " + str(firm.book_value))
+    print("Firm" + repr(firm) + " has a book value of " + str(firm.book_value) + " profit of ", firm.profit, "profit history of ", firm.profit_history, " and a divididend ratio of ", firm.dividend_rate)
 for stock in stocks:
-    print(repr(stock) + ", amount " + str(stock.amount))
+    print(repr(stock) + ", amount " + str(stock.amount) + " links to Firm ", stock.firm)
 
 """
 Simulation
