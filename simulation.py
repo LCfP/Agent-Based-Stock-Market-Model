@@ -58,7 +58,7 @@ for stock in stocks:
 Simulation
 
 Process overview and scheduling from the ODD
-1. Update dividends
+1. Update profits
 2. Update expected price and spread
 3. Market mechanism
 4. Store market prices t-1 
