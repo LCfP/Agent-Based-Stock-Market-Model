@@ -4,6 +4,7 @@ __author__ = 'Schasfoort, Abeshzadeh, Broek & Peters'
 
 import random
 import math
+from functions import transaction
 
 
 def market_mechanism(agentset, observablesetsize, stock, valuation_function, set_of_traders_function, seed):
@@ -31,8 +32,11 @@ def market_mechanism(agentset, observablesetsize, stock, valuation_function, set
             if suitable_trade(demander, supplier, best_supplier_and_price, stock, valuation_function):
                 best_supplier_and_price = (supplier, supplier_price)
 
-        # If the minimum price of all suppliers is lower than the ask price, make deal with demander
-        set_of_matched_agents.append((demander, best_supplier_and_price[0]))
+        # If we found a trade, make the actual trade.
+        if best_supplier_and_price[0] is not None:
+            set_of_matched_agents.append((demander, best_supplier_and_price[0]))
+            make_trade(demander, best_supplier_and_price[0], stock, valuation_function)
+
 
     return set_of_matched_agents
     # observe random set and take highest
@@ -51,3 +55,17 @@ def suitable_trade(demander, supplier, best_supplier_and_price, stock, valuation
     # A trade is only possible if the supplier price is the lowest, and there's stock available.
     if supplier_price < best_supplier_and_price[1] and supplier.stocks["1"] > 0:
         return True
+
+def make_trade(demander, supplier, stock, valuation_function):
+    amount_demander_can_buy = supplier.money / supplier.valuate_stocks(stock=stock, valuation_function=valuation_function) \
+                     * (1 + (supplier.bid_ask_spread / 200))
+    amount_demander_can_buy = math.floor(amount_demander_can_buy)
+    amount_supplier_can_sell = supplier.stocks["1"]
+
+    # Determine trade price, and determine trade quantity
+    price = supplier.valuate_stocks(stock=stock, valuation_function=valuation_function) \
+                     * (1 + (supplier.bid_ask_spread / 200))
+    if amount_demander_can_buy < amount_demander_can_buy:
+        transaction(demander, supplier, amount_demander_can_buy, amount_demander_can_buy * price)
+    else:
+        transaction(demander, supplier, amount_supplier_can_sell, amount_demander_can_buy * price)
