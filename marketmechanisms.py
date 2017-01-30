@@ -53,19 +53,19 @@ def suitable_trade(demander, supplier, best_supplier_and_price, stock, valuation
         return False
 
     # A trade is only possible if the supplier price is the lowest, and there's stock available.
-    if supplier_price < best_supplier_and_price[1] and supplier.stocks["1"] > 0:
+    if supplier_price < best_supplier_and_price[1] and supplier.stocks[stock] > 0:
         return True
 
 def make_trade(demander, supplier, stock, valuation_function):
     amount_demander_can_buy = supplier.money / supplier.valuate_stocks(stock=stock, valuation_function=valuation_function) \
                      * (1 + (supplier.bid_ask_spread / 200))
     amount_demander_can_buy = math.floor(amount_demander_can_buy)
-    amount_supplier_can_sell = supplier.stocks["1"]
+    amount_supplier_can_sell = supplier.stocks[stock]
 
     # Determine trade price, and determine trade quantity
     price = supplier.valuate_stocks(stock=stock, valuation_function=valuation_function) \
                      * (1 + (supplier.bid_ask_spread / 200))
-    if amount_demander_can_buy < amount_demander_can_buy:
-        transaction(demander, supplier, amount_demander_can_buy, amount_demander_can_buy * price)
+    if amount_demander_can_buy < amount_supplier_can_sell:
+        transaction(demander, supplier, stock, amount_demander_can_buy, amount_demander_can_buy * price)
     else:
-        transaction(demander, supplier, amount_supplier_can_sell, amount_demander_can_buy * price)
+        transaction(demander, supplier, stock, amount_supplier_can_sell, amount_supplier_can_sell * price)

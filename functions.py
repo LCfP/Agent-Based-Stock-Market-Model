@@ -7,10 +7,10 @@ import stocks
 __author__ = 'Schasfoort, Abeshzadeh, Broek & Peters'
 
 
-def transaction(buyer, seller, amount_of_product, amount_of_money):
+def transaction(buyer, seller, stock, amount_of_product, amount_of_money):
     """This function makes a buyer and seller agent perform a transaction with each other"""
-    buyer.transact("stocks", amount_of_product, "money", amount_of_money)
-    seller.transact("money", amount_of_money, "stocks", amount_of_product)
+    buyer.transact(stock, amount_of_product, "money", amount_of_money)
+    seller.transact("money", amount_of_money, stock, amount_of_product)
 
 
 def calculate_npv(dividend, discount_rate=0.05, growth_rate=0):

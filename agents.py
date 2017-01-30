@@ -2,6 +2,7 @@
 
 __author__ = 'Schasfoort, Abeshzadeh, Broek & Peters'
 
+from stocks import Stock
 
 class Trader:
     """a base class for Traders"""
@@ -23,13 +24,13 @@ class Trader:
     
     def transact(self, inflow_item, inflow_amount, outflow_item, outflow_amount):
         """This allows an agent to transact stocks and money"""
-        if (inflow_item == "stocks") & (outflow_item == "money") & (outflow_amount <= self.money):
-            self.stocks += inflow_amount
+        if inflow_item is Stock and outflow_item is str and (outflow_amount <= self.money):
+            self.stocks[inflow_item] += inflow_amount
             self.money -= outflow_amount
             print (self, "I just purchased stocks")  # for debugging purposes
-        elif (inflow_item == "money") & (outflow_item == "stocks") & (outflow_amount <= self.stocks):
+        elif inflow_item is str and outflow_item is Stock and (outflow_amount <= self.stocks):
             self.money += inflow_amount
-            self.stocks -= outflow_amount
+            self.stocks[outflow_item] -= outflow_amount
             print (self, "I just sold stocks")
         else: 
             print ("No transaction possible ")
