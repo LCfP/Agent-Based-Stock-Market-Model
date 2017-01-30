@@ -10,9 +10,9 @@ __author__ = 'Schasfoort, Abeshzadeh, Broek & Peters'
 """
 Define initial variables and parameters
 """
-AMOUNT_OF_AGENTS = 3
+AMOUNT_OF_AGENTS = 6
 AMOUNT_OF_FIRMS = 2
-OBSERVABLE_SET_SIZE = 5
+OBSERVABLE_SET_SIZE = 3
 
 SEED = 1
 

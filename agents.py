@@ -3,6 +3,7 @@
 __author__ = 'Schasfoort, Abeshzadeh, Broek & Peters'
 
 from stocks import Stock
+from firms import Firm
 
 class Trader:
     """a base class for Traders"""
@@ -16,10 +17,10 @@ class Trader:
         self.memory_size = memory_size
 
     def valuate_stocks(self, stock, valuation_function):
-        # TODO test this function
         npv_firm = valuation_function(self.memory_size, stock.firm)
+
         # evaluate the below calculation (currently additional stocks dilute value directly)
-        stock_value = npv_firm / (stock.firm.bookvalue / stock.facevalue)
+        stock_value = npv_firm / (stock.firm.book_value / stock.face_value)
         return stock_value
     
     def transact(self, inflow_item, inflow_amount, outflow_item, outflow_amount):
