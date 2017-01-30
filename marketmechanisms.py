@@ -1,4 +1,4 @@
-"""In this file, we define market matching mecahnism functions. These functions take in agent sets and output matched pairs of agents"""
+"""In this file, we define market matching mechanism functions. These functions take in agent sets and output matched pairs of agents"""
 
 __author__ = 'Schasfoort, Abeshzadeh, Broek & Peters'
 
@@ -17,8 +17,6 @@ def market_mechanism(agentset, observablesetsize, stock, valuation_function, set
 
     # every demand agent observes a subset of other agents from which it picks the cheapest supplier
     for demander in randomized_agent_set:
-        demander_price = demander.valuate_stocks(stock=stock, valuation_function=valuation_function) \
-                         * (1 - (demander.bid_ask_spread / 200))  # /2 and / 100 for percent
 
         # find the observable set for the demanding agent
         observable_set = set_of_traders_function(demander, randomized_agent_set, observablesetsize)
@@ -30,7 +28,7 @@ def market_mechanism(agentset, observablesetsize, stock, valuation_function, set
             supplier_price = supplier.valuate_stocks(stock=stock, valuation_function=valuation_function) \
                              * (1 + (supplier.bid_ask_spread / 200))
 
-            if suitable_trade(demander, supplier, best_supplier_and_price, stock):
+            if suitable_trade(demander, supplier, best_supplier_and_price, stock, valuation_function):
                 best_supplier_and_price = (supplier, supplier_price)
 
         # If the minimum price of all suppliers is lower than the ask price, make deal with demander
@@ -40,7 +38,7 @@ def market_mechanism(agentset, observablesetsize, stock, valuation_function, set
     # observe random set and take highest
 
 
-def suitable_trade(demander, supplier, best_supplier_and_price, stock):
+def suitable_trade(demander, supplier, best_supplier_and_price, stock, valuation_function):
     demander_price = demander.valuate_stocks(stock=stock, valuation_function=valuation_function) \
                      * (1 - (demander.bid_ask_spread / 200))  # /2 and / 100 for percent
     supplier_price = supplier.valuate_stocks(stock=stock, valuation_function=valuation_function) \

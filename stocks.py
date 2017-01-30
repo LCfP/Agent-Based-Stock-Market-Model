@@ -13,7 +13,7 @@ class Stock:
         self.amount = amount
 
     def __str__(self):
-        return "Stock of " + repr(self.firm)
+        return "Stock of " + str(self.firm)
 
     def __repr__(self):
-        return "Stock of " + repr(self.firm)
+        return "stock_" + repr(self.firm)
