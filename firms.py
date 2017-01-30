@@ -20,9 +20,8 @@ class Firm:
                                                                          self.profit_history[1:])]
         random.seed(seed)
 
-    def update_profits(self):
-        # TODO update
-        growth = 95 + random.randint(0, 10)
+    def update_profits(self, lowestpercentage=95, variance=10):
+        growth = lowestpercentage + random.randint(0, variance)
         self.profit = int((self.profit * growth) / 100)
         self.profit_growth_history.append((growth - 100) / 100)
         self.profit_history.append(self.profit)

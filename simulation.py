@@ -72,7 +72,8 @@ Process overview and scheduling from the ODD
 
 for quarter in range(parameter_space["simulationTime"]):
     #1 update dividends
-
+    for firm in firms:
+        firm.update_profits(lowestpercentage=95, variance=10)
     #2 update expected price and spread
 
     #3 market mechanism
