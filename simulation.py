@@ -1,6 +1,9 @@
 """This file is our main simulation file it includes the set-up and time loop"""
 
 import setup
+from marketmechanisms import market_mechanism
+import functions
+from randomset import subset_traders
 
 __author__ = 'Schasfoort, Abeshzadeh, Broek & Peters'
 
@@ -9,6 +12,7 @@ Define initial variables and parameters
 """
 AMOUNT_OF_AGENTS = 3
 AMOUNT_OF_FIRMS = 2
+OBSERVABLE_SET_SIZE = 5
 
 SEED = 1
 
@@ -66,17 +70,12 @@ Process overview and scheduling from the ODD
 4. Store market prices t-1 
 """
 
-# for quarter in range(parameter_space["simulationTime"]):
-#     1 update dividends
-#
-#     2 update expected price and spread
-#
-#     3 market mechanism
-#     For actingTrader in Traders:
-#         Observe random subset of traders
-#
-#         Calculate best deal and trade with that trader (buy or sell)
-#
-#         Write data on counter party + quantity + price to data set
-#
-#     4 store market prices
+for quarter in range(parameter_space["simulationTime"]):
+    #1 update dividends
+
+    #2 update expected price and spread
+
+    #3 market mechanism
+    market_mechanism(agents, OBSERVABLE_SET_SIZE, stocks[0], functions.valuation_extrapolate_average, subset_traders,
+                     SEED)
+    #4 store market prices
