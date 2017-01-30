@@ -4,6 +4,7 @@ import setup
 from marketmechanisms import market_mechanism
 import functions
 from randomset import subset_traders
+from stocks import Stock
 
 __author__ = 'Schasfoort, Abeshzadeh, Broek & Peters'
 

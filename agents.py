@@ -25,16 +25,21 @@ class Trader:
     
     def transact(self, inflow_item, inflow_amount, outflow_item, outflow_amount):
         """This allows an agent to transact stocks and money"""
-        if inflow_item is Stock and outflow_item is str and (outflow_amount <= self.money):
+        if type(inflow_item) is Stock and (outflow_amount <= self.money):
             self.stocks[inflow_item] += inflow_amount
             self.money -= outflow_amount
-            print (self, "I just purchased stocks")  # for debugging purposes
-        elif inflow_item is str and outflow_item is Stock and (outflow_amount <= self.stocks):
+            print (self, "just purchased", inflow_amount, "stocks.")  # for debugging purposes
+
+        elif type(inflow_item) is str and (outflow_amount <= outflow_item.amount):
             self.money += inflow_amount
             self.stocks[outflow_item] -= outflow_amount
-            print (self, "I just sold stocks")
+            print (self, "just sold", outflow_amount, "stocks.")
+
         else: 
             print ("No transaction possible ")
+            return False
+
+        return True
 
     def __str__(self):
         return str(self.name)
