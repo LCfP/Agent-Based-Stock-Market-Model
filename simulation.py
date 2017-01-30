@@ -74,9 +74,9 @@ for quarter in range(parameter_space["simulationTime"]):
     #1 update dividends
     for firm in firms:
         firm.update_profits(lowestpercentage=95, variance=10)
-    #2 update expected price and spread
 
-    #3 market mechanism
-    market_mechanism(agents, OBSERVABLE_SET_SIZE, stocks[0], functions.valuation_extrapolate_average, subset_traders,
+    #2 market mechanism
+    for stock in stocks:
+        market_mechanism(agents, OBSERVABLE_SET_SIZE, stock, functions.valuation_extrapolate_average, subset_traders,
                      SEED)
-    #4 store market prices
+
