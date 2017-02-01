@@ -1,6 +1,7 @@
 """In this file, we define general functions for the benchmark stock market model"""
 
 import numpy as np
+import copy
 from stockmarket import stocks, firms
 
 __author__ = 'Schasfoort, Abeshzadeh, Broek & Peters'
@@ -23,6 +24,7 @@ def valuation_extrapolate_average(memory, firm):
     prof_history = firm.profit_history
     expected_profit = np.mean(prof_history[len(prof_history)-memory:len(prof_history)])
     value = calculate_npv(expected_profit * firm.dividend_rate)
+    print(expected_profit)
     return value
 
 
@@ -44,3 +46,31 @@ def test_method():
     value_g = valuation_extrapolate_growth_average(3, test_firm)
     print(value)
     print(value_g)
+
+def distribute_initial_stocks(stocks, agents):
+    local_agents = copy.copy(agents)
+    local_stocks = copy.copy(stocks)
+    for stock in local_stocks:
+        amount = stock.amount
+        distribute_to_agent = 1
+        while amount > 0:
+            for agent in local_agents:
+                if stock in agent.stocks:
+                    agent.stocks[stock] += distribute_to_agent
+                else:
+                    agent.stocks[stock] = distribute_to_agent
+                amount += -distribute_to_agent
+                if amount == 0:
+                    break
+
+    return (local_stocks, local_agents)
+
+def print_setup(agents, firms, stocks):
+    for agent in agents:
+        print("Trader" + repr(agent) + " has $ " + str(agent.money) + "and stocks:", agent.stocks, "and memory of ",
+              agent.memory_size, " finally the bid-ask spread size is ", agent.bid_ask_spread)
+    for firm in firms:
+        print("Firm" + repr(firm) + " has a book value of " + str(firm.book_value) + " profit of ", firm.profit,
+              "profit history of ", firm.profit_history, " and a divididend ratio of ", firm.dividend_rate)
+    for stock in stocks:
+        print(repr(stock) + ", amount " + str(stock.amount) + " links to Firm ", stock.firm)

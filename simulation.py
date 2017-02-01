@@ -23,7 +23,7 @@ INIT_PROFIT_HISTORY = [150, 170, 190]
 
 INIT_FACE_VALUE = 50
 
-parameter_space = {"simulationTime": 10}
+parameter_space = {"simulationTime": 100}
 
 """
 Setup 
@@ -35,27 +35,12 @@ firms = setup.setup_firms(init_book_value=INIT_BOOK_VALUE, init_profit=INIT_PROF
 stocks = setup.setup_stocks(firms, face_value=INIT_FACE_VALUE)
 
 # distribute the initial stocks to the agents equally 1 per 1 until non left. (slow)
-for stock in stocks:
-    amount = stock.amount
-    distribute_to_agent = 1
-    while amount > 0:
-        for agent in agents:
-            if stock in agent.stocks:
-                agent.stocks[stock] += distribute_to_agent
-            else:
-                agent.stocks[stock] = distribute_to_agent
-            amount += -distribute_to_agent
-            if amount == 0:
-                break
+stocks, agents = functions.distribute_initial_stocks(stocks, agents)
+
 """
 Print set-up
 """
-for agent in agents:
-    print("Trader" + repr(agent) + " has $ " + str(agent.money) + "and stocks:", agent.stocks, "and memory of ", agent.memory_size, " finally the bid-ask spread size is ", agent.bid_ask_spread)
-for firm in firms:
-    print("Firm" + repr(firm) + " has a book value of " + str(firm.book_value) + " profit of ", firm.profit, "profit history of ", firm.profit_history, " and a divididend ratio of ", firm.dividend_rate)
-for stock in stocks:
-    print(repr(stock) + ", amount " + str(stock.amount) + " links to Firm ", stock.firm)
+functions.print_setup(agents, firms, stocks)
 
 """
 Simulation
@@ -70,7 +55,7 @@ Process overview and scheduling from the ODD
 for quarter in range(parameter_space["simulationTime"]):
     #1 update dividends
     for firm in firms:
-        firm.update_profits(lowestpercentage=95, variance=10)
+        firm.update_profits(lowestpercentage=100, variance=10)
 
     #2 market mechanism
     for stock in stocks:
