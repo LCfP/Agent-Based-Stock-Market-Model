@@ -1,5 +1,7 @@
 """This file is our main simulation file it includes the set-up and time loop"""
 
+import random
+random.seed(1)
 from stockmarket import functions, setup, marketmechanisms, randomset
 
 __author__ = 'Schasfoort, Abeshzadeh, Broek & Peters'
@@ -53,9 +55,12 @@ Process overview and scheduling from the ODD
 """
 
 for quarter in range(parameter_space["simulationTime"]):
+
+    # functions.print_quarterly_data(agents, firms)
+
     #1 update dividends
     for firm in firms:
-        firm.update_profits(lowestpercentage=100, variance=10)
+        firm.update_profits(lowestpercentage=95, variance=10)
 
     #2 market mechanism
     for stock in stocks:
