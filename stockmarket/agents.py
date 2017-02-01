@@ -2,8 +2,8 @@
 
 __author__ = 'Schasfoort, Abeshzadeh, Broek & Peters'
 
-from stocks import Stock
-from firms import Firm
+from stockmarket.stocks import Stock
+
 
 class Trader:
     """a base class for Traders"""

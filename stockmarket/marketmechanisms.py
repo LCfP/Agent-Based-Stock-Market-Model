@@ -2,9 +2,10 @@
 
 __author__ = 'Schasfoort, Abeshzadeh, Broek & Peters'
 
-import random
 import math
-from functions import transaction
+import random
+
+from stockmarket.functions import transaction
 
 
 def market_mechanism(agentset, observablesetsize, stock, valuation_function, set_of_traders_function, seed):

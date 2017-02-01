@@ -1,8 +1,7 @@
 """In this file, we define general functions for the benchmark stock market model"""
 
 import numpy as np
-import firms
-import stocks
+from stockmarket import stocks, firms
 
 __author__ = 'Schasfoort, Abeshzadeh, Broek & Peters'
 

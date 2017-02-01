@@ -1,10 +1,6 @@
 """This file is our main simulation file it includes the set-up and time loop"""
 
-import setup
-from marketmechanisms import market_mechanism
-import functions
-from randomset import subset_traders
-from stocks import Stock
+from stockmarket import functions, setup, marketmechanisms, randomset
 
 __author__ = 'Schasfoort, Abeshzadeh, Broek & Peters'
 
@@ -78,6 +74,6 @@ for quarter in range(parameter_space["simulationTime"]):
 
     #2 market mechanism
     for stock in stocks:
-        market_mechanism(agents, OBSERVABLE_SET_SIZE, stock, functions.valuation_extrapolate_average, subset_traders,
-                     SEED)
+        marketmechanisms.market_mechanism(agents, OBSERVABLE_SET_SIZE, stock, functions.valuation_extrapolate_average, randomset.subset_traders,
+                         SEED)
 

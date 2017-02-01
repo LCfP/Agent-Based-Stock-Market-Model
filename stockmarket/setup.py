@@ -1,9 +1,7 @@
 """In this file, we define the set-up procedure of the model"""
 
-import agents
 import random
-import firms
-import functions
+from stockmarket import agents, firms, functions
 
 __author__ = 'Schasfoort, Abeshzadeh, Broek & Peters'
 
