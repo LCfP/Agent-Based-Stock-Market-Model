@@ -11,7 +11,6 @@ from stockmarket.functions import transaction
 def market_mechanism(agentset, observablesetsize, stock, valuation_function, set_of_traders_function, seed):
     """return set of matched agents"""
     set_of_matched_agents = []
-    random.seed(seed)
 
     # copy the agentset and shuffle the set to get different order of traders every time
     randomized_agent_set = list(agentset)

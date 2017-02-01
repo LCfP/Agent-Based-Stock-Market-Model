@@ -8,7 +8,6 @@ __author__ = 'Schasfoort, Abeshzadeh, Broek & Peters'
 
 def setup_agents(init_money, init_bid_ask_spread, init_memory_size, seed, amount_of_agents=3):
     """This returns an initialized agent set"""
-    random.seed(seed)
     agent_set = []
     for agent in range(amount_of_agents):
         agent_set.append(agents.Trader(name=agent,
@@ -20,7 +19,6 @@ def setup_agents(init_money, init_bid_ask_spread, init_memory_size, seed, amount
 
 def setup_firms(init_book_value, init_profit, init_profit_history, seed, amount_of_firms=1):
     """This returns an initialized firm set"""
-    random.seed(seed)
     firm_set = []
     for firm in range(amount_of_firms):
         firm_set.append(firms.Firm(name=firm,

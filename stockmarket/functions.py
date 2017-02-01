@@ -24,7 +24,6 @@ def valuation_extrapolate_average(memory, firm):
     prof_history = firm.profit_history
     expected_profit = np.mean(prof_history[len(prof_history)-memory:len(prof_history)])
     value = calculate_npv(expected_profit * firm.dividend_rate)
-    print(expected_profit)
     return value
 
 
@@ -74,3 +73,13 @@ def print_setup(agents, firms, stocks):
               "profit history of ", firm.profit_history, " and a divididend ratio of ", firm.dividend_rate)
     for stock in stocks:
         print(repr(stock) + ", amount " + str(stock.amount) + " links to Firm ", stock.firm)
+
+
+def print_quarterly_data(agents, firms):
+    print("Info on firms.")
+    for firm in firms:
+        firm.show()
+
+    print("Info on agents.")
+    for agent in agents:
+        agent.show()

@@ -43,3 +43,9 @@ class Trader:
 
     def __repr__(self):
         return str(self.name)
+
+    def show(self):
+        print("Name:", self.name)
+        print("Money:", self.money)
+        print("Stocks:", self.stocks)
+        print("")
