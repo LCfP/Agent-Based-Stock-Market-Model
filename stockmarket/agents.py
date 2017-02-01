@@ -1,9 +1,6 @@
 """In this file, we define the benchmark stock market model agent classes"""
 
-__author__ = 'Schasfoort, Abeshzadeh, Broek & Peters'
-
 from stockmarket.stocks import Stock
-
 
 class Trader:
     """a base class for Traders"""
