@@ -42,7 +42,7 @@ class Trader:
         return str(self.name)
 
     def __repr__(self):
-        return str(self.name)
+        return "trader_" + str(self.name)
 
     def show(self):
         print("Name:", self.name)

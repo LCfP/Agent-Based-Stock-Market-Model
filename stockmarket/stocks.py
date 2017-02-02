@@ -16,4 +16,4 @@ class Stock:
         return "Stock of " + str(self.firm)
 
     def __repr__(self):
-        return "stock_" + repr(self.firm)
+        return "stock_" + repr(self.name)

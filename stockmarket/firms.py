@@ -26,7 +26,7 @@ class Firm:
         self.profit_history.append(self.profit)
 
     def __repr__(self):
-        return str(self.name)
+        return 'firm_' + str(self.name)
 
     def __str__(self):
         return str(self.name)
@@ -38,7 +38,7 @@ class Firm:
 
 
 def test_method():
-    test_firm = Firm(12, 1000, 10000, [10000, 10000], seed=1)
+    test_firm = Firm(12, 1000, 10000, [10000, 10000])
     print(test_firm.profit_history)
     print(test_firm.profit_growth_history)
     print(test_firm.profit)

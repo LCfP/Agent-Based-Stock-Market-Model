@@ -40,7 +40,7 @@ def create_stocks(firm, face_value):
     
     
 def test_method():
-    test_firm = firms.Firm(1, 1000, 10000, [8000, 10000, 9000, 10000], seed=1)
+    test_firm = firms.Firm(1, 1000, 10000, [8000, 10000, 9000, 10000])
     value = valuation_extrapolate_average(3, test_firm)
     value_g = valuation_extrapolate_growth_average(3, test_firm)
     print(value)
@@ -66,10 +66,10 @@ def distribute_initial_stocks(stocks, agents):
 
 def print_setup(agents, firms, stocks):
     for agent in agents:
-        print("Trader" + repr(agent) + " has $ " + str(agent.money) + "and stocks:", agent.stocks, "and memory of ",
+        print(repr(agent) + " has $ " + str(agent.money) + "and stocks:", agent.stocks, "and memory of ",
               agent.memory_size, " finally the bid-ask spread size is ", agent.bid_ask_spread)
     for firm in firms:
-        print("Firm" + repr(firm) + " has a book value of " + str(firm.book_value) + " profit of ", firm.profit,
+        print(repr(firm) + " has a book value of " + str(firm.book_value) + " profit of ", firm.profit,
               "profit history of ", firm.profit_history, " and a divididend ratio of ", firm.dividend_rate)
     for stock in stocks:
         print(repr(stock) + ", amount " + str(stock.amount) + " links to Firm ", stock.firm)
