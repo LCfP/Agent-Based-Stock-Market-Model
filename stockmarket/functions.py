@@ -2,16 +2,40 @@
 
 import numpy as np
 import copy
+import sqlite3
 from stockmarket import stocks, firms
 
 __author__ = 'Schasfoort, Abeshzadeh, Broek & Peters'
 
 
-def transaction(buyer, seller, stock, amount_of_product, amount_of_money):
+def transaction(buyer, seller, stock, amount_of_product, amount_of_money, record=False, recordInfo={}):
     """This function makes a buyer and seller agent perform a transaction with each other"""
     # TODO Do a proper test before transaction is done. This implementation is very rigid.
     if buyer.transact(stock, amount_of_product, "money", amount_of_money):
         seller.transact("money", amount_of_money, stock, amount_of_product)
+    # record the transaction
+    if record:
+        cur = recordInfo['cur']
+        cur.execute("INSERT OR IGNORE INTO Objects (object_name, object_type) VALUES (?,?)",
+                    (repr(buyer), repr(buyer)[:repr(buyer).find('_')]))
+        cur.execute("SELECT id FROM Objects WHERE object_name = ?", (repr(buyer),))
+        buyer_id = cur.fetchone()[0]
+
+        cur.execute("INSERT OR IGNORE INTO Objects (object_name, object_type) VALUES (?,?)",
+                    (repr(seller), repr(seller)[:repr(seller).find('_')]))
+        cur.execute("SELECT id FROM Objects WHERE object_name = ?", (repr(seller),))
+        seller_id = cur.fetchone()[0]
+
+        cur.execute("INSERT OR IGNORE INTO Objects (object_name, object_type) VALUES (?,?)",
+                    (repr(stock), repr(stock)[:repr(stock).find('_')]))
+        cur.execute("SELECT id FROM Objects WHERE object_name = ?", (repr(stock),))
+        stock_id = cur.fetchone()[0]
+
+        cur.execute("INSERT INTO Transactions (experiment_id, seed, period, amount_of_product, "
+                    "amount_of_money, buyer_id, seller_id, stock_id) VALUES (?,?,?,?,?,?,?,?)",
+                    (recordInfo['experiment_id'], recordInfo['seed'], recordInfo['period'],
+                     amount_of_product, amount_of_money, buyer_id, seller_id, stock_id))
+
 
 def calculate_npv(dividend, discount_rate=0.05, growth_rate=0):
     """Fill in this function to calculate NPV"""

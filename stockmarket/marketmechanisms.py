@@ -8,7 +8,8 @@ import random
 from stockmarket.functions import transaction
 
 
-def market_mechanism(agentset, observablesetsize, stock, valuation_function, set_of_traders_function):
+def market_mechanism(agentset, observablesetsize, stock, valuation_function, set_of_traders_function,
+                     record=False, recordInfo={}):
     """return set of matched agents"""
     set_of_matched_agents = []
 
@@ -34,12 +35,20 @@ def market_mechanism(agentset, observablesetsize, stock, valuation_function, set
 
         # If we found a trade, make the actual trade.
         if best_supplier_and_price[0] is not None:
-            # TODO Mark, I think the line below this is obsolete is that correct?
-            #set_of_matched_agents.append((demander, best_supplier_and_price[0]))
-            make_trade(demander, best_supplier_and_price[0], stock, valuation_function)
+            price = best_supplier_and_price[0].valuate_stocks(stock=stock, valuation_function=valuation_function) \
+                    * (1 + (best_supplier_and_price[0].bid_ask_spread / 200))
+            amount_demander_can_buy = math.floor(demander.money / price)
+            amount_supplier_can_sell = supplier.stocks[stock]
+
+            if amount_demander_can_buy < amount_supplier_can_sell:
+                amount = amount_demander_can_buy
+            else:
+                amount = amount_supplier_can_sell
+
+            if amount > 0:
+                transaction(demander, supplier, stock, amount, amount * price, record=record, recordInfo=recordInfo)
 
     return randomized_agent_set
-
 
 def suitable_trade(demander, supplier, best_supplier_and_price, stock, valuation_function):
     demander_price = demander.valuate_stocks(stock=stock, valuation_function=valuation_function) \
@@ -55,18 +64,3 @@ def suitable_trade(demander, supplier, best_supplier_and_price, stock, valuation
     if supplier_price < best_supplier_and_price[1] and supplier.stocks[stock] > 0:
         return True
 
-
-def make_trade(demander, supplier, stock, valuation_function):
-    # Determine trade price, and determine trade quantity
-    price = supplier.valuate_stocks(stock=stock, valuation_function=valuation_function) \
-            * (1 + (supplier.bid_ask_spread / 200))
-    amount_demander_can_buy = math.floor(demander.money / price)
-    amount_supplier_can_sell = supplier.stocks[stock]
-
-    if amount_demander_can_buy < amount_supplier_can_sell:
-        amount = amount_demander_can_buy
-    else:
-        amount = amount_supplier_can_sell
-
-    if amount > 0:
-        transaction(demander, supplier, stock, amount, amount * price)

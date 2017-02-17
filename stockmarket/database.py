@@ -12,7 +12,6 @@ def create_tables(cur):
 
     CREATE TABLE Transactions (
         id INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT UNIQUE,
-        unix_time REAL UNIQUE,
         experiment_id INTEGER,
         seed INTEGER,
         period INTEGER,
@@ -55,20 +54,21 @@ def create_tables(cur):
 
     ''')
 
-def write_to_statevariables(cur, experiment_id, seed, period, agentSets=[]):
-    """Writes all variables of all agents in the dataset to the Statevariables table"""
-    for agentSet in agentSets:
-        for agent in agentSet:
-            variables = vars(agent)
-            for variable in variables:
-                cur.execute("INSERT INTO Statevariables (unix_time, experiment_id, seed, period, variable_type, owner_id, value) VALUES (?,?,?,?,?,?,?)",
-                            (time.time(), experiment_id, seed, period, str(variable), repr(agent), str(variables[variable])))
-                time.sleep(1)
 
-def record_statevariables(cur, experiment_id, seed, period, agent, record=True):
-    """Records all state variables for this agent in the Statevariables table"""
-    if record:
-        variables = vars(agent)
-        for variable in variables:
-            cur.execute("INSERT INTO Statevariables (experiment_id, seed, period, variable_type, owner_id, value) VALUES (?,?,?,?,?,?)",
-                    ( experiment_id, seed, period, str(variable), repr(agent), str(variables[variable])))
+def record_statevariables(cur, experiment_id, seed, period, agent):
+    """Records all state variables for this agent in the Statevariable and related tables"""
+    variables = vars(agent)
+    for variable in variables:
+        # store the variable type into the variabletypes table
+        cur.execute("INSERT OR IGNORE INTO Variabletypes (variable_type) VALUES (?)", (str(variable), ))
+        cur.execute("SELECT id FROM Variabletypes WHERE variable_type = ?", (str(variable),))
+        variable_type = cur.fetchone()[0]
+
+        # store the agent and type of agent in the objects table
+        cur.execute("INSERT OR IGNORE INTO Objects (object_name, object_type) VALUES (?,?)", (repr(agent), repr(agent)[:repr(agent).find('_')]))
+        cur.execute("SELECT id FROM Objects WHERE object_name = ?", (repr(agent),))
+        owner_id = cur.fetchone()[0]
+
+        cur.execute("INSERT INTO Statevariables (experiment_id, seed, period, "
+                    "variable_type, owner_id, value) VALUES (?,?,?,?,?,?)",
+                    ( experiment_id, seed, period, variable_type, owner_id, str(variables[variable])))

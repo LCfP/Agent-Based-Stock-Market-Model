@@ -2,9 +2,6 @@
 
 import random
 
-__author__ = 'Schasfoort, Abeshzadeh, Broek & Peters'
-
-
 class Firm:
     """a base class for Firms"""
 
@@ -22,7 +19,7 @@ class Firm:
     def update_profits(self, lowestpercentage=95, variance=10):
         growth = (lowestpercentage + random.randint(0, variance)) / 100
         self.profit = int(self.profit * growth)
-        self.profit_growth_history.append(growth)
+        self.profit_growth_history.append(1-growth)
         self.profit_history.append(self.profit)
 
     def __repr__(self):

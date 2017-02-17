@@ -12,25 +12,25 @@ Look at the tables and ask if it is a thing... or just an attribute of a thing.
 because we simulate agent interactions and interactions take the form of transactions. that is the first
 table. 
 
-
 ### Table 1 Transactions
 * primary key = id
-* logical key = unixTimeCode
+* foreign_key = experiment_id
+* seed
+* period
 * amount_of_product
 * amount_of_money
-* seed
 * foreign_key = buyer_id
 * foreign_key = seller_id 
 * foreign_key = stock_id
-* foreign_key = experiment_id
 
 ### Table 2 State Variables
 * primary_key = id
-* logical_key = unixTimeCode
+* foreign_key = experiment_id
 * seed
-* value
+* period
 * foreign_key = Variable_type 
 * foreign_key = owner_id (object)
+* value
 
 ### Table 3 Variable types
 * primary_key = id
@@ -38,10 +38,14 @@ table.
 
 ### Table 4 Objects
 * primary_key = id
-* logical_key = object_id
+* logical_key = object_name
 * STRING object_type 
 
-### Table 5 Experiments
+
+|
+
+
+### Possibly later: Experiments
 * primary_key = id
 * logical_key = experiment
 * parameter_space
