@@ -32,9 +32,18 @@ def transaction(buyer, seller, stock, amount_of_product, amount_of_money, record
         stock_id = cur.fetchone()[0]
 
         cur.execute("INSERT INTO Transactions (experiment_id, seed, period, amount_of_product, "
-                    "amount_of_money, buyer_id, seller_id, stock_id) VALUES (?,?,?,?,?,?,?,?)",
+                    "amount_of_money) VALUES (?,?,?,?,?)",
                     (recordInfo['experiment_id'], recordInfo['seed'], recordInfo['period'],
-                     amount_of_product, amount_of_money, buyer_id, seller_id, stock_id))
+                     amount_of_product, amount_of_money))
+        cur.execute("SELECT MAX(id) FROM Transactions")
+        transaction_id = cur.fetchone()[0]
+
+        cur.execute("INSERT OR IGNORE INTO Transactors (transaction_id, transactor_id, role) VALUES (?,?,?)",
+                    (transaction_id, buyer_id, 'buyer'))
+        cur.execute("INSERT OR IGNORE INTO Transactors (transaction_id, transactor_id, role) VALUES (?,?,?)",
+                    (transaction_id, seller_id, 'seller'))
+        cur.execute("INSERT OR IGNORE INTO Transactors (transaction_id, transactor_id, role) VALUES (?,?,?)",
+                    (transaction_id, stock_id, 'stock'))
 
 
 def calculate_npv(dividend, discount_rate=0.05, growth_rate=0):

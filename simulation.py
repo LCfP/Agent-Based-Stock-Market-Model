@@ -1,6 +1,6 @@
 """This file is our main simulation file it includes the set-up and time loop"""
 parameter_space = {
-    'simulationTime': 100, 'record_data': True, 'experiment_id': 1, 'amount_of_agents': 6, 'amount_of_firms': 2,
+    'simulationTime': 100, 'record_data': True, 'experiment_id': 1, 'amount_of_agents': 12, 'amount_of_firms': 3,
     'observable_set_size':3, 'initial_money': (100,200), 'initial_bid_ask': (5,5), 'initial_memory_size': (1,4),
     'initial_profit': (200,200), 'initial_book_value': (10000, 10000), 'initial_profit_history': [150, 170, 190],
     'initial_face_value': 50, 'seed': 1

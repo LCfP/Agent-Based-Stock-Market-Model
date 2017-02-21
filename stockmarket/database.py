@@ -9,6 +9,7 @@ def create_tables(cur):
     DROP TABLE IF EXISTS Variabletypes;
     DROP TABLE IF EXISTS Objects;
     DROP TABLE IF EXISTS Experiments;
+    DROP TABLE IF EXISTS Transactors;
 
     CREATE TABLE Transactions (
         id INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT UNIQUE,
@@ -16,10 +17,14 @@ def create_tables(cur):
         seed INTEGER,
         period INTEGER,
         amount_of_product REAL,
-        amount_of_money REAL,
-        buyer_id INTEGER,
-        seller_id INTEGER,
-        stock_id INTEGER
+        amount_of_money REAL
+    );
+
+    CREATE TABLE Transactors(
+        transaction_id INTEGER NOT NULL,
+		transactor_id INTEGER NOT NULL,
+		role REAL,
+		PRIMARY KEY (transaction_id, transactor_id)
     );
 
     CREATE TABLE Statevariables (
