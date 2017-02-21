@@ -30,7 +30,7 @@ stocks = setup.setup_stocks(firms, face_value=parameter_space['initial_face_valu
 stocks, agents = functions.distribute_initial_stocks(stocks, agents)
 
 if RECORD_DATA:
-    conn = sqlite3.connect('dataBase.sqlite')
+    conn = sqlite3.connect('dataBaseOffline.sqlite')
     cur = conn.cursor()
     database.create_tables(cur)
 
