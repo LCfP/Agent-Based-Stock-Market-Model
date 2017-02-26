@@ -88,9 +88,9 @@ def distribute_initial_stocks(stocks, agents):
         while amount > 0:
             for agent in local_agents:
                 if stock in agent.stocks:
-                    agent.stocks[stock] += distribute_to_agent
+                    agent.stocks[repr(stock)] += distribute_to_agent
                 else:
-                    agent.stocks[stock] = distribute_to_agent
+                    agent.stocks[repr(stock)] = distribute_to_agent
                 amount += -distribute_to_agent
                 if amount == 0:
                     break

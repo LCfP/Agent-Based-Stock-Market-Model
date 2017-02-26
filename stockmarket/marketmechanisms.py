@@ -38,7 +38,7 @@ def market_mechanism(agentset, observablesetsize, stock, valuation_function, set
             price = best_supplier_and_price[0].valuate_stocks(stock=stock, valuation_function=valuation_function) \
                     * (1 + (best_supplier_and_price[0].bid_ask_spread / 200))
             amount_demander_can_buy = math.floor(demander.money / price)
-            amount_supplier_can_sell = supplier.stocks[stock]
+            amount_supplier_can_sell = supplier.stocks[repr(stock)]
 
             if amount_demander_can_buy < amount_supplier_can_sell:
                 amount = amount_demander_can_buy
@@ -61,6 +61,6 @@ def suitable_trade(demander, supplier, best_supplier_and_price, stock, valuation
         return False
 
     # A trade is only possible if the supplier price is the lowest, and there's stock available.
-    if supplier_price < best_supplier_and_price[1] and supplier.stocks[stock] > 0:
+    if supplier_price < best_supplier_and_price[1] and supplier.stocks[repr(stock)] > 0:
         return True
 

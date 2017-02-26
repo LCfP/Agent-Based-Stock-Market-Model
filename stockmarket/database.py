@@ -1,6 +1,7 @@
 """In this file, we provide functions for creating and updating the database"""
 import sqlite3
 import time
+import json
 
 def create_tables(cur):
     cur.executescript('''
