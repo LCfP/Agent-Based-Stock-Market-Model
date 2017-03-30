@@ -70,14 +70,6 @@ def valuation_extrapolate_growth_average(memory, firm):
 def create_stocks(firm, face_value):
     amount_of_stocks = firm.book_value / face_value
     return stocks.Stock(firm.name, firm, face_value, amount_of_stocks)
-    
-    
-def test_method():
-    test_firm = firms.Firm(1, 1000, 10000, [8000, 10000, 9000, 10000])
-    value = valuation_extrapolate_average(3, test_firm)
-    value_g = valuation_extrapolate_growth_average(3, test_firm)
-    print(value)
-    print(value_g)
 
 def distribute_initial_stocks(stocks, agents):
     local_agents = copy.copy(agents)
