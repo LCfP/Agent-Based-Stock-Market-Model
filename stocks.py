@@ -1,11 +1,19 @@
 """In this file, we define the benchmark stock market model stock classes"""
+
 __author__ = 'Schasfoort, Abeshzadeh, Broek & Peters'
 
-class Stock():
+
+class Stock:
     """a base class for Stocks"""
-    def __init__(self, id ,firm, faceValue, amount):
+    def __init__(self, name, firm, face_value, amount):
         """Creates a new stock"""
-        self.id = id
+        self.name = name
         self.firm = firm
-        self.faceValue = faceValue
+        self.face_value = face_value
         self.amount = amount
+
+    def __str__(self):
+        return "Stock of " + repr(self.firm)
+
+    def __repr__(self):
+        return "Stock of " + repr(self.firm)

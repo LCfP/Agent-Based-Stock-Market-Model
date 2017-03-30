@@ -1,74 +1,80 @@
 """This file is our main simulation file it includes the set-up and time loop"""
+
+import setup
+
 __author__ = 'Schasfoort, Abeshzadeh, Broek & Peters'
 
-import agents
-import functions
-import setup
 
 """
 Define initial variables and parameters
 """
-AMOUNTOFAGENTS = 3
-AMOUNTOFFIRMS = 1
+AMOUNT_OF_AGENTS = 3
+AMOUNT_OF_FIRMS = 2
 
 SEED = 1
 
-INITMONEY = (100,200)
-INITBIDASK = (5,5)
-INITMEMORYSIZE = (2,3)
+INIT_MONEY = (100, 200)
+INIT_BID_ASK = (5, 5)
+INIT_MEMORY_SIZE = (2, 3)
 
-INITPROFIT = (200, 200)
-INITBOOKVALUE = (10000,10000)
-PROFITHISTORY = [150, 170, 190]
+INIT_PROFIT = (200, 200)
+INIT_BOOK_VALUE = (10000, 10000)
+PROFIT_HISTORY = [150, 170, 190]
 
-INITFACEVALUE = 50
+INIT_FACE_VALUE = 50
 
 """
 Setup 
 """
-agents = setup.setupAgents(initMoney=INITMONEY, initBidAskSpread=INITBIDASK, initMemorySize=INITMEMORYSIZE, seed=SEED, amountOfAgents=AMOUNTOFAGENTS)
-firms = setup.setupFirms(initBookValue=INITBOOKVALUE, initProfit=INITPROFIT, initprofitHistory=PROFITHISTORY, seed=SEED, amountOfFirms=AMOUNTOFFIRMS)
-stocks = setup.setupStocks(firms, faceValue=INITFACEVALUE)
-# distribute the initial stocks to the agents
+agents = setup.setup_agents(init_money=INIT_MONEY, init_bid_ask_spread=INIT_BID_ASK, init_memory_size=INIT_MEMORY_SIZE,
+                            seed=SEED, amount_of_agents=AMOUNT_OF_AGENTS)
+firms = setup.setup_firms(init_book_value=INIT_BOOK_VALUE, init_profit=INIT_PROFIT, init_profit_history=PROFIT_HISTORY,
+                          seed=SEED, amount_of_firms=AMOUNT_OF_FIRMS)
+stocks = setup.setup_stocks(firms, face_value=INIT_FACE_VALUE)
+# distribute the initial stocks to the agents equally 1 per 1 until non left. (slow)
 for stock in stocks:
-    for agent in agents:
-        agent.stocks.append([stock, 0])
     amount = stock.amount
-    while (amount > 0):   
+    distribute_to_agent = 1
+    while amount > 0:
         for agent in agents:
-            agent.stocks[stock.id][1] += 1
+            if stock in agent.stocks:
+                agent.stocks[stock] += distribute_to_agent
+            else:
+                agent.stocks[stock] = distribute_to_agent
+            amount += -distribute_to_agent
+            if amount == 0:
+                break
 
-parameterspace = {"simulationTime" : 10}
+parameter_space = {"simulationTime": 10}
 for agent in agents:
-    print(agent.money)
+    print(repr(agent) + " has " + str(agent.money) + "$ and stocks:")
     print(agent.stocks)
 for firm in firms:
-    print(firm.bookValue)
+    print(repr(firm) + " has a book value of " + str(firm.book_value))
 for stock in stocks:
-    print(stock.firm)
-    print(stock.amount)
+    print(repr(stock) + ", amount " + str(stock.amount))
 
 """
 Simulation
 
 Process overview and scheduling from the ODD
-1. Update dividendspy
+1. Update dividends
 2. Update expected price and spread
 3. Market mechanism
 4. Store market prices t-1 
 """
 
-#for quarter in range(parameterspace["simulationTime"]):
-	# 1 update dividends
-	
-	# 2 update expected price and spread
-
-	# 3 market mechanism
-	#For actingTrader in Traders:
-		#Observe random subset of traders
-		
-		#Calculate best deal and trade with that trader (buy or sell) 
-		
-		#Write data on counterparty + quantity + price to dataset
-	
-	# 4 store market prices
+# for quarter in range(parameter_space["simulationTime"]):
+#     1 update dividends
+#
+#     2 update expected price and spread
+#
+#     3 market mechanism
+#     For actingTrader in Traders:
+#         Observe random subset of traders
+#
+#         Calculate best deal and trade with that trader (buy or sell)
+#
+#         Write data on counter party + quantity + price to data set
+#
+#     4 store market prices
