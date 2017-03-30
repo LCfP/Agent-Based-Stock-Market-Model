@@ -1,80 +1,84 @@
 """This file is our main simulation file it includes the set-up and time loop"""
+parameter_space = {
+    'simulationTime': 100, 'record_data': True, 'experiment_id': 1, 'amount_of_agents': 12, 'amount_of_firms': 3,
+    'observable_set_size':3, 'initial_money': (100,200), 'initial_bid_ask': (5,5), 'initial_memory_size': (1,4),
+    'initial_profit': (200,200), 'initial_book_value': (10000, 10000), 'initial_profit_history': [150, 170, 190],
+    'initial_face_value': 50, 'seed': 1
+}
 
-import setup
+import sqlite3
+import random
+random.seed(parameter_space['seed'])
+from stockmarket import functions, setup, marketmechanisms, randomset, database
 
-__author__ = 'Schasfoort, Abeshzadeh, Broek & Peters'
-
-
-"""
-Define initial variables and parameters
-"""
-AMOUNT_OF_AGENTS = 3
-AMOUNT_OF_FIRMS = 2
-
-SEED = 1
-
-INIT_MONEY = (100, 200)
-INIT_BID_ASK = (5, 5)
-INIT_MEMORY_SIZE = (2, 3)
-
-INIT_PROFIT = (200, 200)
-INIT_BOOK_VALUE = (10000, 10000)
-PROFIT_HISTORY = [150, 170, 190]
-
-INIT_FACE_VALUE = 50
+RECORD_DATA = parameter_space['record_data']
 
 """
 Setup 
 """
-agents = setup.setup_agents(init_money=INIT_MONEY, init_bid_ask_spread=INIT_BID_ASK, init_memory_size=INIT_MEMORY_SIZE,
-                            seed=SEED, amount_of_agents=AMOUNT_OF_AGENTS)
-firms = setup.setup_firms(init_book_value=INIT_BOOK_VALUE, init_profit=INIT_PROFIT, init_profit_history=PROFIT_HISTORY,
-                          seed=SEED, amount_of_firms=AMOUNT_OF_FIRMS)
-stocks = setup.setup_stocks(firms, face_value=INIT_FACE_VALUE)
-# distribute the initial stocks to the agents equally 1 per 1 until non left. (slow)
-for stock in stocks:
-    amount = stock.amount
-    distribute_to_agent = 1
-    while amount > 0:
-        for agent in agents:
-            if stock in agent.stocks:
-                agent.stocks[stock] += distribute_to_agent
-            else:
-                agent.stocks[stock] = distribute_to_agent
-            amount += -distribute_to_agent
-            if amount == 0:
-                break
+agents = setup.setup_agents(init_money=parameter_space['initial_money'],
+                            init_bid_ask_spread=parameter_space['initial_bid_ask'],
+                            init_memory_size=parameter_space['initial_memory_size'],
+                            seed=parameter_space['seed'], amount_of_agents=parameter_space['amount_of_agents'])
+firms = setup.setup_firms(init_book_value=parameter_space['initial_book_value'],
+                          init_profit=parameter_space['initial_profit'],
+                          init_profit_history=parameter_space['initial_profit_history'],
+                          seed=parameter_space['seed'], amount_of_firms=parameter_space['amount_of_firms'])
+stocks = setup.setup_stocks(firms, face_value=parameter_space['initial_face_value'])
 
-parameter_space = {"simulationTime": 10}
-for agent in agents:
-    print(repr(agent) + " has " + str(agent.money) + "$ and stocks:")
-    print(agent.stocks)
-for firm in firms:
-    print(repr(firm) + " has a book value of " + str(firm.book_value))
-for stock in stocks:
-    print(repr(stock) + ", amount " + str(stock.amount))
+# distribute the initial stocks to the agents equally 1 per 1 until non left. (slow)
+stocks, agents = functions.distribute_initial_stocks(stocks, agents)
+
+if RECORD_DATA:
+    conn = sqlite3.connect('dataBaseOffline.sqlite')
+    cur = conn.cursor()
+    database.create_tables(cur)
+
+"""
+Print set-up
+"""
+functions.print_setup(agents, firms, stocks)
 
 """
 Simulation
 
 Process overview and scheduling from the ODD
-1. Update dividends
+1. Update profits
 2. Update expected price and spread
 3. Market mechanism
 4. Store market prices t-1 
 """
 
-# for quarter in range(parameter_space["simulationTime"]):
-#     1 update dividends
-#
-#     2 update expected price and spread
-#
-#     3 market mechanism
-#     For actingTrader in Traders:
-#         Observe random subset of traders
-#
-#         Calculate best deal and trade with that trader (buy or sell)
-#
-#         Write data on counter party + quantity + price to data set
-#
-#     4 store market prices
+for quarter in range(parameter_space["simulationTime"]):
+
+    if RECORD_DATA:
+        recordInfo = {'cur': cur, 'experiment_id': parameter_space['experiment_id'],
+                      'seed': parameter_space['seed'], 'period': quarter}
+    else:
+        recordInfo = {}
+
+    #1 update dividends
+    for firm in firms:
+        firm.update_profits(lowestpercentage=95, variance=10)
+        if RECORD_DATA:
+            database.record_statevariables(cur=cur, experiment_id=parameter_space['experiment_id'],
+                                       seed=parameter_space['seed'], period=quarter, agent=firm)
+
+    #2 market mechanism
+    for stock in stocks:
+        agents = marketmechanisms.market_mechanism(agents, parameter_space['observable_set_size'], stock,
+                                                   functions.valuation_extrapolate_average, randomset.subset_traders,
+                                                   record=RECORD_DATA, recordInfo=recordInfo)
+        if RECORD_DATA:
+            database.record_statevariables(cur=cur, experiment_id=parameter_space['experiment_id'],
+                                           seed=parameter_space['seed'], period=quarter, agent=stock)
+
+    #3 record agent-state variables
+    if RECORD_DATA:
+        for agent in agents:
+            database.record_statevariables(cur=cur, experiment_id=parameter_space['experiment_id'],
+                                           seed=parameter_space['seed'], period=quarter, agent=agent)
+
+if RECORD_DATA:
+    conn.commit()
+    cur.close()

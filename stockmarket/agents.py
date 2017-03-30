@@ -1,7 +1,6 @@
 """In this file, we define the benchmark stock market model agent classes"""
 
-__author__ = 'Schasfoort, Abeshzadeh, Broek & Peters'
-
+from stockmarket.stocks import Stock
 
 class Trader:
     """a base class for Traders"""
@@ -15,27 +14,38 @@ class Trader:
         self.memory_size = memory_size
 
     def valuate_stocks(self, stock, valuation_function):
-        # TODO test this function
         npv_firm = valuation_function(self.memory_size, stock.firm)
+
         # evaluate the below calculation (currently additional stocks dilute value directly)
-        stock_value = npv_firm / (stock.firm.bookvalue / stock.facevalue)
+        stock_value = npv_firm / (stock.firm.book_value / stock.face_value)
         return stock_value
     
     def transact(self, inflow_item, inflow_amount, outflow_item, outflow_amount):
         """This allows an agent to transact stocks and money"""
-        if (inflow_item == "stocks") & (outflow_item == "money") & (outflow_amount <= self.money):
-            self.stocks += inflow_amount
+        if type(inflow_item) is Stock and (outflow_amount <= self.money):
+            self.stocks[repr(inflow_item)] += inflow_amount
             self.money -= outflow_amount
-            print (self, "I just purchased stocks")  # for debugging purposes
-        elif (inflow_item == "money") & (outflow_item == "stocks") & (outflow_amount <= self.stocks):
+            print (self, "just purchased", inflow_amount, "stocks.")  # for debugging purposes
+
+        elif type(inflow_item) is str and (outflow_amount <= outflow_item.amount):
             self.money += inflow_amount
-            self.stocks -= outflow_amount
-            print (self, "I just sold stocks")
+            self.stocks[repr(outflow_item)] -= outflow_amount
+            print (self, "just sold", outflow_amount, "stocks.")
+
         else: 
             print ("No transaction possible ")
+            return False
+
+        return True
 
     def __str__(self):
         return str(self.name)
 
     def __repr__(self):
-        return str(self.name)
+        return "trader_" + str(self.name)
+
+    def show(self):
+        print("Name:", self.name)
+        print("Money:", self.money)
+        print("Stocks:", self.stocks)
+        print("")
