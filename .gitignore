@@ -1,8 +1,7 @@
 # Jetbrains IDEs
 /.idea
 
-/__pycache__
-/.ipynb_checkpoints
+__pycache__/
 
 #ignore all databases
 *.sqlite
