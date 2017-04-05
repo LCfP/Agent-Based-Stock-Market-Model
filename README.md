@@ -19,7 +19,7 @@ place in the simulation.py file. Exceptions are the functions.transaction, and d
 ## To do
 - [x] Build minimal model
 - [x] Build SQL database
-- [ ] Visualization of output
-- [ ] Sophisticated profit process
+- [ ] Test the existing code
+- [ ] Add different traders to the model (fundamentalist and chartists) 
 - [ ] New trading mechanism
-- [ ] Extend the model 
+
