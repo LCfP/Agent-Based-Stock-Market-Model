@@ -14,10 +14,9 @@ class Trader:
         self.bid_ask_spread = bid_ask_spread
         self.memory_size = memory_size
         self.function = function
-        self.valuation_parameters = dict(memory=memory_size)
 
     def valuate_stocks(self, stock):
-        return self.function(stock=stock, **self.valuation_parameters)
+        return self.function(stock=stock, memory=self.memory_size)
 
     def transact(self, inflow_item, inflow_amount, outflow_item, outflow_amount):
         """This allows an agent to transact stocks and money"""

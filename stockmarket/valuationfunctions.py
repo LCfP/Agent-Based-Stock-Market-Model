@@ -23,3 +23,4 @@ def valuation_extrapolate_growth_average(stock, memory, **_):
 
 def price_trend(stock, memory, **_):
     pass
+
