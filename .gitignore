@@ -3,6 +3,7 @@
 
 __pycache__/
 .ipynb_checkpoints/
+.cache/
 
 #ignore all databases
 *.sqlite

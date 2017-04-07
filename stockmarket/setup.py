@@ -1,7 +1,7 @@
 """In this file, we define the set-up procedure of the model"""
 
 import random
-from stockmarket import agents, firms, functions
+from stockmarket import agents, firms, functions, valuationfunctions
 
 __author__ = 'Schasfoort, Abeshzadeh, Broek & Peters'
 
@@ -13,7 +13,8 @@ def setup_agents(init_money, init_bid_ask_spread, init_memory_size, seed, amount
         agent_set.append(agents.Trader(name=agent,
                                        money=randomize_init_variable(init_money[0], init_money[1]),
                                        bid_ask_spread=randomize_init_variable(init_bid_ask_spread[0], init_bid_ask_spread[1]),
-                                       memory_size=randomize_init_variable(init_memory_size[0], init_memory_size[1])))
+                                       memory_size=randomize_init_variable(init_memory_size[0], init_memory_size[1]),
+                                       function=valuationfunctions.valuation_extrapolate_average))
     return agent_set
 
 

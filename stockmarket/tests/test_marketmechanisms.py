@@ -1,6 +1,7 @@
-"""This file runs tests for all functions in functions"""
+"""This file runs tests for all functions in marketmechanims"""
 import pytest
 from numpy.testing import assert_equal
+from stockmarket.marketmechanisms import *
 from stockmarket.agents import *
 from stockmarket.firms import *
 from stockmarket.setup import *
@@ -18,9 +19,11 @@ def set_up_agents():
     stocks, agents = distribute_initial_stocks(stocks, agents)
     return {'demander': demander, 'supplier': supplier, 'agents': agents, 'firm': firm, 'stocks': stocks}
 
-def test_calculate_npv():
-    assert_equal(calculate_npv(1, 0.05), 20)
-    assert_equal(calculate_npv(2, 0.05), 40)
 
-def test_distribute_initial_stocks(set_up_agents):
-    pass
+def test_suitable_trade(set_up_agents):
+    assert_equal(suitable_trade(set_up_agents['demander'], set_up_agents['supplier'],
+                                (None, math.inf), set_up_agents['stocks'][0]),
+                                False)
+    assert_equal(suitable_trade(set_up_agents['demander'], set_up_agents['supplier'],
+                                (None, math.inf), set_up_agents['stocks'][0]),
+                                False)

@@ -55,20 +55,6 @@ def calculate_npv(dividend, discount_rate=0.05, growth_rate=0):
     return npv
 
 
-def valuation_extrapolate_average(memory, firm):
-    prof_history = firm.profit_history
-    expected_profit = np.mean(prof_history[len(prof_history)-memory:len(prof_history)])
-    value = calculate_npv(expected_profit * firm.dividend_rate)
-    return value
-
-
-def valuation_extrapolate_growth_average(memory, firm):
-    profit_growth_history = firm.profit_growth_history
-    expected_growth = np.mean(profit_growth_history[len(profit_growth_history)-memory:len(profit_growth_history)])
-    value = calculate_npv(firm.profit * firm.dividend_rate, growth_rate=expected_growth)
-    return value
-
-
 def create_stocks(firm, face_value):
     amount_of_stocks = firm.book_value / face_value
     return stocks.Stock(firm.name, firm, face_value, amount_of_stocks)
@@ -81,7 +67,7 @@ def distribute_initial_stocks(stocks, agents):
         distribute_to_agent = 1
         while amount > 0:
             for agent in local_agents:
-                if stock in agent.stocks:
+                if repr(stock) in agent.stocks:
                     agent.stocks[repr(stock)] += distribute_to_agent
                 else:
                     agent.stocks[repr(stock)] = distribute_to_agent

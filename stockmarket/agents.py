@@ -2,9 +2,10 @@
 
 from stockmarket.stocks import Stock
 
+
 class Trader:
     """a base class for Traders"""
-    def __init__(self, name, money, bid_ask_spread, memory_size):
+    def __init__(self, name, money, bid_ask_spread, memory_size, function):
         """Creates a new trader"""
         self.name = name
         self.money = money
@@ -12,14 +13,12 @@ class Trader:
         # bid ask spread is an integer
         self.bid_ask_spread = bid_ask_spread
         self.memory_size = memory_size
+        self.function = function
+        self.valuation_parameters = dict(memory=memory_size)
 
-    def valuate_stocks(self, stock, valuation_function):
-        npv_firm = valuation_function(self.memory_size, stock.firm)
+    def valuate_stocks(self, stock):
+        return self.function(stock=stock, **self.valuation_parameters)
 
-        # evaluate the below calculation (currently additional stocks dilute value directly)
-        stock_value = npv_firm / (stock.firm.book_value / stock.face_value)
-        return stock_value
-    
     def transact(self, inflow_item, inflow_amount, outflow_item, outflow_amount):
         """This allows an agent to transact stocks and money"""
         if type(inflow_item) is Stock and (outflow_amount <= self.money):
@@ -30,10 +29,10 @@ class Trader:
         elif type(inflow_item) is str and (outflow_amount <= outflow_item.amount):
             self.money += inflow_amount
             self.stocks[repr(outflow_item)] -= outflow_amount
-            print (self, "just sold", outflow_amount, "stocks.")
+            print(self, "just sold", outflow_amount, "stocks.")
 
         else: 
-            print ("No transaction possible ")
+            print("No transaction possible")
             return False
 
         return True
