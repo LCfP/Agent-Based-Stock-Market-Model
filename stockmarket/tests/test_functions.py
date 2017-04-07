@@ -1,5 +1,6 @@
 """This file runs tests for all functions in functions"""
 from numpy.testing import assert_equal
+from numpy.testing import assert_raises
 from stockmarket.functions import *
 
 class TestFunctions:
@@ -9,7 +10,10 @@ class TestFunctions:
         pass
 
     def test_calculate_npv(self):
-        assert_equal(calculate_npv(1, 0.05), 20)
-        assert_equal(calculate_npv(2, 0.05), 40)
-
-
+        # default values
+        assert_equal(calculate_npv(3), 60)
+        # positive values
+        # negative values
+        # floats
+        # discount rate smaller than growth rate
+        assert_raises(ValueError, calculate_npv, 1, 0.05, 0.1)

@@ -49,6 +49,8 @@ def transaction(buyer, seller, stock, amount_of_product, amount_of_money, record
 def calculate_npv(dividend, discount_rate=0.05, growth_rate=0):
     """Fill in this function to calculate NPV"""
     # TODO growth rate cannot be higher than discount rate
+    if discount_rate < growth_rate:
+        raise ValueError('discount rate < growth rate', 'dc = ' + str(discount_rate), 'gr = ' + str(growth_rate))
     npv = dividend / (discount_rate - growth_rate)
     return npv
 
