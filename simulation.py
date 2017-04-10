@@ -67,7 +67,7 @@ for quarter in range(parameter_space["simulationTime"]):
     #2 market mechanism
     for stock in stocks:
         agents = marketmechanisms.market_mechanism(agents, parameter_space['observable_set_size'], stock,
-                                                   functions.valuation_extrapolate_average, randomset.subset_traders,
+                                                   randomset.subset_traders,
                                                    record=RECORD_DATA, recordInfo=recordInfo)
         if RECORD_DATA:
             database.record_statevariables(cur=cur, experiment_id=parameter_space['experiment_id'],

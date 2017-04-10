@@ -49,22 +49,10 @@ def transaction(buyer, seller, stock, amount_of_product, amount_of_money, record
 def calculate_npv(dividend, discount_rate=0.05, growth_rate=0):
     """Fill in this function to calculate NPV"""
     # TODO growth rate cannot be higher than discount rate
+    if discount_rate < growth_rate:
+        raise ValueError('discount rate < growth rate', 'dc = ' + str(discount_rate), 'gr = ' + str(growth_rate))
     npv = dividend / (discount_rate - growth_rate)
     return npv
-
-
-def valuation_extrapolate_average(memory, firm):
-    prof_history = firm.profit_history
-    expected_profit = np.mean(prof_history[len(prof_history)-memory:len(prof_history)])
-    value = calculate_npv(expected_profit * firm.dividend_rate)
-    return value
-
-
-def valuation_extrapolate_growth_average(memory, firm):
-    profit_growth_history = firm.profit_growth_history
-    expected_growth = np.mean(profit_growth_history[len(profit_growth_history)-memory:len(profit_growth_history)])
-    value = calculate_npv(firm.profit * firm.dividend_rate, growth_rate=expected_growth)
-    return value
 
 
 def create_stocks(firm, face_value):
