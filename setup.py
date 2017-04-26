@@ -7,4 +7,7 @@ setup(name='abm',
       author='',
       author_email='',
       license='MIT',
-      packages=['stockmarket'])
+      packages=['stockmarket'],
+      setup_requires=['pytest-runner'],
+      tests_require=['pytest'])
+
