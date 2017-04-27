@@ -1,15 +1,18 @@
 """In this file, we define the stock valuation functions of the agents"""
 
 import numpy as np
-from stockmarket.functions import calculate_npv
+from stockmarket.functions import npv_growing_perpetuity
 
 __author__ = 'Schasfoort, Abeshzadeh, Broek & Peters'
 
 
 def valuation_extrapolate_average(stock, memory, **_):
     prof_history = stock.firm.profit_history
-    expected_profit = np.mean(prof_history[len(prof_history)-memory:len(prof_history)])
-    value = calculate_npv(expected_profit * stock.firm.dividend_rate)
+    if memory < len(prof_history):
+        expected_profit = np.mean(prof_history[-memory:])
+    else:
+        expected_profit = np.mean(prof_history)
+    value = npv_growing_perpetuity(expected_profit * stock.firm.dividend_rate)
     return np.divide(value, stock.amount)
 
 

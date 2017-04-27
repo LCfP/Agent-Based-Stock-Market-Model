@@ -1,9 +1,7 @@
 """In this file, we define general functions for the benchmark stock market model"""
 
-import numpy as np
 import copy
-import sqlite3
-from stockmarket import stocks, firms
+import numpy as np
 
 __author__ = 'Schasfoort, Abeshzadeh, Broek & Peters'
 
@@ -11,8 +9,8 @@ __author__ = 'Schasfoort, Abeshzadeh, Broek & Peters'
 def transaction(buyer, seller, stock, amount_of_product, amount_of_money, record=False, recordInfo={}):
     """This function makes a buyer and seller agent perform a transaction with each other"""
     # TODO Do a proper test before transaction is done. This implementation is very rigid.
-    if buyer.transact(stock, amount_of_product, "money", amount_of_money):
-        seller.transact("money", amount_of_money, stock, amount_of_product)
+    seller.sell(stock, amount_of_product, amount_of_money)
+    buyer.buy(stock, amount_of_product, amount_of_money)
     # record the transaction
     if record:
         cur = recordInfo['cur']
@@ -46,36 +44,25 @@ def transaction(buyer, seller, stock, amount_of_product, amount_of_money, record
                     (transaction_id, stock_id, 'stock'))
 
 
-def calculate_npv(dividend, discount_rate=0.05, growth_rate=0):
-    """Fill in this function to calculate NPV"""
-    # TODO growth rate cannot be higher than discount rate
-    if discount_rate < growth_rate:
-        raise ValueError('discount rate < growth rate', 'dc = ' + str(discount_rate), 'gr = ' + str(growth_rate))
-    npv = dividend / (discount_rate - growth_rate)
-    return npv
+def npv_growing_perpetuity(dividend, discount_rate=0.05, growth_rate=0):
+    """Fill in this function to calculate NPV of a growing perpetuity"""
+    if discount_rate <= growth_rate:
+        raise ValueError('discount rate <= growth rate', 'dc = ' + str(discount_rate), 'gr = ' + str(growth_rate))
+    return np.divide(dividend, (discount_rate - growth_rate))
 
-
-def create_stocks(firm, face_value):
-    amount_of_stocks = firm.book_value / face_value
-    return stocks.Stock(firm.name, firm, face_value, amount_of_stocks)
 
 def distribute_initial_stocks(stocks, agents):
     local_agents = copy.copy(agents)
-    local_stocks = copy.copy(stocks)
-    for stock in local_stocks:
-        amount = stock.amount
-        distribute_to_agent = 1
-        while amount > 0:
-            for agent in local_agents:
-                if repr(stock) in agent.stocks:
-                    agent.stocks[repr(stock)] += distribute_to_agent
-                else:
-                    agent.stocks[repr(stock)] = distribute_to_agent
-                amount += -distribute_to_agent
-                if amount == 0:
-                    break
+    for stock in stocks:
+        agent_number = len(local_agents)
+        amount_each = stock.amount // agent_number
+        rest = int(stock.amount % agent_number)
+        for x in range(0, rest):
+            local_agents[x].stocks[stock] = amount_each + 1
+        for x in range(rest, agent_number):
+            local_agents[x].stocks[stock] = amount_each
+    return local_agents
 
-    return (local_stocks, local_agents)
 
 def print_setup(agents, firms, stocks):
     for agent in agents:
