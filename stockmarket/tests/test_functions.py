@@ -15,7 +15,7 @@ def set_up_agents():
     demander = Trader(name='demander', money=10, bid_ask_spread=0, memory_size=2, function=valuation_extrapolate_average)
     supplier = Trader(name='supplier', money=10, bid_ask_spread=0, memory_size=1, function=valuation_extrapolate_average)
     agents = [demander, supplier]
-    firm = Firm(name='firm', book_value=200, profit=0, profit_history=[0, 5, 0], seed=1, dividend_rate=1)
+    firm = Firm(name='firm', book_value=200, profits=[0, 5, 0, 0], seed=1, dividend_rate=1)
     stocks = setup_stocks([firm], amount=4)
     # distribute stocks
     agents = distribute_initial_stocks(stocks, agents)
@@ -39,7 +39,7 @@ def test_distribute_initial_stocks(set_up_agents):
     assert_equal(set_up_agents['demander'].stocks[set_up_agents['stocks'][0]], 2)
     assert_equal(set_up_agents['supplier'].stocks[set_up_agents['stocks'][0]], 2)
     # uneven distribution
-    other_firm = Firm("other", 200, 0, [0, 5, 0], 1, 1)
+    other_firm = Firm("other", 200, [0, 5, 0, 0], 1, 1)
     stock = Stock(other_firm, 5)
     agents = distribute_initial_stocks([stock], set_up_agents['agents'])
     assert_equal(agents[0].stocks[stock], 3)

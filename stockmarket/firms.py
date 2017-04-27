@@ -5,17 +5,18 @@ import random
 class Firm:
     """a base class for Firms"""
 
-    def __init__(self, name, book_value, profit, profit_history, seed, dividend_rate=1):
+    def __init__(self, name, book_value, profits, seed, dividend_rate=1):
         """Creates a new trader"""
         self.name = name
         self.book_value = book_value
-        self.profit = profit
+        self.profit = profits[-1]
         self.dividend_rate = dividend_rate
-        self.profit_history = profit_history
-        self.profit_history.append(profit)
+        self.profit_history = profits
 
-    def update_profits(self, lowestpercentage=95, variance=10):
-        growth = (lowestpercentage + random.randint(0, variance)) / 100
+    def determine_growth(self, sd=5):
+        return (random.randint(100-sd, 100+sd)) / 100
+
+    def update_profits(self, growth):
         self.profit = int(self.profit * growth)
         self.profit_history.append(self.profit)
 

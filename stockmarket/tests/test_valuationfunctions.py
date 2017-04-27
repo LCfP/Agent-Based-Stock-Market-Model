@@ -10,8 +10,8 @@ from numpy.testing import assert_almost_equal
 
 @pytest.fixture()
 def stock():
-    return (Stock(Firm("Firm1", 10000, 300, [200, 300, 400], 1), 100),
-            Stock(Firm("Firm1", 8774, 246, [215, 359, 233], 1), 100))
+    return (Stock(Firm("Firm1", 10000, [200, 300, 400, 300], 1), 100),
+            Stock(Firm("Firm1", 8774, [215, 359, 233, 246], 1), 100))
 
 
 def test_extrapolate(stock):
