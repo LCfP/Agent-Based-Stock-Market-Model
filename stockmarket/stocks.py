@@ -11,6 +11,7 @@ class Stock:
         self.firm = firm
         self.face_value = firm.book_value / amount
         self.amount = amount
+        self.price_history = []
 
     def __str__(self):
         return "Stock of " + str(self.firm)

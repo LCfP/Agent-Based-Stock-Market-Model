@@ -11,8 +11,8 @@ class Trader:
         self.money = money
         self.stocks = {}
         # bid ask spread is an integer
-        self.bid_ask_spread = bid_ask_spread
         self.memory_size = memory_size
+        self.bid_ask_spread = bid_ask_spread
         self.function = function
 
     def valuate_stocks(self, stock):

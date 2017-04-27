@@ -24,6 +24,15 @@ def valuation_extrapolate_growth_average(stock, memory, **_):
     #  return np.divide(value, stock.amount)
 
 
-def price_trend(stock, memory, **_):
-    pass
+def price_trend(stock, ma_short, ma_long, min_profit, max_loss, **_):
+    val_mashort = np.mean(stock.price_history[-ma_short:])
+    val_malong = np.mean(stock.price_history[-ma_long:])
+    # if MAshort is greater than MAlong the chartists thinks the price will increase.
+    if val_mashort > val_malong:
+        return stock.price_history[-1] * min_profit
+    # if MAshort is smaller than MAlong the chartists thinks the price will decrease.
+    elif val_mashort < val_malong:
+        return stock.price_history[-1] * max_loss
+    else:
+        return stock.price_history[-1]
 

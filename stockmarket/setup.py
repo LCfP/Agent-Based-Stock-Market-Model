@@ -11,11 +11,12 @@ def setup_agents(init_money, init_bid_ask_spread, init_memory_size, seed, amount
     """This returns an initialized agent set"""
     agent_set = []
     for agent in range(amount_of_agents):
+        memory = randomize_init_variable(init_memory_size[0], init_memory_size[1])
         agent_set.append(agents.Trader(name=agent,
                                        money=randomize_init_variable(init_money[0], init_money[1]),
                                        bid_ask_spread=randomize_init_variable(init_bid_ask_spread[0], init_bid_ask_spread[1]),
-                                       memory_size=randomize_init_variable(init_memory_size[0], init_memory_size[1]),
-                                       function=valuationfunctions.valuation_extrapolate_average))
+                                       memory_size=memory,
+                                       function=lambda x: valuationfunctions.valuation_extrapolate_average(x, memory)))
     return agent_set
 
 

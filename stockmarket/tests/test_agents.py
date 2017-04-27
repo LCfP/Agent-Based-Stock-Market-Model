@@ -10,9 +10,10 @@ from numpy.testing import assert_raises
 
 @pytest.fixture()
 def agents():
-    return [Trader("Agent1", 1000, 0, 2, valuation_extrapolate_average),
-                Trader("Agent2", 1000, 0, 2, valuation_extrapolate_growth_average),
-                Trader("Agent3", 1000, 0, 2, price_trend)]
+    return [Trader("Agent1", 1000, 0, 2, lambda **x: valuation_extrapolate_average(**x)),
+                Trader("Agent2", 1000, 0, 2, lambda **x: valuation_extrapolate_growth_average(**x)),
+                Trader("Agent3", 1000, 0, 2, lambda **x: price_trend(**x, ma_long=1, ma_short=1, max_loss=1,
+                                                                     min_profit=1))]
 
 
 @pytest.fixture()
@@ -25,7 +26,7 @@ def test_valuate_stocks(agents, stock):
     # test if different kind of functions work
     assert_equal(agents[0].valuate_stocks(stock), valuation_extrapolate_average(stock, 2))
     assert_equal(agents[1].valuate_stocks(stock), valuation_extrapolate_growth_average(stock, 2))
-    assert_equal(agents[2].valuate_stocks(stock), price_trend(stock, 2))
+    assert_equal(agents[2].valuate_stocks(stock), price_trend(stock, 1, 1, 1, 1))
     # test change of parameters
     agents[0].memory_size = 3
     assert_equal(agents[0].valuate_stocks(stock), valuation_extrapolate_average(stock, 3))
