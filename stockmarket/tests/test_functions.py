@@ -46,6 +46,10 @@ def test_distribute_initial_stocks(set_up_agents):
     assert_equal(agents[1].stocks[stock], 2)
 
 
-def test_transaction():
-    pass
+def test_transaction(set_up_agents):
+    buyer = set_up_agents['demander']
+    seller = set_up_agents['supplier']
+    stock = set_up_agents['stocks'][0]
+    transaction(buyer, seller, stock, 1, 7)
+    assert_equal([buyer.stocks[stock], buyer.money, seller.stocks[stock], seller.money], [3, 3, 1, 17])
 
