@@ -8,7 +8,7 @@ parameter_space = {
     'simulationTime': 100, 'record_data': True, 'experiment_id': 1, 'amount_of_agents': 12, 'amount_of_firms': 3,
     'observable_set_size': 3, 'initial_money': (100, 200), 'initial_bid_ask': (5, 5), 'initial_memory_size': (1, 4),
     'initial_profit': (200, 200), 'initial_book_value': (10000, 10000), 'initial_profit_history': [150, 170, 190],
-    'initial_face_value': 50, 'seed': 1
+    'initial_stock_amount': 200, 'seed': 1
 }
 
 random.seed(parameter_space['seed'])
@@ -25,7 +25,7 @@ firms = setup.setup_firms(init_book_value=parameter_space['initial_book_value'],
                           init_profit=parameter_space['initial_profit'],
                           init_profit_history=parameter_space['initial_profit_history'],
                           seed=parameter_space['seed'], amount_of_firms=parameter_space['amount_of_firms'])
-stocks = setup.setup_stocks(firms, face_value=parameter_space['initial_face_value'])
+stocks = setup.setup_stocks(firms, amount=parameter_space['initial_stock_amount'])
 
 # distribute the initial stocks to the agents equally 1 per 1 until non left. (slow)
 agents = functions.distribute_initial_stocks(stocks, agents)

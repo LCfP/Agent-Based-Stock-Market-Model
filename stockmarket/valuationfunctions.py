@@ -8,7 +8,10 @@ __author__ = 'Schasfoort, Abeshzadeh, Broek & Peters'
 
 def valuation_extrapolate_average(stock, memory, **_):
     prof_history = stock.firm.profit_history
-    expected_profit = np.mean(prof_history[len(prof_history)-memory:len(prof_history)])
+    if memory < len(prof_history):
+        expected_profit = np.mean(prof_history[len(prof_history)-memory:len(prof_history)])
+    else:
+        expected_profit = np.mean(prof_history[0:len(prof_history)])
     value = npv_growing_perpetuity(expected_profit * stock.firm.dividend_rate)
     return np.divide(value, stock.amount)
 

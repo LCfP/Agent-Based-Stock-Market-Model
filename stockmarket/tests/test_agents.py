@@ -18,7 +18,7 @@ def agents():
 @pytest.fixture()
 def stock():
     firm = Firm("Firm1", 10000, 300, [200, 300, 400], 1)
-    return Stock(firm, 100)
+    return Stock(firm, 1000)
 
 
 def test_valuate_stocks(agents, stock):

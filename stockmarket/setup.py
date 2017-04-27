@@ -32,10 +32,10 @@ def setup_firms(init_book_value, init_profit, init_profit_history, seed, amount_
     return firm_set
 
 
-def setup_stocks(set_of_firms, face_value):
+def setup_stocks(set_of_firms, amount):
     stock_set = []
     for firm in set_of_firms:
-        stock_set.append(stocks.Stock(firm, face_value))
+        stock_set.append(stocks.Stock(firm, amount))
     return stock_set
 
 

@@ -15,7 +15,7 @@ def set_up_agents():
     supplier = Trader(name='supplier', money=10, bid_ask_spread=0, memory_size=1, function=valuation_extrapolate_average)
     agents = [demander, supplier]
     firm = Firm(name='firm', book_value=200, profit=0, profit_history=[0, 5, 0], seed=1, dividend_rate=1)
-    stocks = setup_stocks([firm], face_value=50)
+    stocks = setup_stocks([firm], amount=4)
     # distribute stocks
     agents = distribute_initial_stocks(stocks, agents)
     return {'demander': demander, 'supplier': supplier, 'agents': agents, 'firm': firm, 'stocks': stocks}
