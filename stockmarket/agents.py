@@ -18,23 +18,20 @@ class Trader:
     def valuate_stocks(self, stock):
         return self.function(stock=stock, memory=self.memory_size)
 
-    def transact(self, inflow_item, inflow_amount, outflow_item, outflow_amount):
-        """This allows an agent to transact stocks and money"""
-        if type(inflow_item) is Stock and (outflow_amount <= self.money):
-            self.stocks[repr(inflow_item)] += inflow_amount
-            self.money -= outflow_amount
-            print (self, "just purchased", inflow_amount, "stocks.")  # for debugging purposes
+    def sell(self, stock, amount, price):
+        if self.stocks[stock] < amount:
+            raise ValueError("not enough stocks to sell this amount")
+        self.stocks[stock] -= amount
+        self.money += price
 
-        elif type(inflow_item) is str and (outflow_amount <= outflow_item.amount):
-            self.money += inflow_amount
-            self.stocks[repr(outflow_item)] -= outflow_amount
-            print(self, "just sold", outflow_amount, "stocks.")
-
-        else: 
-            print("No transaction possible")
-            return False
-
-        return True
+    def buy(self, stock, amount, price):
+        if self.money < price:
+            raise ValueError("not enough money to buy this amount of stocks")
+        try:
+            self.stocks[stock] += amount
+        except KeyError:
+            self.stocks[stock] = amount
+        self.money -= price
 
     def __str__(self):
         return str(self.name)

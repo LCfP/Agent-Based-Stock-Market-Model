@@ -1,7 +1,7 @@
 """In this file, we define the set-up procedure of the model"""
 
 import random
-from stockmarket import agents, firms, functions, valuationfunctions
+from stockmarket import agents, firms, stocks, valuationfunctions
 
 __author__ = 'Schasfoort, Abeshzadeh, Broek & Peters'
 
@@ -35,7 +35,7 @@ def setup_firms(init_book_value, init_profit, init_profit_history, seed, amount_
 def setup_stocks(set_of_firms, face_value):
     stock_set = []
     for firm in set_of_firms:
-        stock_set.append(functions.create_stocks(firm, face_value))
+        stock_set.append(stocks.Stock(firm, face_value))
     return stock_set
 
 

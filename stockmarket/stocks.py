@@ -5,12 +5,12 @@ __author__ = 'Schasfoort, Abeshzadeh, Broek & Peters'
 
 class Stock:
     """a base class for Stocks"""
-    def __init__(self, name, firm, face_value, amount):
+    def __init__(self, firm, face_value):
         """Creates a new stock"""
-        self.name = name
+        self.name = firm.name
         self.firm = firm
         self.face_value = face_value
-        self.amount = amount
+        self.amount = firm.book_value / face_value
 
     def __str__(self):
         return "Stock of " + str(self.firm)
