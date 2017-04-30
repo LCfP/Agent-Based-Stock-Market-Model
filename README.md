@@ -1,4 +1,4 @@
-[![Build Status](https://travis-ci.org/LCfP/abm.svg?branch=master)](https://travis-ci.org/LCfP/abm)
+[![Build Status](https://travis-ci.org/LCfP/abm.svg?branch=dev)](https://travis-ci.org/LCfP/abm)
 [![Coverage Status](https://coveralls.io/repos/github/LCfP/abm/badge.svg?branch=dev)](https://coveralls.io/github/LCfP/abm?branch=dev)
 
 # Basic stock market model
