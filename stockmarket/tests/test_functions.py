@@ -12,15 +12,14 @@ from stockmarket.valuationfunctions import *
 
 @pytest.fixture()
 def set_up_agents():
-    demander = Trader(name='demander', money=10, bid_ask_spread=0, memory_size=2,
-                      function=lambda x: valuation_extrapolate_average(x, 2))
-    supplier = Trader(name='supplier', money=10, bid_ask_spread=0, memory_size=2,
-                      function=lambda x: valuation_extrapolate_average(x, 1))
+    demander = Trader(name='demander', money=10, bid_ask_spread=0, memory=2,
+                      function=lambda x: extrapolate_average_profit(x, 2))
+    supplier = Trader(name='supplier', money=10, bid_ask_spread=0, memory=2,
+                      function=lambda x: extrapolate_average_profit(x, 1))
     agents = [demander, supplier]
     firm = Firm(name='firm', book_value=200, profits=[0, 5, 0, 0], seed=1, dividend_rate=1)
     stocks = setup_stocks([firm], amount=4)
-    # distribute stocks
-    agents = distribute_initial_stocks(stocks, agents)
+    distribute_initial_stocks(stocks, agents)
     return {'demander': demander, 'supplier': supplier, 'agents': agents, 'firm': firm, 'stocks': stocks}
 
 
@@ -36,6 +35,11 @@ def test_growing_perpetuity():
     assert_raises(ValueError, npv_growing_perpetuity, 1, 0.5, 0.5)
 
 
+def test_moving_averages():
+    # TODO: write tests
+    pass
+
+
 def test_distribute_initial_stocks(set_up_agents):
     # even distribution
     assert_equal(set_up_agents['demander'].stocks[set_up_agents['stocks'][0]], 2)
@@ -43,9 +47,9 @@ def test_distribute_initial_stocks(set_up_agents):
     # uneven distribution
     other_firm = Firm("other", 200, [0, 5, 0, 0], 1, 1)
     stock = Stock(other_firm, 5)
-    agents = distribute_initial_stocks([stock], set_up_agents['agents'])
-    assert_equal(agents[0].stocks[stock], 3)
-    assert_equal(agents[1].stocks[stock], 2)
+    distribute_initial_stocks([stock], set_up_agents['agents'])
+    assert_equal(set_up_agents['demander'].stocks[stock], 3)
+    assert_equal(set_up_agents['supplier'].stocks[stock], 2)
 
 
 def test_transaction(set_up_agents):

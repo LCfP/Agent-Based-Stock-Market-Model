@@ -1,17 +1,15 @@
 """In this file, we define the benchmark stock market model agent classes"""
 
-from stockmarket.stocks import Stock
-
 
 class Trader:
     """a base class for Traders"""
-    def __init__(self, name, money, bid_ask_spread, memory_size, function):
+    def __init__(self, name, money, bid_ask_spread, memory, function):
         """Creates a new trader"""
         self.name = name
         self.money = money
-        self.stocks = {}
+        self.stocks = StockDict()
         # bid ask spread is an integer
-        self.memory_size = memory_size
+        self.memory_size = memory
         self.bid_ask_spread = bid_ask_spread
         self.function = function
 
@@ -44,3 +42,14 @@ class Trader:
         print("Money:", self.money)
         print("Stocks:", self.stocks)
         print("")
+
+
+class StockDict(dict):
+    def __getitem__(self, key):
+        try:
+            return self.__dict__[key]
+        except KeyError:
+            return 0
+
+    def __setitem__(self, key, value):
+        self.__dict__[key] = value

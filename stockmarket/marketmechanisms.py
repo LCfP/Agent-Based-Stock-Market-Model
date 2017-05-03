@@ -15,57 +15,58 @@ def market_mechanism(agentset, observablesetsize, stock, set_of_traders_function
     randomized_agent_set = list(agentset)
     random.shuffle(randomized_agent_set)
 
-    # every demand agent observes a subset of other agents from which it picks the cheapest supplier
+    total_volumn = 0
+    total_money = 0
+
     for demander in randomized_agent_set:
-        # find the observable set for the demanding agent
+
         observable_set = set_of_traders_function(demander, randomized_agent_set, observablesetsize)
+        
+        sup = best_supplier(observable_set, stock)
+        if sup is not None:
+            vol = find_volume(demander, sup, stock)
+            if vol > 0:
+                price = selling_price(stock, sup)
+                transaction(demander, sup, stock, vol, vol * price, record, recordInfo)
+                total_volumn += vol
+                total_money += vol * price
 
-        # Find cheapest supplier and save the price
-        best_supplier_and_price = (None, math.inf)
+    stock.add_price(total_volumn, total_money)
 
-        for supplier in observable_set:
-            supplier_price = supplier.valuate_stocks(stock=stock) \
-                             * (1 + (supplier.bid_ask_spread / 200))
 
-            if suitable_trade(demander, supplier, best_supplier_and_price, stock):
-                best_supplier_and_price = (supplier, supplier_price)
-
-        # If we found a trade, make the actual trade.
-        if best_supplier_and_price[0] is not None:
-            price = best_supplier_and_price[0].valuate_stocks(stock=stock) \
-                    * (1 + (best_supplier_and_price[0].bid_ask_spread / 200))
-            amount_demander_can_buy = math.floor(demander.money / price)
-            amount_supplier_can_sell = supplier.stocks[stock]
-
-            if amount_demander_can_buy < amount_supplier_can_sell:
-                amount = amount_demander_can_buy
-            else:
-                amount = amount_supplier_can_sell
-
-            if amount > 0:
-                transaction(demander, supplier, stock, amount, amount * price, record=record, recordInfo=recordInfo)
-
-    return randomized_agent_set
-
-def suitable_trade(demander, supplier, best_supplier_and_price, stock):
-    """
-    Evaluates if a trade can take place
-
-    If the price the demanding trader is willing to pay is bigger than the supplier price,
-    the supplier price is cheaper than the current cheapest price, and the supplier has stocks to sell:
-    return True. Otherwise, returns False.
-    """
-    demander_price = demander.valuate_stocks(stock=stock) \
-                     * (1 - (demander.bid_ask_spread / 200))  # /2 and / 100 for percent
-    supplier_price = supplier.valuate_stocks(stock=stock) \
-                     * (1 + (supplier.bid_ask_spread / 200))
-
-    priceIsRight = (demander_price > supplier_price)
-    priceIsBest = (supplier_price < best_supplier_and_price[1])
-    thereAreStocks = (supplier.stocks[stock] > 0)
-
-    if priceIsRight and priceIsBest and thereAreStocks:
-        return True
+def find_volume(demander, supplier, stock):
+    sp = selling_price(stock, supplier)
+    bp = buying_price(stock, demander)
+    if bp is not None and sp is not None and sp <= bp:
+        return min(supplier.stocks[stock], math.floor(demander.money / sp))
     else:
-        return False
+        return 0
 
+
+def best_supplier(suppliers, stock):
+    current_supplier = None
+    current_price = None
+    for supplier in suppliers:
+        price = selling_price(stock, supplier)
+        if price is not None and supplier.stocks[stock] > 0:
+            if current_price is None or current_price > price:
+                current_supplier = supplier
+                current_price = price
+    return current_supplier
+
+
+def buying_price(stock, demander):
+    price = demander.valuate_stocks(stock)
+    if price is not None:
+        return demander.valuate_stocks(stock) * (1 - (demander.bid_ask_spread / 200))
+    else:
+        return None
+
+
+def selling_price(stock, supplier):
+    price = supplier.valuate_stocks(stock)
+    if price is not None:
+        # TODO: Edge case: valuated at zero
+        return supplier.valuate_stocks(stock) * (1 + (supplier.bid_ask_spread / 200))
+    else:
+        return None
