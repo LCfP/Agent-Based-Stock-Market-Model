@@ -1,7 +1,7 @@
 """In this file, we define the stock valuation functions of the agents"""
 
 import numpy as np
-from stockmarket.functions import *
+from stockmarket.functions import npv_growing_perpetuity
 
 __author__ = 'Schasfoort, Abeshzadeh, Broek & Peters'
 

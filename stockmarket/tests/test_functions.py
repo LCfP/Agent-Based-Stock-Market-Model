@@ -1,12 +1,10 @@
 """This file runs tests for all functions in functions"""
+
 import pytest
 from numpy.testing import assert_equal
 from numpy.testing import assert_raises
-from stockmarket.agents import *
 from stockmarket.firms import *
 from stockmarket.setup import *
-from stockmarket.stocks import *
-from stockmarket.functions import *
 from stockmarket.valuationfunctions import *
 
 
@@ -39,23 +37,4 @@ def test_moving_averages():
     # TODO: write tests
     pass
 
-
-def test_distribute_initial_stocks(set_up_agents):
-    # even distribution
-    assert_equal(set_up_agents['demander'].stocks[set_up_agents['stocks'][0]], 2)
-    assert_equal(set_up_agents['supplier'].stocks[set_up_agents['stocks'][0]], 2)
-    # uneven distribution
-    other_firm = Firm("other", 200, [0, 5, 0, 0], 1, 1)
-    stock = Stock(other_firm, 5)
-    distribute_initial_stocks([stock], set_up_agents['agents'])
-    assert_equal(set_up_agents['demander'].stocks[stock], 3)
-    assert_equal(set_up_agents['supplier'].stocks[stock], 2)
-
-
-def test_transaction(set_up_agents):
-    buyer = set_up_agents['demander']
-    seller = set_up_agents['supplier']
-    stock = set_up_agents['stocks'][0]
-    transaction(buyer, seller, stock, 1, 7)
-    assert_equal([buyer.stocks[stock], buyer.money, seller.stocks[stock], seller.money], [3, 3, 1, 17])
 

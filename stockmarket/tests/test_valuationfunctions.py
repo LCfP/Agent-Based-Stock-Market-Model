@@ -1,7 +1,7 @@
 """This file runs tests for all functions in valuation functions"""
 
 import pytest
-from stockmarket.stocks import Stock
+from stockmarket.stock import Stock
 from stockmarket.firms import Firm
 from stockmarket.valuationfunctions import *
 from numpy.testing import assert_equal

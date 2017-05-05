@@ -14,6 +14,19 @@ class Stock:
         self.price_history = []
 
     def add_price(self, vol, price):
+        """Adds the average stock price of the period to the price history of the stock
+
+        Calculates the average price of all trades of `self` in the period, weighted by amount, and adds it
+        to the `price_history` of the stock.
+
+        Parameters
+        ----------
+        vol : int
+            Total amount of stocks traded in the period.
+        price : scalar
+            Total price for all stocks in the period.
+
+        """
         if vol > 0:
             self.price_history.append(price / vol)
         elif self.price_history:

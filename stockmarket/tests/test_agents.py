@@ -1,9 +1,9 @@
 """This file runs tests for all functions in agents"""
 import pytest
-from stockmarket.agents import *
+from stockmarket.agent import *
 from stockmarket.valuationfunctions import *
 from stockmarket.firms import Firm
-from stockmarket.stocks import Stock
+from stockmarket.stock import Stock
 from numpy.testing import assert_equal
 from numpy.testing import assert_raises
 

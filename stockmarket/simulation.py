@@ -1,11 +1,9 @@
 """This file is our main simulation file it includes the set-up and time loop"""
 
-import sqlite3
 import random
 from stockmarket import functions, setup, marketmechanisms, randomset, database
-from stockmarket.parameters import Parameters
+import stockmarket.parameters as p
 
-p = Parameters()
 random.seed(p.seed)
 RECORD_DATA = p.record_data
 
@@ -17,18 +15,17 @@ agents = setup.setup_agents(init_money=p.initial_money,
                             init_memory_size=p.initial_memory,
                             seed=p.seed, fundamentalist=p.amount_fundamentalists,
                             chartist=p.amount_chartists)
+
 firms = setup.setup_firms(init_book_value=p.initial_book_value,
                           init_profit=p.initial_profit,
                           seed=p.seed, amount_of_firms=p.amount_firms)
+
 stocks = setup.setup_stocks(firms, amount=p.initial_stock_amount)
 
-# distribute the initial stocks to the agents equally 1 per 1 until non left. (slow)
-functions.distribute_initial_stocks(stocks, agents)
+setup.distribute_initial_stocks(stocks, agents)
 
 if RECORD_DATA:
-    conn = sqlite3.connect('dataBaseOffline.sqlite')
-    cur = conn.cursor()
-    database.create_tables(cur)
+    database.create_tables()
 
 """
 Print set-up
@@ -47,34 +44,23 @@ Process overview and scheduling from the ODD
 
 for quarter in range(p.simulation_time):
 
-    if RECORD_DATA:
-        recordInfo = {'cur': cur, 'experiment_id': p.experiment_id,
-                      'seed': p.seed, 'period': quarter}
-    else:
-        recordInfo = {}
-
     # 1 update dividends
     for firm in firms:
         firm.update_profits(firm.determine_growth())
         if RECORD_DATA:
-            database.record_statevariables(cur=cur, experiment_id=p.experiment_id,
-                                       seed=p.seed, period=quarter, agent=firm)
+            database.record_statevariables(period=quarter, agent=firm)
 
     # 2 market mechanism
     for stock in stocks:
-        marketmechanisms.market_mechanism(agents, p.observable_set_size, stock,
-                                                   randomset.subset_traders,
-                                                   record=RECORD_DATA, recordInfo=recordInfo)
+        marketmechanisms.trade_stock(agents, p.observable_set_size, stock, randomset.subset_traders, quarter)
         if RECORD_DATA:
-            database.record_statevariables(cur=cur, experiment_id=p.experiment_id,
-                                           seed=p.seed, period=quarter, agent=stock)
+            database.record_statevariables(period=quarter, agent=stock)
 
     # 3 record agent-state variables
     if RECORD_DATA:
         for agent in agents:
-            database.record_statevariables(cur=cur, experiment_id=p.experiment_id,
-                                           seed=p.seed, period=quarter, agent=agent)
+            database.record_statevariables(period=quarter, agent=agent)
 
 if RECORD_DATA:
-    conn.commit()
-    cur.close()
+    database.commit()
+    database.close()

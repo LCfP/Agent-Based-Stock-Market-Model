@@ -2,7 +2,8 @@
 
 import random
 import itertools
-from stockmarket import agents, firms, stocks, valuationfunctions
+from stockmarket import firms, stock, valuationfunctions
+from stockmarket.agent import Trader
 
 __author__ = 'Schasfoort, Abeshzadeh, Broek & Peters'
 
@@ -11,11 +12,11 @@ def setup_agents(init_money, init_bid_ask_spread, init_memory_size, seed, fundam
     """This returns an initialized agent set"""
     agent_set = []
     init_agent = lambda x, y: agent_set.append(
-                                agents.Trader(name=x,
-                                              money=randomize_init_variable(init_money[0], init_money[1]),
-                                              bid_ask_spread=randomize_init_variable(init_bid_ask_spread[0], init_bid_ask_spread[1]),
-                                              memory=randomize_init_variable(init_memory_size[0], init_memory_size[1]),
-                                              function=y))
+                                Trader(name=x,
+                                       money=randomize_init_variable(init_money[0], init_money[1]),
+                                       bid_ask_spread=randomize_init_variable(init_bid_ask_spread[0], init_bid_ask_spread[1]),
+                                       memory=randomize_init_variable(init_memory_size[0], init_memory_size[1]),
+                                       function=y))
     for agent in range(fundamentalist):
         init_agent(agent, valuationfunctions.extrapolate_average_profit)
     for agent in range(fundamentalist, chartist+fundamentalist):
@@ -44,10 +45,20 @@ def setup_firms(init_book_value, init_profit, seed, amount_of_firms=1):
 def setup_stocks(set_of_firms, amount):
     stock_set = []
     for firm in set_of_firms:
-        stock_set.append(stocks.Stock(firm, amount))
+        stock_set.append(stock.Stock(firm, amount))
     return stock_set
 
 
 def randomize_init_variable(min_amount, max_amount):
     return random.randint(min_amount, max_amount)
 
+
+def distribute_initial_stocks(stocks, agents):
+    for stock in stocks:
+        agent_number = len(agents)
+        amount_each = stock.amount // agent_number
+        rest = int(stock.amount % agent_number)
+        for x in range(0, rest):
+            agents[x].stocks[stock] = amount_each + 1
+        for x in range(rest, agent_number):
+            agents[x].stocks[stock] = amount_each

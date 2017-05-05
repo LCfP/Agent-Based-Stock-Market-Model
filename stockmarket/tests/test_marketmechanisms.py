@@ -3,10 +3,10 @@
 import pytest
 from numpy.testing import assert_equal
 from stockmarket.marketmechanisms import *
-from stockmarket.agents import *
+from stockmarket.agent import *
 from stockmarket.firms import *
-from stockmarket.stocks import Stock
-from stockmarket.functions import distribute_initial_stocks
+from stockmarket.stock import Stock
+from stockmarket.setup import distribute_initial_stocks
 from stockmarket.valuationfunctions import extrapolate_average_profit
 from stockmarket.valuationfunctions import extrapolate_moving_average_price
 
@@ -60,4 +60,12 @@ def test_volume():
     assert_equal(find_volume(demander, seller, stock), 3)
     assert_equal(find_volume(seller, demander, stock), 0)
 
+
+def test_transaction(chartist, fundamentalist, stock):
+    buyer = chartist
+    seller = fundamentalist
+    buyer.stocks[stock] = 2
+    seller.stocks[stock] = 2
+    transaction(buyer, seller, stock, 1, 7)
+    assert_equal([buyer.stocks[stock], buyer.money, seller.stocks[stock], seller.money], [3, 3, 1, 17])
 

@@ -1,20 +1,30 @@
-"""In this file, we define market matching mechanism functions. These functions take in agent sets and output matched pairs of agents"""
-
-__author__ = 'Schasfoort, Abeshzadeh, Broek & Peters'
+"""In this file, we define market matching mechanism functions.
+These functions take in agent sets and output matched pairs of agents"""
 
 import math
 import random
+import stockmarket.parameters as par
+from stockmarket.database import record_transaction
 
-from stockmarket.functions import transaction
+__author__ = 'Schasfoort, Abeshzadeh, Broek & Peters'
 
 
-def market_mechanism(agentset, observablesetsize, stock, set_of_traders_function,
-                     record=False, recordInfo={}):
-    """return set of matched agents"""
+def trade_stock(agentset, observablesetsize, stock, set_of_traders_function, quarter):
+    """ ???
+
+    Parameters
+    ----------
+    agentset
+    observablesetsize
+    stock
+    set_of_traders_function
+    quarter
+    """
     # copy the agentset and shuffle the set to get different order of traders every time
     randomized_agent_set = list(agentset)
     random.shuffle(randomized_agent_set)
 
+    # store total price and trade volume for the stock in the given period.
     total_volumn = 0
     total_money = 0
 
@@ -27,14 +37,34 @@ def market_mechanism(agentset, observablesetsize, stock, set_of_traders_function
             vol = find_volume(demander, sup, stock)
             if vol > 0:
                 price = selling_price(stock, sup)
-                transaction(demander, sup, stock, vol, vol * price, record, recordInfo)
+                total_price = vol * price
+                transaction(demander, sup, stock, vol, total_price)
                 total_volumn += vol
                 total_money += vol * price
+                if par.record_data:
+                    record_transaction(demander, sup, stock, vol, total_price, quarter)
 
     stock.add_price(total_volumn, total_money)
 
 
 def find_volume(demander, supplier, stock):
+    """Determines maximum volume the traders can trade for
+
+    Parameters
+    ----------
+    demander : :obj:`agent`
+        Buyer of the stock.
+    supplier : :obj:`agent`
+        Seller of the stock.
+    stock : :obj:`stock`
+        Stock to be traded.
+
+    Returns
+    -------
+    int
+        Maximum trade volume between `demander` and `supplier`.
+
+    """
     sp = selling_price(stock, supplier)
     bp = buying_price(stock, demander)
     if bp is not None and sp is not None and sp <= bp:
@@ -44,6 +74,25 @@ def find_volume(demander, supplier, stock):
 
 
 def best_supplier(suppliers, stock):
+    """Returns trader with the lowest price.
+
+    Determines the trader that sells the `stock` for the lowest price and returns it.
+
+    Parameters
+    ----------
+    suppliers : :obj:`list` of :obj:`agent`
+        List of potential sellers.
+    stock : :obj:`stock`
+        Stock to be traded.
+
+    Returns
+    -------
+    :obj:`agent`
+        Trader with the lowest price.
+    None
+        If there is no trader able to sell in the list of `suppliers`.
+
+    """
     current_supplier = None
     current_price = None
     for supplier in suppliers:
@@ -56,6 +105,23 @@ def best_supplier(suppliers, stock):
 
 
 def buying_price(stock, demander):
+    """Determines maximum price an agent is willing to pay for a stock.
+
+    Parameters
+    ----------
+    stock : :obj:`stock`
+        Stock to be traded.
+    demander : :obj:`agent`
+        The buyer of the stock.
+
+    Returns
+    -------
+    scalar :
+        Price the `demander` is willing to buy for.
+    None :
+        If the `demander` doesn't have a price.
+
+    """
     price = demander.valuate_stocks(stock)
     if price is not None:
         return demander.valuate_stocks(stock) * (1 - (demander.bid_ask_spread / 200))
@@ -64,9 +130,49 @@ def buying_price(stock, demander):
 
 
 def selling_price(stock, supplier):
+    """Determines minimum price an agent is willing to sell a stock for.
+
+    Parameters
+    ----------
+    stock : :obj:`stock`
+        Stock to be traded.
+    supplier : :obj:`agent`
+        The seller of the stock.
+
+    Returns
+    -------
+    scalar :
+        Price the `supplier` is willing to sell for.
+    None :
+        If the `supplier` doesn't have a price.
+
+    """
     price = supplier.valuate_stocks(stock)
     if price is not None:
         # TODO: Edge case: valuated at zero
         return supplier.valuate_stocks(stock) * (1 + (supplier.bid_ask_spread / 200))
     else:
         return None
+
+
+def transaction(buyer, seller, stock, amount_of_product, amount_of_money):
+    """Perform transaction between buyer and seller.
+
+    Parameters
+    ----------
+    buyer : :obj:`agent`
+        Trader that buys the stock.
+    seller : :obj:`agent`
+        Trader that sells the stock.
+    stock : :obj:`stock`
+        The stock to be sold.
+    amount_of_product : int
+        Number of stocks sold.
+    amount_of_money : scalar
+        Total price for all stocks.
+    quarter :
+        The quarter the transaction occurs
+
+    """
+    seller.sell(stock, amount_of_product, amount_of_money)
+    buyer.buy(stock, amount_of_product, amount_of_money)
