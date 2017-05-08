@@ -3,7 +3,7 @@
 
 class Trader:
     """a base class for Traders"""
-    def __init__(self, name, money, bid_ask_spread, memory, function, ma_short=3, ma_long=5):
+    def __init__(self, name, money, bid_ask_spread, memory, ma_short, ma_long, function):
         """Creates a new trader"""
         self.name = name
         self.money = money

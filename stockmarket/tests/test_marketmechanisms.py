@@ -13,13 +13,13 @@ from stockmarket.valuationfunctions import extrapolate_ma_price
 
 @pytest.fixture()
 def fundamentalist():
-    return Trader(name='supplier', money=10, bid_ask_spread=10, memory=2,
+    return Trader(name='supplier', money=10, bid_ask_spread=10, memory=2, ma_short=3, ma_long=5,
                   function=extrapolate_average_profit)
 
 
 @pytest.fixture()
 def chartist():
-    return Trader(name='demander', money=10, bid_ask_spread=10, memory=2,
+    return Trader(name='demander', money=10, bid_ask_spread=10, memory=2, ma_short=3, ma_long=5,
                   function=extrapolate_ma_price)
 
 
@@ -44,15 +44,15 @@ def test_buying_price(stock, fundamentalist, chartist):
 
 
 def test_best_supplier(fundamentalist, chartist, stock):
-    low_price = Trader('low', 10, 5, 1, extrapolate_average_profit)
+    low_price = Trader('low', 10, 5, 1, 3, 5, extrapolate_average_profit)
     distribute_initial_stocks([stock], [low_price, chartist])
     assert_equal(best_supplier([fundamentalist, chartist, low_price], stock), low_price)
     assert_equal(best_supplier([chartist, low_price, fundamentalist], stock), low_price)
 
 
 def test_volume():
-    seller = Trader("1", 100, 10, 2, extrapolate_average_profit)
-    demander = Trader("2", 100, 10, 1, extrapolate_average_profit)
+    seller = Trader("1", 100, 10, 2, 3, 5, extrapolate_average_profit)
+    demander = Trader("2", 100, 10, 1, 3, 5, extrapolate_average_profit)
     firm = Firm("1", 200, [10, 20], 1)
     stock = Stock(firm, 10)
     seller.stocks[stock] = 5
