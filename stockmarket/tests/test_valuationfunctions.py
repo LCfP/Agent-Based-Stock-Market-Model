@@ -23,12 +23,11 @@ def test_extrapolate(stock):
     assert_equal(extrapolate_average_profit(stock[0], 6), 60)
 
 
-def test_extrapolate_ma(stock):
-    # natural number
-    stock[0].price_history = [10, 20, 10, 20]
-    assert_equal(extrapolate_moving_average_price(stock[0], 4), 15)
-
-    
-
-
+def test_ma_price(stock):
+    # normal
+    stock[0].price_history = [200, 210, 220, 230, 240]
+    assert_equal(extrapolate_ma_price(stock[0], 3, 5), 235)
+    # price history too short
+    stock[0].price_history = [200, 210, 220, 230]
+    assert_equal(extrapolate_ma_price(stock[0], 3, 5), None)
 

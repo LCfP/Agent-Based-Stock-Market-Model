@@ -8,7 +8,7 @@ from stockmarket.agent import Trader
 __author__ = 'Schasfoort, Abeshzadeh, Broek & Peters'
 
 
-def setup_agents(init_money, init_bid_ask_spread, init_memory_size, seed, fundamentalist=3, chartist=3):
+def setup_agents(init_money, init_bid_ask_spread, init_memory_size, init_ma_s, init_ma_l, seed, fundamentalist=3, chartist=3):
     """This returns an initialized agent set"""
     agent_set = []
     init_agent = lambda x, y: agent_set.append(
@@ -16,11 +16,13 @@ def setup_agents(init_money, init_bid_ask_spread, init_memory_size, seed, fundam
                                        money=randomize_init_variable(init_money[0], init_money[1]),
                                        bid_ask_spread=randomize_init_variable(init_bid_ask_spread[0], init_bid_ask_spread[1]),
                                        memory=randomize_init_variable(init_memory_size[0], init_memory_size[1]),
+                                       ma_short=randomize_init_variable(init_ma_s[0], init_ma_s[1]),
+                                       ma_long=randomize_init_variable(init_ma_l[0], init_ma_l[1]),
                                        function=y))
     for agent in range(fundamentalist):
         init_agent(agent, valuationfunctions.extrapolate_average_profit)
     for agent in range(fundamentalist, chartist+fundamentalist):
-        init_agent(agent, valuationfunctions.extrapolate_moving_average_price)
+        init_agent(agent, valuationfunctions.extrapolate_ma_price)
     return agent_set
 
 

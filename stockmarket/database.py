@@ -1,8 +1,6 @@
 """In this file, we provide functions for creating and updating the database"""
 
 import sqlite3
-import time
-import json
 import stockmarket.parameters as par
 
 conn = sqlite3.connect(par.database_name)

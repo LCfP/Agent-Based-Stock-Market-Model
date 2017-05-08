@@ -2,7 +2,7 @@
 simulation_time = 100
 
 experiment_id = 1
-seed = 1
+seed = 1  # doesn't work yet, has to be implemented in setup
 
 # Number of agents
 amount_fundamentalists = 10
@@ -13,6 +13,8 @@ amount_firms = 4
 initial_money = (100, 200)  # in the range from
 initial_bid_ask = (5, 5)
 initial_memory = (1, 4)
+initial_ma_short = (3, 3)
+initial_ma_long = (7, 7)
 
 # Firm parameters
 initial_profit = (200, 200)

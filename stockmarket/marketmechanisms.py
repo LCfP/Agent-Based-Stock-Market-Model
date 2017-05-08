@@ -10,6 +10,7 @@ __author__ = 'Schasfoort, Abeshzadeh, Broek & Peters'
 
 
 def trade_stock(agentset, observablesetsize, stock, set_of_traders_function, quarter):
+    # TODO
     """ ???
 
     Parameters

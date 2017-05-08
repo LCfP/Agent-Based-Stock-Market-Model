@@ -8,7 +8,7 @@ from stockmarket.firms import *
 from stockmarket.stock import Stock
 from stockmarket.setup import distribute_initial_stocks
 from stockmarket.valuationfunctions import extrapolate_average_profit
-from stockmarket.valuationfunctions import extrapolate_moving_average_price
+from stockmarket.valuationfunctions import extrapolate_ma_price
 
 
 @pytest.fixture()
@@ -20,7 +20,7 @@ def fundamentalist():
 @pytest.fixture()
 def chartist():
     return Trader(name='demander', money=10, bid_ask_spread=10, memory=2,
-                  function=extrapolate_moving_average_price)
+                  function=extrapolate_ma_price)
 
 
 @pytest.fixture()

@@ -3,7 +3,7 @@
 
 class Trader:
     """a base class for Traders"""
-    def __init__(self, name, money, bid_ask_spread, memory, function):
+    def __init__(self, name, money, bid_ask_spread, memory, function, ma_short=3, ma_long=5):
         """Creates a new trader"""
         self.name = name
         self.money = money
@@ -12,6 +12,8 @@ class Trader:
         self.memory_size = memory
         self.bid_ask_spread = bid_ask_spread
         self.function = function
+        self.ma_short = ma_short;
+        self.ma_long = ma_long;
 
     def valuate_stocks(self, stock):
         """Returns value of a stock.
@@ -30,7 +32,7 @@ class Trader:
 
         """
         # calls valuation function currently assigned to the Trader.
-        return self.function(stock=stock, memory=self.memory_size)
+        return self.function(stock=stock, memory=self.memory_size, s=self.ma_short, l=self.ma_long)
 
     def sell(self, stock, amount, price):
         """Sells stocks
