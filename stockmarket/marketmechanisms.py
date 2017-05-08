@@ -32,24 +32,44 @@ def trade_stock(agentset, observablesetsize, stock, set_of_traders_function, qua
     for demander in randomized_agent_set:
 
         observable_set = set_of_traders_function(demander, randomized_agent_set, observablesetsize)
-        
-        sup = best_supplier(observable_set, stock)
-        if sup is not None:
-            vol = find_volume(demander, sup, stock)
-            if vol > 0:
-                price = selling_price(stock, sup)
-                total_price = vol * price
-                transaction(demander, sup, stock, vol, total_price)
-                total_volumn += vol
-                total_money += vol * price
-                if par.record_data:
-                    record_transaction(demander, sup, stock, vol, total_price, quarter)
+
+        trade = find_best_trade(demander, observable_set, stock)
+        if trade is not None:
+            transaction(demander, trade[0], stock, trade[1], trade[1] * trade[2])
+            total_volumn += trade[1]
+            total_money += trade[1] * trade[2]
+            if par.record_data:
+                record_transaction(demander, trade[0], stock, trade[1], trade[1] * trade[2], quarter)
 
     stock.add_price(total_volumn, total_money)
 
 
-def find_volume(demander, supplier, stock):
-    """Determines maximum volume the traders can trade for
+def find_best_trade(demander, sellers, stock):
+    """
+
+    Parameters
+    ----------
+    demander
+    sellers
+    stock
+
+    Returns
+    -------
+    seller : :obj:`seller`
+    volume : int
+    price : int
+
+    """
+    sup = best_supplier(sellers, stock)
+    if sup is not None:
+        vol_price = find_volume_price(demander, sup, stock)
+        if vol_price is not None:
+            return sup, vol_price[0], vol_price[1]
+    return None
+
+
+def find_volume_price(demander, supplier, stock):
+    """Determines volume and price of the trade
 
     Parameters
     ----------
@@ -62,16 +82,18 @@ def find_volume(demander, supplier, stock):
 
     Returns
     -------
-    int
-        Maximum trade volume between `demander` and `supplier`.
+    volume : int
+        Trade volume.
+    price : int
+        Price of trade
 
     """
     sp = selling_price(stock, supplier)
     bp = buying_price(stock, demander)
     if bp is not None and sp is not None and sp <= bp:
-        return min(supplier.stocks[stock], math.floor(demander.money / sp))
+        return min(supplier.stocks[stock], math.floor(demander.money / sp)), sp
     else:
-        return 0
+        return None
 
 
 def best_supplier(suppliers, stock):

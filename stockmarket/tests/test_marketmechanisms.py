@@ -2,6 +2,7 @@
 
 import pytest
 from numpy.testing import assert_equal
+from numpy.testing import assert_almost_equal
 from stockmarket.marketmechanisms import *
 from stockmarket.agent import *
 from stockmarket.firms import *
@@ -33,6 +34,19 @@ def stock(firm):
     return Stock(firm, 200)
 
 
+def test_best_trade():
+    seller1 = Trader("1", 100, 10, 2, 3, 5, extrapolate_average_profit)
+    seller2 = Trader("2", 100, 5, 2, 3, 5, extrapolate_average_profit)
+    demander = Trader("d", 100, 10, 1, 3, 5, extrapolate_average_profit)
+    firm = Firm("1", 200, [10, 20], 1)
+    stock = Stock(firm, 10)
+    seller1.stocks[stock] = 3
+    seller2.stocks[stock] = 3
+    demander.stocks[stock] = 4
+    trade = find_best_trade(demander, [seller1, seller2], stock)
+    assert_equal(trade[:-1], [seller2, 3])
+    assert_almost_equal(trade[-1], 30.75)
+
 def test_selling_price(stock, fundamentalist, chartist):
     assert_equal(selling_price(stock, fundamentalist), extrapolate_average_profit(stock, 2) * 1.05)
     assert_equal(selling_price(stock, chartist), None)
@@ -50,15 +64,15 @@ def test_best_supplier(fundamentalist, chartist, stock):
     assert_equal(best_supplier([chartist, low_price, fundamentalist], stock), low_price)
 
 
-def test_volume():
+def test_volume_price():
     seller = Trader("1", 100, 10, 2, 3, 5, extrapolate_average_profit)
     demander = Trader("2", 100, 10, 1, 3, 5, extrapolate_average_profit)
     firm = Firm("1", 200, [10, 20], 1)
     stock = Stock(firm, 10)
     seller.stocks[stock] = 5
     demander.stocks[stock] = 5
-    assert_equal(find_volume(demander, seller, stock), 3)
-    assert_equal(find_volume(seller, demander, stock), 0)
+    assert_equal(find_volume_price(demander, seller, stock), [3, 31.5])
+    assert_equal(find_volume_price(seller, demander, stock), None)
 
 
 def test_transaction(chartist, fundamentalist, stock):
