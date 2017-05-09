@@ -1,67 +1,51 @@
 """In this file, we define general functions for the benchmark stock market model"""
 
-import copy
 import numpy as np
 
 __author__ = 'Schasfoort, Abeshzadeh, Broek & Peters'
 
 
-def transaction(buyer, seller, stock, amount_of_product, amount_of_money, record=False, recordInfo={}):
-    """This function makes a buyer and seller agent perform a transaction with each other"""
-    # TODO Do a proper test before transaction is done. This implementation is very rigid.
-    seller.sell(stock, amount_of_product, amount_of_money)
-    buyer.buy(stock, amount_of_product, amount_of_money)
-    # record the transaction
-    if record:
-        cur = recordInfo['cur']
-        cur.execute("INSERT OR IGNORE INTO Objects (object_name, object_type) VALUES (?,?)",
-                    (repr(buyer), repr(buyer)[:repr(buyer).find('_')]))
-        cur.execute("SELECT id FROM Objects WHERE object_name = ?", (repr(buyer),))
-        buyer_id = cur.fetchone()[0]
-
-        cur.execute("INSERT OR IGNORE INTO Objects (object_name, object_type) VALUES (?,?)",
-                    (repr(seller), repr(seller)[:repr(seller).find('_')]))
-        cur.execute("SELECT id FROM Objects WHERE object_name = ?", (repr(seller),))
-        seller_id = cur.fetchone()[0]
-
-        cur.execute("INSERT OR IGNORE INTO Objects (object_name, object_type) VALUES (?,?)",
-                    (repr(stock), repr(stock)[:repr(stock).find('_')]))
-        cur.execute("SELECT id FROM Objects WHERE object_name = ?", (repr(stock),))
-        stock_id = cur.fetchone()[0]
-
-        cur.execute("INSERT INTO Transactions (experiment_id, seed, period, amount_of_product, "
-                    "amount_of_money) VALUES (?,?,?,?,?)",
-                    (recordInfo['experiment_id'], recordInfo['seed'], recordInfo['period'],
-                     amount_of_product, amount_of_money))
-        cur.execute("SELECT MAX(id) FROM Transactions")
-        transaction_id = cur.fetchone()[0]
-
-        cur.execute("INSERT OR IGNORE INTO Transactors (transaction_id, transactor_id, role) VALUES (?,?,?)",
-                    (transaction_id, buyer_id, 'buyer'))
-        cur.execute("INSERT OR IGNORE INTO Transactors (transaction_id, transactor_id, role) VALUES (?,?,?)",
-                    (transaction_id, seller_id, 'seller'))
-        cur.execute("INSERT OR IGNORE INTO Transactors (transaction_id, transactor_id, role) VALUES (?,?,?)",
-                    (transaction_id, stock_id, 'stock'))
-
-
 def npv_growing_perpetuity(dividend, discount_rate=0.05, growth_rate=0):
-    """Fill in this function to calculate NPV of a growing perpetuity"""
+    """Returns the present value of a growing perpetuity.
+
+    Parameters
+    ----------
+    dividend : scalar
+        Value of the first dividend.
+    discount_rate : scalar
+        Rate of interest as decimal per period.
+    growth_rate : scalar
+        Rate of growth of the dividend as decimal per period.
+
+    Returns
+    -------
+    scalar
+        Present value
+    """
     if discount_rate <= growth_rate:
         raise ValueError('discount rate <= growth rate', 'dc = ' + str(discount_rate), 'gr = ' + str(growth_rate))
     return np.divide(dividend, (discount_rate - growth_rate))
 
 
-def distribute_initial_stocks(stocks, agents):
-    local_agents = copy.copy(agents)
-    for stock in stocks:
-        agent_number = len(local_agents)
-        amount_each = stock.amount // agent_number
-        rest = int(stock.amount % agent_number)
-        for x in range(0, rest):
-            local_agents[x].stocks[stock] = amount_each + 1
-        for x in range(rest, agent_number):
-            local_agents[x].stocks[stock] = amount_each
-    return local_agents
+def moving_average(x, n):
+    """Returns the moving averages as a list.
+
+    Calculates the simple moving averages using the last `n` data points for each entry.
+
+    Parameters
+    ----------
+    x : array_like
+        Input array.
+    n : int
+        Number of data points used to calculate a moving average.
+
+    Returns
+    -------
+    array
+        Returns a new array holding the moving averages.
+    """
+    cumsum = np.cumsum(np.insert(x, 0, 0))
+    return (cumsum[n:] - cumsum[:-n]) / n
 
 
 def print_setup(agents, firms, stocks):

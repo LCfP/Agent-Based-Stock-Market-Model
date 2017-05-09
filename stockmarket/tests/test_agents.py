@@ -1,18 +1,17 @@
 """This file runs tests for all functions in agents"""
 import pytest
-from stockmarket.agents import *
+from stockmarket.agent import *
 from stockmarket.valuationfunctions import *
 from stockmarket.firms import Firm
-from stockmarket.stocks import Stock
+from stockmarket.stock import Stock
 from numpy.testing import assert_equal
 from numpy.testing import assert_raises
 
 
 @pytest.fixture()
 def agents():
-    return [Trader("Agent1", 1000, 0, 2, valuation_extrapolate_average),
-                Trader("Agent2", 1000, 0, 2, valuation_extrapolate_growth_average),
-                Trader("Agent3", 1000, 0, 2, price_trend)]
+    return [Trader("Agent1", 1000, 0, 2, 3, 5, lambda **x: extrapolate_average_profit(**x)),
+            Trader("Agent2", 1000, 0, 2, 3, 5, lambda **x: extrapolate_ma_price(**x))]
 
 
 @pytest.fixture()
@@ -23,15 +22,14 @@ def stock():
 
 def test_valuate_stocks(agents, stock):
     # test if different kind of functions work
-    assert_equal(agents[0].valuate_stocks(stock), valuation_extrapolate_average(stock, 2))
-    assert_equal(agents[1].valuate_stocks(stock), valuation_extrapolate_growth_average(stock, 2))
-    assert_equal(agents[2].valuate_stocks(stock), price_trend(stock, 2))
+    assert_equal(agents[0].valuate_stocks(stock), extrapolate_average_profit(stock, 2))
+    assert_equal(agents[1].valuate_stocks(stock), extrapolate_ma_price(stock, 3, 5))
     # test change of parameters
     agents[0].memory_size = 3
-    assert_equal(agents[0].valuate_stocks(stock), valuation_extrapolate_average(stock, 3))
+    assert_equal(agents[0].valuate_stocks(stock), extrapolate_average_profit(stock, 3))
     # test change function
-    agents[0].function = valuation_extrapolate_growth_average
-    assert_equal(agents[0].valuate_stocks(stock), valuation_extrapolate_growth_average(stock, 3))
+    agents[0].function = extrapolate_growth_average_profit
+    assert_equal(agents[0].valuate_stocks(stock), extrapolate_growth_average_profit(stock, 3))
 
 
 def test_buy(agents, stock):
@@ -55,6 +53,6 @@ def test_sell(agents, stock):
     assert_equal(agents[0].stocks[stock], 40)
     assert_equal(agents[0].money, 1500)
     # does not have stock
-    assert_raises(KeyError, agents[1].sell, stock, 10, 1000)
+    assert_raises(ValueError, agents[1].sell, stock, 10, 1000)
     # not enough stock for transaction
     assert_raises(ValueError, agents[0].sell, stock, 50, 1500)

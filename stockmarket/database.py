@@ -1,9 +1,13 @@
 """In this file, we provide functions for creating and updating the database"""
-import sqlite3
-import time
-import json
 
-def create_tables(cur):
+import sqlite3
+import stockmarket.parameters as par
+
+conn = sqlite3.connect(par.database_name)
+cur = conn.cursor()
+
+
+def create_tables():
     cur.executescript('''
     DROP TABLE IF EXISTS Transactions;
     DROP TABLE IF EXISTS Statevariables;
@@ -61,7 +65,7 @@ def create_tables(cur):
     ''')
 
 
-def record_statevariables(cur, experiment_id, seed, period, agent):
+def record_statevariables(period, agent):
     """Records all state variables for this agent in the Statevariable and related tables"""
     variables = vars(agent)
     for variable in variables:
@@ -77,4 +81,43 @@ def record_statevariables(cur, experiment_id, seed, period, agent):
 
         cur.execute("INSERT INTO Statevariables (experiment_id, seed, period, "
                     "variable_id, owner_id, value) VALUES (?,?,?,?,?,?)",
-                    ( experiment_id, seed, period, variable_type_id, owner_id, str(variables[variable])))
+                    (par.experiment_id, par.seed, period, variable_type_id, owner_id, str(variables[variable])))
+
+
+def record_transaction(buyer, seller, stock, amount_of_product, amount_of_money, quarter):
+    cur.execute("INSERT OR IGNORE INTO Objects (object_name, object_type) VALUES (?,?)",
+                (repr(buyer), repr(buyer)[:repr(buyer).find('_')]))
+    cur.execute("SELECT id FROM Objects WHERE object_name = ?", (repr(buyer),))
+    buyer_id = cur.fetchone()[0]
+
+    cur.execute("INSERT OR IGNORE INTO Objects (object_name, object_type) VALUES (?,?)",
+                (repr(seller), repr(seller)[:repr(seller).find('_')]))
+    cur.execute("SELECT id FROM Objects WHERE object_name = ?", (repr(seller),))
+    seller_id = cur.fetchone()[0]
+
+    cur.execute("INSERT OR IGNORE INTO Objects (object_name, object_type) VALUES (?,?)",
+                (repr(stock), repr(stock)[:repr(stock).find('_')]))
+    cur.execute("SELECT id FROM Objects WHERE object_name = ?", (repr(stock),))
+    stock_id = cur.fetchone()[0]
+
+    cur.execute("INSERT INTO Transactions (experiment_id, seed, period, amount_of_product, "
+                "amount_of_money) VALUES (?,?,?,?,?)",
+                (par.experiment_id, par.seed, quarter,
+                 amount_of_product, amount_of_money))
+    cur.execute("SELECT MAX(id) FROM Transactions")
+    transaction_id = cur.fetchone()[0]
+
+    cur.execute("INSERT OR IGNORE INTO Transactors (transaction_id, transactor_id, role) VALUES (?,?,?)",
+                (transaction_id, buyer_id, 'buyer'))
+    cur.execute("INSERT OR IGNORE INTO Transactors (transaction_id, transactor_id, role) VALUES (?,?,?)",
+                (transaction_id, seller_id, 'seller'))
+    cur.execute("INSERT OR IGNORE INTO Transactors (transaction_id, transactor_id, role) VALUES (?,?,?)",
+                (transaction_id, stock_id, 'stock'))
+
+
+def commit():
+    conn.commit()
+
+
+def close():
+    cur.close()

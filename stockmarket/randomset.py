@@ -4,6 +4,7 @@ __author__ = 'Schasfoort, Abeshzadeh, Broek & Peters'
 
 import random
 
+
 def subset_traders(demander, randomized_set, observable_set_size):
     total_observable_set = list(randomized_set)
     total_observable_set.remove(demander)
