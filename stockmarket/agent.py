@@ -100,11 +100,5 @@ class Trader:
 
 class StockDict(dict):
     """A dictionary that returns 0 when key doesn't exist"""
-    def __getitem__(self, key):
-        try:
-            return self.__dict__[key]
-        except KeyError:
-            return 0
-
-    def __setitem__(self, key, value):
-        self.__dict__[key] = value
+    def __missing__(self, key):
+        return 0
