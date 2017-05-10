@@ -30,11 +30,12 @@ def trade_stock(agentset, observablesetsize, stock, set_of_traders_function, qua
     total_money = 0
 
     for demander in randomized_agent_set:
-
+        # create a random set of suppliers the demander can observe
         observable_set = set_of_traders_function(demander, randomized_agent_set, observablesetsize)
-
+        # pick the cheapest supplier
         trade = find_best_trade(demander, observable_set, stock)
-        if trade is not None:
+        # if there is a trade and the volume of that trade is bigger than zero: trade!
+        if (trade is not None) and (trade[1] > 0):
             transaction(demander, trade[0], stock, trade[1], trade[1] * trade[2])
             total_volumn += trade[1]
             total_money += trade[1] * trade[2]
