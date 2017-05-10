@@ -5,16 +5,16 @@ experiment_id = 1
 seed = 1  # doesn't work yet, has to be implemented in setup
 
 # Number of agents
-amount_fundamentalists = 10
-amount_chartists = 10
+amount_fundamentalists = 100
+amount_chartists = 100
 amount_firms = 4
 
 # Trader parameters
 initial_money = (100, 200)  # in the range from
 initial_bid_ask = (5, 5)
 initial_memory = (1, 4)
-initial_ma_short = (3, 3)
-initial_ma_long = (7, 7)
+initial_ma_short = (2, 4)
+initial_ma_long = (7, 9)
 
 # Firm parameters
 initial_profit = (200, 200)
