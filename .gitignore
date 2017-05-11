@@ -39,6 +39,10 @@ coverage.xml
 #ignore all databases
 *.sqlite
 
+#ignore al pictures
+*.png
+*.jpg
+
 # Windows image file caches
 Thumbs.db
 ehthumbs.db
