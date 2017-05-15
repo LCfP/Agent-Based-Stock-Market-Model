@@ -8,7 +8,7 @@ random.seed(p.seed)
 RECORD_DATA = p.record_data
 
 """
-Setup 
+Setup
 """
 agents = setup.setup_agents(init_money=p.initial_money,
                             init_bid_ask_spread=p.initial_bid_ask,
@@ -36,12 +36,11 @@ functions.print_setup(agents, firms, stocks)
 
 """
 Simulation
-
 Process overview and scheduling from the ODD
 1. Update profits
 2. Update expected price and spread
 3. Market mechanism
-4. Store market prices t-1 
+4. Store market prices t-1
 """
 
 for quarter in range(p.simulation_time):

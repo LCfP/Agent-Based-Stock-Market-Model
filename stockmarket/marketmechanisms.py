@@ -4,10 +4,35 @@ These functions take in agent sets and output matched pairs of agents"""
 import math
 import random
 import stockmarket.parameters as par
-from stockmarket.database import record_transaction
+from stockmarket.database import record_transaction, df_update_transactions
 
 __author__ = 'Schasfoort, Abeshzadeh, Broek & Peters'
 
+def overTheCounterMarket(agentset, stock, observablesetsize, set_of_traders_function, period, seed, Transactions, Transactors, Objects):
+    # copy the agentset and shuffle the set to get different order of traders every time
+    randomized_agent_set = list(agentset)
+    random.shuffle(randomized_agent_set)
+
+    # store total price and trade volume for the stock in the given period.
+    total_volumn = 0
+    total_money = 0
+
+    for demander in randomized_agent_set:
+        # create a random set of suppliers the demander can observe
+        observable_set = set_of_traders_function(demander, randomized_agent_set, observablesetsize)
+        # pick the cheapest supplier
+        trade = find_best_trade(demander, observable_set, stock)
+        # if there is a trade and the volume of that trade is bigger than zero: trade!
+        if (trade is not None) and (trade[1] > 0):
+            transaction(demander, trade[0], stock, trade[1], trade[1] * trade[2])
+            total_volumn += trade[1]
+            total_money += trade[1] * trade[2]
+            Transactions, Transactors, Objects = df_update_transactions(seed, period, demander, trade[0], stock, trade[1], trade[1] * trade[2], Transactions, Transactors, Objects)
+
+    # add average price to the stock's memory
+    stock.add_price(total_volumn, total_money)
+
+    return agentset, stock, Transactions, Transactors, Objects
 
 def trade_stock(agentset, observablesetsize, stock, set_of_traders_function, quarter):
     # TODO

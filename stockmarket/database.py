@@ -1,11 +1,20 @@
 """In this file, we provide functions for creating and updating the database"""
 
 import sqlite3
+import pandas as pd
 import stockmarket.parameters as par
 
 conn = sqlite3.connect(par.database_name)
 cur = conn.cursor()
 
+def stockMarketBaselineTables():
+    Transactions = pd.DataFrame(columns= ['id', 'seed', 'period', 'amount_of_product', 'amount_of_money'])
+    Transactors = pd.DataFrame(columns= ['transaction_id', 'transactor_id', 'role'])
+    Statevariables = pd.DataFrame(columns= ['id', 'seed', 'period', 'variable_id', 'owner_id', 'value'])
+    Variabletypes = pd.DataFrame(columns=['id', 'variable_type'])
+    Objects = pd.DataFrame(columns=['id', 'object_name', 'object_type'])
+    Experiments = pd.DataFrame(columns=['id', 'object_name', 'object_type'])
+    return Transactions, Transactors, Statevariables, Variabletypes, Objects, Experiments
 
 def create_tables():
     cur.executescript('''
@@ -64,6 +73,28 @@ def create_tables():
 
     ''')
 
+def df_update_statevariables(seed, period, agent, Statevariables, Variabletypes, Objects):
+    """Records all state variables for this agent in provided Statevariable and related tables and returns them"""
+    variables = vars(agent)
+    for variable in variables:
+        # store the variable type into the variabletypes table
+        if str(variable) not in Variabletypes['variable_type'].values:
+            variable_type_id = len(Variabletypes)
+            Variabletypes.loc[variable_type_id] = variable_type_id, str(variable)
+        else:
+            variable_type_id = list(Variabletypes['variable_type'].values).index(str(variable))
+
+        # store the agent and type of agent in the objects table
+        if repr(agent) not in Objects['object_name'].values:
+            owner_id = len(Objects)
+            Objects.loc[owner_id] = owner_id, repr(agent), repr(agent)[:repr(agent).find('_')]
+        else:
+            owner_id = list(Objects['object_name'].values).index(repr(agent))
+
+        # store the state variables
+        Statevariables.loc[len(Statevariables)] = len(Statevariables), seed, \
+                                                  period, variable_type_id, owner_id, str(variables[variable])
+    return Statevariables, Variabletypes, Objects
 
 def record_statevariables(period, agent):
     """Records all state variables for this agent in the Statevariable and related tables"""
@@ -79,27 +110,61 @@ def record_statevariables(period, agent):
         cur.execute("SELECT id FROM Objects WHERE object_name = ?", (repr(agent),))
         owner_id = cur.fetchone()[0]
 
+        # store the state variables in the state variables table
         cur.execute("INSERT INTO Statevariables (experiment_id, seed, period, "
                     "variable_id, owner_id, value) VALUES (?,?,?,?,?,?)",
                     (par.experiment_id, par.seed, period, variable_type_id, owner_id, str(variables[variable])))
 
+def df_update_transactions(seed, period, buyer, seller, stock, amount_of_product, amount_of_money, Transactions, Transactors, Objects):
+    # store the buyer in the objects table
+    if repr(buyer) not in Objects['object_name'].values:
+        buyer_id = len(Objects)
+        Objects.loc[buyer_id] = buyer_id, repr(buyer), repr(buyer)[:repr(buyer).find('_')]
+    else:
+        buyer_id = list(Objects['object_name'].values).index(repr(buyer))
+    # store the seller in the objects table
+    if repr(seller) not in Objects['object_name'].values:
+        seller_id = len(Objects)
+        Objects.loc[seller_id] = seller_id, repr(seller), repr(seller)[:repr(seller).find('_')]
+    else:
+        seller_id = list(Objects['object_name'].values).index(repr(seller))
+    # Store the stock in the objects table
+    if repr(stock) not in Objects['object_name'].values:
+        stock_id = len(Objects)
+        Objects.loc[stock_id] = stock_id, repr(stock), repr(stock)[:repr(stock).find('_')]
+    else:
+        stock_id = list(Objects['object_name'].values).index(repr(stock))
+    # Store the transaction details in the Transactions Table
+    Transactions.loc[len(Transactions)] = len(Transactions), seed, period, amount_of_product, amount_of_money
+    transaction_id = len(Transactions)
+
+    # for the transaction update the buyer, seller and type of item traded in the transactors column
+    for actor_id, role in list(zip([buyer_id, seller_id, stock_id],['buyer', 'seller', 'stock'])):
+        Transactors.loc[len(Transactors)] = transaction_id, actor_id, role
+
+    return Transactions, Transactors, Objects
+
 
 def record_transaction(buyer, seller, stock, amount_of_product, amount_of_money, quarter):
+    # store the buyer in the objects table
     cur.execute("INSERT OR IGNORE INTO Objects (object_name, object_type) VALUES (?,?)",
                 (repr(buyer), repr(buyer)[:repr(buyer).find('_')]))
     cur.execute("SELECT id FROM Objects WHERE object_name = ?", (repr(buyer),))
     buyer_id = cur.fetchone()[0]
 
+    # store the seller in the objects table
     cur.execute("INSERT OR IGNORE INTO Objects (object_name, object_type) VALUES (?,?)",
                 (repr(seller), repr(seller)[:repr(seller).find('_')]))
     cur.execute("SELECT id FROM Objects WHERE object_name = ?", (repr(seller),))
     seller_id = cur.fetchone()[0]
 
+    # Store the stock in the objects table
     cur.execute("INSERT OR IGNORE INTO Objects (object_name, object_type) VALUES (?,?)",
                 (repr(stock), repr(stock)[:repr(stock).find('_')]))
     cur.execute("SELECT id FROM Objects WHERE object_name = ?", (repr(stock),))
     stock_id = cur.fetchone()[0]
 
+    # Store the transaction details in the Transactions Table
     cur.execute("INSERT INTO Transactions (experiment_id, seed, period, amount_of_product, "
                 "amount_of_money) VALUES (?,?,?,?,?)",
                 (par.experiment_id, par.seed, quarter,
