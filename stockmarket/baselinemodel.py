@@ -18,7 +18,8 @@ def stockMarketSimulation(seed,
                           initial_profit,
                           initial_book_value,
                           initial_stock_amount,
-                          observable_set_size):
+                          observable_set_size,
+                          printProgress=False):
     """Returns a set of agents at time stockMarketSimulationParameterSet['simuatlion_time'] and the values
     of their state variables for every time step in stockMarketSimulationParameterSet['simuatlion_time'].
 
@@ -84,12 +85,13 @@ def stockMarketSimulation(seed,
 
     setup.distribute_initial_stocks(stocks, agents)
 
-    Transactions, Transactors, Statevariables, Variabletypes, Objects, Experiments = database.stockMarketBaselineTables()
+    Transactions, Transactors, Statevariables, Variabletypes, Objects = database.stockMarketBaselineTables()
 
     """
     Print set-up
     """
-    functions.print_setup(agents, firms, stocks)
+    #if (printProgress):
+    #    functions.print_setup(agents, firms, stocks)
 
     """
     Simulation
@@ -102,7 +104,8 @@ def stockMarketSimulation(seed,
     """
 
     for quarter in range(simulation_time):
-
+        if (printProgress):
+            print('period: ', quarter)
         # 1 update dividends
         for firm in firms:
             firm.update_profits(firm.determine_growth())
@@ -128,7 +131,7 @@ def stockMarketSimulation(seed,
                                                                                        agent, Statevariables,
                                                                                        Variabletypes, Objects)
 
-    return Transactions, Transactors, Statevariables, Variabletypes, Objects, Experiments
+    return Transactions, Transactors, Statevariables, Variabletypes, Objects
 
 
 

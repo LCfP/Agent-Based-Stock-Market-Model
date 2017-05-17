@@ -13,8 +13,7 @@ def stockMarketBaselineTables():
     Statevariables = pd.DataFrame(columns= ['id', 'seed', 'period', 'variable_id', 'owner_id', 'value'])
     Variabletypes = pd.DataFrame(columns=['id', 'variable_type'])
     Objects = pd.DataFrame(columns=['id', 'object_name', 'object_type'])
-    Experiments = pd.DataFrame(columns=['id', 'object_name', 'object_type'])
-    return Transactions, Transactors, Statevariables, Variabletypes, Objects, Experiments
+    return Transactions, Transactors, Statevariables, Variabletypes, Objects
 
 def create_tables():
     cur.executescript('''
