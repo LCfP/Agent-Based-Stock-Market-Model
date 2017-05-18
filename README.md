@@ -7,8 +7,10 @@ the model works. Feel free to copy or use the code under the terms of the licenc
  
 # How to use the model
 1. Download the repository to your system.
-2. Run the simulation.py file --> this generates a SQLlite database on your system.
-3. Use the data_notebook.ipynb (Jupyter Notebook) to analyse the data. 
+2. Run the simulation_notebook 
+3. Set the amount of runs you want and simulate those.
+4. The results will be added to an sql lite database on your system.
+5. Use the data_notebook.ipynb (Jupyter Notebook) to analyse this data. 
 
 # Repository structure
 
