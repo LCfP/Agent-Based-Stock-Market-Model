@@ -91,7 +91,8 @@ def df_update_statevariables(seed, period, agent, Statevariables, Variabletypes,
         else:
             variable_type_id = list(Variabletypes['variable_type'].values).index(str(variable))
         # store the state variables
-        statevariables.append(pd.DataFrame.from_records([(len(Statevariables), seed, period, variable_type_id, owner_id, str(variables[variable]))], columns=Statevariables.columns.values))
+        variable_id = sum([len(x) for x in statevariables])
+        statevariables.append(pd.DataFrame.from_records([(variable_id, seed, period, variable_type_id, owner_id, str(variables[variable]))], columns=Statevariables.columns.values))
 
     return pd.concat(statevariables, ignore_index=True), pd.concat(varTypes, ignore_index=True), pd.concat(objects, ignore_index=True)
 
