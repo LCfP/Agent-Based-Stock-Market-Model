@@ -12,8 +12,8 @@ class Trader:
         self.memory_size = memory
         self.bid_ask_spread = bid_ask_spread
         self.function = function
-        self.ma_short = ma_short;
-        self.ma_long = ma_long;
+        self.ma_short = ma_short
+        self.ma_long = ma_long
 
     def valuate_stocks(self, stock):
         """Returns value of a stock.
