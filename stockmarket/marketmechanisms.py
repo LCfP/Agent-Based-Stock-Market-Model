@@ -8,6 +8,7 @@ from stockmarket.database import record_transaction, df_update_transactions
 
 __author__ = 'Schasfoort, Abeshzadeh, Broek & Peters'
 
+
 def overTheCounterMarket(agentset, stock, observablesetsize, set_of_traders_function, period, seed, Transactions, Transactors, Objects):
     # copy the agentset and shuffle the set to get different order of traders every time
     randomized_agent_set = list(agentset)

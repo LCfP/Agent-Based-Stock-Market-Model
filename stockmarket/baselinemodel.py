@@ -74,12 +74,12 @@ def stockMarketSimulation(seed,
                                 init_memory_size=initial_memory,
                                 init_ma_s=initial_ma_short,
                                 init_ma_l=initial_ma_long,
-                                seed=seed, fundamentalist=amount_fundamentalists,
+                                fundamentalist=amount_fundamentalists,
                                 chartist=amount_chartists)
 
     firms = setup.setup_firms(init_book_value=initial_book_value,
                               init_profit=initial_profit,
-                              seed=seed, amount_of_firms=amount_firms)
+                              amount_of_firms=amount_firms)
 
     stocks = setup.setup_stocks(firms, amount=initial_stock_amount)
 
