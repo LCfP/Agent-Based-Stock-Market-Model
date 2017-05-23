@@ -8,6 +8,6 @@ setup(name='abm',
       author_email='',
       license='MIT',
       packages=['stockmarket'],
-      setup_requires=['pytest-runner', 'numpy'],
+      setup_requires=['pytest-runner', 'numpy', 'pandas'],
       tests_require=['pytest'])
 
