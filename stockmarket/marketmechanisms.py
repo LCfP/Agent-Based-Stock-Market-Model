@@ -34,6 +34,7 @@ def overTheCounterMarket(agentset, stock, observablesetsize, set_of_traders_func
 
     return agentset, stock, Transactions, Transactors, Objects
 
+
 def trade_stock(agentset, observablesetsize, stock, set_of_traders_function, quarter):
     # TODO
     """ ???
