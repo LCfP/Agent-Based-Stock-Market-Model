@@ -22,7 +22,7 @@ def setup_agents(init_money, init_bid_ask_spread, init_memory_size, init_ma_s, i
     for agent in range(fundamentalist):
         init_agent(agent, valuationfunctions.extrapolate_average_profit)
     for agent in range(fundamentalist, chartist+fundamentalist):
-        init_agent(agent, valuationfunctions.extrapolate_ma_price)
+        init_agent(agent, valuationfunctions.predict_by_moving_avg_growth)
     return agent_set
 
 

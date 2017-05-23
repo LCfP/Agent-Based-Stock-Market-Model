@@ -2,6 +2,8 @@
 
 import numpy as np
 from stockmarket.functions import npv_growing_perpetuity
+from stockmarket.functions import moving_average
+
 
 __author__ = 'Schasfoort, Abeshzadeh, Broek & Peters'
 
@@ -56,4 +58,40 @@ def extrapolate_ma_price(stock, s, l, **_):
         return short_ma+((short_ma-long_ma)/(l-s))
     else:
         return None
+
+
+def predict_by_moving_avg_growth(stock, s, **_):
+    """Returns predicted value of a stock
+
+    Predicts the next price of a stock by extrapolating the moving average and its growth.
+
+    Parameters
+    ----------
+    stock : :obj:`stock`
+        Stock to be predicted.
+    s : int
+         Number of data points used to calculate a moving average.
+
+    Returns
+    -------
+    int
+        Predicted next price of the stock
+
+
+    Notes
+    _____
+    The moving average lags behind by n/2 + 0.5 periods when not centered around the mean.
+
+    """
+    if len(stock.price_history) < s+1:
+        return None
+    else:
+        ma = sum(stock.price_history[-s:]) / s
+        growth = ma - sum(stock.price_history[-s-1:-1]) / s
+        predicted = ma + (s/2+0.5)*growth
+        if predicted > 0:
+            return predicted
+        else:
+            return 0
+
 
