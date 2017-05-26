@@ -26,7 +26,7 @@ def chartist():
 
 @pytest.fixture()
 def firm():
-    return Firm(name='firm', book_value=200, profits=[3, 5, 5, 3], seed=1, dividend_rate=1)
+    return Firm(name='firm', book_value=200, profits=[3, 5, 5, 3], dividend_rate=1)
 
 
 @pytest.fixture()
@@ -46,6 +46,7 @@ def test_best_trade():
     trade = find_best_trade(demander, [seller1, seller2], stock)
     assert_equal(trade[:-1], [seller2, 3])
     assert_almost_equal(trade[-1], 30.75)
+
 
 def test_selling_price(stock, fundamentalist, chartist):
     assert_equal(selling_price(stock, fundamentalist), extrapolate_average_profit(stock, 2) * 1.05)

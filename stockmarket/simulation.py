@@ -15,12 +15,12 @@ agents = setup.setup_agents(init_money=p.initial_money,
                             init_memory_size=p.initial_memory,
                             init_ma_s=p.initial_ma_short,
                             init_ma_l=p.initial_ma_long,
-                            seed=p.seed, fundamentalist=p.amount_fundamentalists,
+                            fundamentalist=p.amount_fundamentalists,
                             chartist=p.amount_chartists)
 
 firms = setup.setup_firms(init_book_value=p.initial_book_value,
                           init_profit=p.initial_profit,
-                          seed=p.seed, amount_of_firms=p.amount_firms)
+                          amount_of_firms=p.amount_firms)
 
 stocks = setup.setup_stocks(firms, amount=p.initial_stock_amount)
 
