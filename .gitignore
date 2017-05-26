@@ -38,6 +38,7 @@ coverage.xml
 
 #ignore all databases
 *.sqlite
+*.json
 
 #ignore al pictures
 *.png
