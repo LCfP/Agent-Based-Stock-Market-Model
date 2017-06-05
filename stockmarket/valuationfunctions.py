@@ -83,7 +83,8 @@ def predict_by_moving_avg_growth(stock, s, **_):
     The moving average lags behind by n/2 + 0.5 periods when not centered around the mean.
 
     """
-    if len(stock.price_history) < s+1:
+    stockPriceHistory = len(stock.price_history)
+    if stockPriceHistory < s+1:
         return None
     else:
         ma = sum(stock.price_history[-s:]) / s

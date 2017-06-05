@@ -35,8 +35,8 @@ def setup_firms(init_book_value, init_profit, amount_of_firms=1):
                                    profits=[randomize_init_variable(init_profit[0], init_profit[1])],
                                    dividend_rate=1))
     for firm in firm_set:
-        # creates a profit history for the last 3 periods.
-        for _ in itertools.repeat(None, 3):
+        # creates a profit history for the last 6 periods.
+        for _ in itertools.repeat(None, 6):
             firm.update_profits(firm.determine_growth())
 
     return firm_set
