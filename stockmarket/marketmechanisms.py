@@ -5,6 +5,7 @@ import math
 import random
 import stockmarket.parameters as par
 from stockmarket.database import record_transaction, df_update_transactions
+import numpy as np
 
 __author__ = 'Schasfoort, Abeshzadeh, Broek & Peters'
 
@@ -118,8 +119,8 @@ def find_volume_price(demander, supplier, stock):
     """
     sp = selling_price(stock, supplier)
     bp = buying_price(stock, demander)
-    if bp is not None and sp is not None and sp <= bp:
-        return min(supplier.stocks[stock], math.floor(demander.money / sp)), sp
+    if bp is not None and sp is not None and (sp <= bp and sp > 0):
+        return min(supplier.stocks[stock], math.floor(np.divide(demander.money, sp))), sp
     else:
         return None
 
