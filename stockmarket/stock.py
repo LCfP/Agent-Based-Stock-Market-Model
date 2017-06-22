@@ -1,7 +1,7 @@
 """In this file, we define the benchmark stock market model stock classes"""
 
-__author__ = 'Schasfoort, Abeshzadeh, Broek & Peters'
-
+import numpy as np
+from stockmarket.functions import npv_growing_perpetuity
 
 class Stock:
     """a base class for Stocks"""
@@ -11,7 +11,9 @@ class Stock:
         self.firm = firm
         self.face_value = firm.book_value / amount
         self.amount = amount
-        self.price_history = []
+        priceHistoryOnValue = np.array([npv_growing_perpetuity(prof_his * firm.dividend_rate) for prof_his in firm.profit_history])
+        priceHistPerStock = np.divide(priceHistoryOnValue, amount)
+        self.price_history = list(priceHistPerStock)
 
     def add_price(self, vol, price):
         """Adds the average stock price of the period to the price history of the stock
