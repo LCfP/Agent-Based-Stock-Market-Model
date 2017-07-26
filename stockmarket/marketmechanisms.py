@@ -7,7 +7,30 @@ import stockmarket.parameters as par
 from stockmarket.database import record_transaction, df_update_transactions
 import numpy as np
 
-__author__ = 'Schasfoort, Abeshzadeh, Broek & Peters'
+def continuousDoubleAuction(agentset, stock, orderbook,observablesetsize, set_of_traders_function, period, seed, Transactions, Transactors, Objects):
+    """
+    Agent, bids and asks are continuously submitted to the limit-order book. If a new bid is larger than the lowest
+    ask a trade takes place and the agent purchases at the lowest ask. These orders are then removed from the book.
+    If this bid is larger than the lowest asking price on the book then a trade takes place, and the agent purchases at the best (lowest) ask, removing that order from the book.
+    If bitbti is smaller than the lowest asking price then it is added to the bid side of the limit order book, replacing the best bid if it is larger than that.
+    """
+    # copy the agentset and shuffle the set to get different order of traders every time
+    randomized_agent_set = list(agentset)
+    random.shuffle(randomized_agent_set)
+
+    # store total price and trade volume for the stock in the given period.
+    total_volumn = 0
+    total_money = 0
+
+    for demander in randomized_agent_set:
+        pass
+        # submit bid or ask to limit order book based on price
+
+        # ask limit order book for best bid-ask combination and ask it to remove that
+
+        # execute best trade
+
+    return agentset, stock, orderbook, Transactions, Transactors, Objects
 
 
 def overTheCounterMarket(agentset, stock, observablesetsize, set_of_traders_function, period, seed, Transactions, Transactors, Objects):
