@@ -5,30 +5,60 @@ import math
 import random
 import stockmarket.parameters as par
 from stockmarket.database import record_transaction, df_update_transactions
+from stockmarket.functions import div0
 import numpy as np
 
-def continuousDoubleAuction(agentset, stock, orderbook,observablesetsize, set_of_traders_function, period, seed, Transactions, Transactors, Objects):
+
+def continuous_double_auction(agentset, stock, orderbook, period, seed, Transactions, Transactors, Objects):
     """
-    Agent, bids and asks are continuously submitted to the limit-order book. If a new bid is larger than the lowest
-    ask a trade takes place and the agent purchases at the lowest ask. These orders are then removed from the book.
-    If this bid is larger than the lowest asking price on the book then a trade takes place, and the agent purchases at the best (lowest) ask, removing that order from the book.
-    If bitbti is smaller than the lowest asking price then it is added to the bid side of the limit order book, replacing the best bid if it is larger than that.
+    Agent, bids and asks are continuously submitted to the limit-order book. The resulting trades are executed.
     """
-    # copy the agentset and shuffle the set to get different order of traders every time
+    # copy the agent set and shuffle the set to get different order of traders every time
     randomized_agent_set = list(agentset)
     random.shuffle(randomized_agent_set)
 
     # store total price and trade volume for the stock in the given period.
-    total_volumn = 0
+    total_volume = 0
     total_money = 0
 
-    for demander in randomized_agent_set:
-        pass
+    for agent in randomized_agent_set:
         # submit bid or ask to limit order book based on price
+        # look at previous price,
+        previous_price = orderbook.transaction_prices[-1]
+        # look at own price forecast
+        price_forecast = agent.valuate_stocks(stock)
+        # if forecast price > previous submit bid with price random between previous price and forecast
+        # volume is max possible volume the agent can buy at bid price
+        if price_forecast > previous_price:
+            bid_price = random.uniform(price_forecast, previous_price)
+            # determine bid_volume as agent.money / bid price
+            bid_volume = div0(agent.money, int(bid_price))
+            orderbook.add_bid(bid_price, bid_volume, agent)
+        # if forecast price < previous submit ask with price random between previous price and forecast
+        # volume is full inventory of stocks
+        if price_forecast > previous_price:
+            ask_price = random.uniform(price_forecast, previous_price)
+            orderbook.add_ask(ask_price, agent.stocks[stock], agent)
+        # apply continuous double auction mechanism and execute the subsequent trade till None is returned
+        while True:
+            matched_orders = orderbook.match_orders()
+            if matched_orders is None:
+                break
+            # execute trade
+            transaction(matched_orders[2].owner, matched_orders[3].owner ,stock,
+                        matched_orders[1],
+                        matched_orders[0] * matched_orders[1])
+            total_volume += matched_orders[1]
+            total_money += matched_orders[0] * matched_orders[1]
+            Transactions, Transactors, Objects = df_update_transactions(seed, period, matched_orders[2].owner,
+                                                                        matched_orders[3].owner, stock, matched_orders[1],
+                                                                        matched_orders[0] * matched_orders[1],
+                                                                        Transactions, Transactors, Objects)
+        # clean limit order book
+        orderbook.clean_book()
 
-        # ask limit order book for best bid-ask combination and ask it to remove that
-
-        # execute best trade
+    # add average price to the stock's memory
+    stock.add_price(total_volume, total_money)
 
     return agentset, stock, orderbook, Transactions, Transactors, Objects
 
@@ -72,7 +102,7 @@ def trade_stock(agentset, observablesetsize, stock, set_of_traders_function, qua
     set_of_traders_function
     quarter
     """
-    # copy the agentset and shuffle the set to get different order of traders every time
+    # copy the agent set and shuffle the set to get different order of traders every time
     randomized_agent_set = list(agentset)
     random.shuffle(randomized_agent_set)
 

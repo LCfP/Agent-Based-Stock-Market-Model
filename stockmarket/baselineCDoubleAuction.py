@@ -1,9 +1,8 @@
 """This file is our main simulation file it includes the set-up and time loop"""
 
 import random
-import pandas as pd
-from stockmarket import functions, setup, marketmechanisms, randomset, database
-import stockmarket.parameters as p
+from stockmarket.limitorderbook import *
+from stockmarket import setup, marketmechanisms, database
 
 def stockMarketSimulation(seed,
                           simulation_time,
@@ -18,7 +17,7 @@ def stockMarketSimulation(seed,
                           initial_profit,
                           initial_book_value,
                           initial_stock_amount,
-                          observable_set_size,
+                          order_expiration_time,
                           printProgress=False):
     """Returns a set of agents at time stockMarketSimulationParameterSet['simuatlion_time'] and the values
     of their state variables for every time step in stockMarketSimulationParameterSet['simuatlion_time'].
@@ -83,6 +82,10 @@ def stockMarketSimulation(seed,
 
     stocks = setup.setup_stocks(firms, amount=initial_stock_amount)
 
+    order_books = []
+    for stock in stocks:
+        order_books.append(LimitOrderBook(stock, stock.price_history[-1], order_expiration_time))
+
     setup.distribute_initial_stocks(stocks, agents)
 
     # Create databases and initialize objects
@@ -105,7 +108,7 @@ def stockMarketSimulation(seed,
     """
 
     for quarter in range(simulation_time):
-        if (printProgress):
+        if printProgress:
             print('period: ', quarter)
         # 1 update dividends
         for firm in firms:
@@ -114,17 +117,15 @@ def stockMarketSimulation(seed,
                                                                                        firm, Statevariables,
                                                                                        Variabletypes, Objects)
 
-
         # 2 market mechanism
-        for stock in stocks:
+        for idx, stock in enumerate(stocks):
             # marketmechanisms.continuousDoubleAuction
-            agents, stock, Transactions, Transactors, Objects = marketmechanisms.continuousDoubleAuction(agents, stock,
-                                                                                                         orderbook,
-                                                                                                         observable_set_size,
-                                                                                                         randomset.subset_traders,
-                                                                                                         quarter, seed,
-                                                                                                         Transactions,
-                                                                                                         Transactors, Objects)
+            agents, stock, order_books[idx], \
+            Transactions, Transactors, Objects = marketmechanisms.continuous_double_auction(agents, stock,
+                                                                                            order_books[idx],
+                                                                                            quarter, seed,
+                                                                                            Transactions,
+                                                                                            Transactors, Objects)
 
             Statevariables, Variabletypes, Objects = database.df_update_statevariables(seed, quarter,
                                                                                        stock, Statevariables,
