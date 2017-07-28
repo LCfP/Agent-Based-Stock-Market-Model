@@ -21,7 +21,7 @@ def limitorderbooks():
     stocks = Stock(firm, 1000)
     return [LimitOrderBook(stocks, 100, 120)]
 
-def test_add_bid():
+def test_add_bid(limitorderbooks):
     limitorderbooks[0].add_bid(10, 20, 'trader-1')
     limitorderbooks[0].add_bid(5, 20, 'trader-2')
     limitorderbooks[0].add_bid(7, 20, 'trader-3')
@@ -34,7 +34,7 @@ def test_add_bid():
     # second highest bid trader = trader-2
     assert_equal(limitorderbooks[0].bids[-2].owner, 'trader-3')
 
-def test_add_ask():
+def test_add_ask(limitorderbooks):
     limitorderbooks[0].add_ask(11, 20, 'trader-1')
     limitorderbooks[0].add_ask(5, 20, 'trader-2')
     limitorderbooks[0].add_ask(7, 20, 'trader-3')
@@ -47,7 +47,7 @@ def test_add_ask():
     # second highest ask trader = trader-5
     assert_equal(limitorderbooks[0].asks[-2].owner, 'trader-5')
 
-def test_clean_book():
+def test_clean_book(limitorderbooks):
     limitorderbooks[0].add_bid(10, 20, 'trader-1')
     limitorderbooks[0].add_bid(5, 20, 'trader-2')
     limitorderbooks[0].add_ask(11, 20, 'trader-1')
@@ -60,7 +60,7 @@ def test_clean_book():
     assert_equal(len(limitorderbooks[0].bids), 0)
     assert_equal(len(limitorderbooks[0].asks), 0)
 
-def test_match_orders():
+def test_match_orders(limitorderbooks):
     # add some asks
     limitorderbooks[0].add_ask(5, 20, 'trader-2')
     limitorderbooks[0].add_ask(7, 20, 'trader-3')
