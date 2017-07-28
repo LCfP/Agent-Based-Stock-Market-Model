@@ -2,8 +2,6 @@
 
 import numpy as np
 
-__author__ = 'Schasfoort, Abeshzadeh, Broek & Peters'
-
 
 def npv_growing_perpetuity(dividend, discount_rate=0.05, growth_rate=0):
     """Returns the present value of a growing perpetuity.
@@ -46,6 +44,19 @@ def moving_average(x, n):
     """
     cumsum = np.cumsum(np.insert(x, 0, 0))
     return (cumsum[n:] - cumsum[:-n]) / n
+
+
+def div0(a, b):
+    """
+    ignore / 0, div0( [-1, 0, 1], 0 ) -> [0, 0, 0]
+    credits to Dennis @ https://stackoverflow.com/questions/26248654/numpy-return-0-with-divide-by-zero
+    """
+    #with np.errstate(divide='ignore', invalid='ignore'):
+    answer = np.true_divide(a, b)
+    if not np.isfinite(answer):
+        answer = 0
+    #c[~ np.isfinite(c)] = 0  # -inf inf NaN
+    return answer
 
 
 def print_setup(agents, firms, stocks):
