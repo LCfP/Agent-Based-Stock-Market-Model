@@ -27,18 +27,24 @@ def continuous_double_auction(agentset, stock, orderbook, period, seed, Transact
         previous_price = orderbook.transaction_prices[-1]
         # look at own price forecast
         price_forecast = agent.valuate_stocks(stock)
+        # simultaneously submit a bid and ask based on the bid-ask spread
+        bid_price = price_forecast * ((100 - agent.bid_ask_spread) / 100)
+        bid_volume = int(div0(agent.money, bid_price))
+        orderbook.add_bid(bid_price, bid_volume, agent)
+        ask_price = price_forecast * ((100 + agent.bid_ask_spread) / 100)
+        orderbook.add_ask(ask_price, agent.stocks[stock], agent)
         # if forecast price > previous submit bid with price random between previous price and forecast
         # volume is max possible volume the agent can buy at bid price
-        if price_forecast > previous_price:
-            bid_price = random.uniform(price_forecast, previous_price)
-            # determine bid_volume as agent.money / bid price
-            bid_volume = int(div0(agent.money, int(bid_price)))
-            orderbook.add_bid(bid_price, bid_volume, agent)
+        # if price_forecast > previous_price:
+        #     bid_price = random.uniform(price_forecast, previous_price)
+        #     # determine bid_volume as agent.money / bid price
+        #     bid_volume = int(div0(agent.money, int(bid_price)))
+        #     orderbook.add_bid(bid_price, bid_volume, agent)
         # if forecast price < previous submit ask with price random between previous price and forecast
         # volume is full inventory of stocks
-        if price_forecast < previous_price:
-            ask_price = random.uniform(price_forecast, previous_price)
-            orderbook.add_ask(ask_price, agent.stocks[stock], agent)
+        # if price_forecast < previous_price:
+        #     ask_price = random.uniform(price_forecast, previous_price)
+        #     orderbook.add_ask(ask_price, agent.stocks[stock], agent)
         # apply continuous double auction mechanism and execute the subsequent trade till None is returned
         while True:
             matched_orders = orderbook.match_orders()
@@ -58,6 +64,9 @@ def continuous_double_auction(agentset, stock, orderbook, period, seed, Transact
             stock.add_price(total_volume, total_money)
         # clean limit order book
         orderbook.clean_book()
+
+    # at the end of the day, cleanse the order-book
+    orderbook.cleanse_book()
 
     return agentset, stock, orderbook, Transactions, Transactors, Objects
 

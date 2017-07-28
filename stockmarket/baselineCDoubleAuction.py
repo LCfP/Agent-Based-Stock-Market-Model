@@ -4,6 +4,7 @@ import random
 from stockmarket.limitorderbook import *
 from stockmarket import setup, marketmechanisms, database
 
+
 def stockMarketSimulation(seed,
                           simulation_time,
                           amount_fundamentalists,

@@ -38,13 +38,17 @@ class LimitOrderBook:
         self.bids = new_bids
         self.asks = new_asks
 
+    def cleanse_book(self):
+        self.bids = []
+        self.asks = []
+
     def match_orders(self):
         """Return a price, volume, bid and ask and delete them from the order book if volume of either reaches zero"""
         # first make sure that neither the bids or asks books are empty
         if not (self.bids and self.asks):
             return None
         # then match highest bid with lowest ask
-        if self.bids[-1].price >= self.asks[0].price:
+        if (self.bids[-1].price >= self.asks[0].price):
             winning_bid = self.bids[-1]
             winning_ask = self.asks[0]
             price = winning_ask.price
@@ -56,8 +60,8 @@ class LimitOrderBook:
                 del self.asks[0]
             else:
                 # decrease volume for both bid and ask
-                winning_bid.volume -= volume
-                winning_ask.volume -= volume
+                self.asks[0].volume -= volume
+                self.bids[-1].volume -= volume
                 # delete the empty bid or ask
                 if min_index == 0:
                     del self.bids[-1]
