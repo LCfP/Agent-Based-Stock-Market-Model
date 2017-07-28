@@ -64,7 +64,7 @@ class LimitOrderBook:
                 else:
                     del self.asks[0]
                 #del [self.bids[-1], self.asks[0]][min_index]
-
+            self.transaction_prices.append(price)
             return price, volume, winning_bid, winning_ask
 
     def __repr__(self):

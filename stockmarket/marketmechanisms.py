@@ -32,11 +32,11 @@ def continuous_double_auction(agentset, stock, orderbook, period, seed, Transact
         if price_forecast > previous_price:
             bid_price = random.uniform(price_forecast, previous_price)
             # determine bid_volume as agent.money / bid price
-            bid_volume = div0(agent.money, int(bid_price))
+            bid_volume = int(div0(agent.money, int(bid_price)))
             orderbook.add_bid(bid_price, bid_volume, agent)
         # if forecast price < previous submit ask with price random between previous price and forecast
         # volume is full inventory of stocks
-        if price_forecast > previous_price:
+        if price_forecast < previous_price:
             ask_price = random.uniform(price_forecast, previous_price)
             orderbook.add_ask(ask_price, agent.stocks[stock], agent)
         # apply continuous double auction mechanism and execute the subsequent trade till None is returned
@@ -54,11 +54,10 @@ def continuous_double_auction(agentset, stock, orderbook, period, seed, Transact
                                                                         matched_orders[3].owner, stock, matched_orders[1],
                                                                         matched_orders[0] * matched_orders[1],
                                                                         Transactions, Transactors, Objects)
+            # add average price to the stock's memory
+            stock.add_price(total_volume, total_money)
         # clean limit order book
         orderbook.clean_book()
-
-    # add average price to the stock's memory
-    stock.add_price(total_volume, total_money)
 
     return agentset, stock, orderbook, Transactions, Transactors, Objects
 
