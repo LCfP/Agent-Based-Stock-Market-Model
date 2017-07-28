@@ -14,15 +14,15 @@ def agents():
             Trader("Agent2", 1000, 0, 2, 3, 5, lambda **x: extrapolate_ma_price(**x))]
 
 @pytest.fixture()
-def limitorderbook():
+def limitorderbooks():
     # create a firm
     firm = Firm("Firm1", 10000, [200, 300, 400, 300], 1)
     # create a stock of that firm
     stocks = Stock(firm, 1000)
-    return LimitOrderBook(stocks, 100, 120)
+    return [LimitOrderBook(stocks, 100, 120)]
 
 def test_add_bid():
-    order_book = limitorderbook
+    order_book = limitorderbooks[0]
     order_book.add_bid(10, 20, 'trader-1')
     order_book.add_bid(5, 20, 'trader-2')
     order_book.add_bid(7, 20, 'trader-3')
@@ -36,7 +36,7 @@ def test_add_bid():
     assert_equal(order_book.bids[-2].owner, 'trader-3')
 
 def test_add_ask():
-    order_book = limitorderbook
+    order_book = limitorderbooks[0]
     order_book.add_ask(11, 20, 'trader-1')
     order_book.add_ask(5, 20, 'trader-2')
     order_book.add_ask(7, 20, 'trader-3')
@@ -50,7 +50,7 @@ def test_add_ask():
     assert_equal(order_book.asks[-2].owner, 'trader-5')
 
 def test_clean_book():
-    order_book = limitorderbook
+    order_book = limitorderbooks[0]
     order_book.add_bid(10, 20, 'trader-1')
     order_book.add_bid(5, 20, 'trader-2')
     order_book.add_ask(11, 20, 'trader-1')
@@ -64,7 +64,7 @@ def test_clean_book():
     assert_equal(len(order_book.asks), 0)
 
 def test_match_orders():
-    order_book = limitorderbook
+    order_book = limitorderbooks[0]
     # add some asks
     order_book.add_ask(5, 20, 'trader-2')
     order_book.add_ask(7, 20, 'trader-3')
