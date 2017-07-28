@@ -1,7 +1,5 @@
 """In this file, we define what set of supplying agents the demanding agent can see."""
 
-__author__ = 'Schasfoort, Abeshzadeh, Broek & Peters'
-
 import random
 
 

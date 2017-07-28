@@ -6,6 +6,7 @@ from numpy.testing import assert_raises
 from stockmarket.firms import *
 from stockmarket.setup import *
 from stockmarket.valuationfunctions import *
+from stockmarket.functions import *
 
 
 @pytest.fixture()
@@ -38,3 +39,7 @@ def test_moving_averages():
     pass
 
 
+def test_div0():
+    assert_equal(div0(23, 0), 0)
+    assert_equal(div0(10, 5), 2)
+    assert_equal(div0(10, 4), 2.5)

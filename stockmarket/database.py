@@ -115,6 +115,7 @@ def record_statevariables(period, agent):
                     "variable_id, owner_id, value) VALUES (?,?,?,?,?,?)",
                     (par.experiment_id, par.seed, period, variable_type_id, owner_id, str(variables[variable])))
 
+
 def df_update_transactions(seed, period, buyer, seller, stock, amount_of_product, amount_of_money, Transactions, Transactors, Objects):
     transactions, transactors, objects = [Transactions], [Transactors], [Objects]
     # store the buyer in the objects table

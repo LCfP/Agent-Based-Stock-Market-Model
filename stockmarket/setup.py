@@ -5,8 +5,6 @@ import itertools
 from stockmarket import firms, stock, valuationfunctions
 from stockmarket.agent import Trader
 
-__author__ = 'Schasfoort, Abeshzadeh, Broek & Peters'
-
 
 def setup_agents(init_money, init_bid_ask_spread, init_memory_size, init_ma_s, init_ma_l, fundamentalist=3, chartist=3):
     """This returns an initialized agent set"""
