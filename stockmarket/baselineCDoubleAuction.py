@@ -90,7 +90,7 @@ def stockMarketSimulation(seed,
     setup.distribute_initial_stocks(stocks, agents)
 
     # Create databases and initialize objects
-    Transactions, Transactors, Statevariables, Variabletypes, Objects = database.stockMarketBaselineTables()
+    Transactions, Transactors, Statevariables, Variabletypes, Objects = database.stock_market_baseline_tables()
 
     """
     Print set-up

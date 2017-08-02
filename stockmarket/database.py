@@ -7,7 +7,8 @@ import stockmarket.parameters as par
 conn = sqlite3.connect(par.database_name)
 cur = conn.cursor()
 
-def stockMarketBaselineTables():
+
+def stock_market_baseline_tables():
     Transactions = pd.DataFrame(columns= ['id', 'seed', 'period', 'amount_of_product', 'amount_of_money'])
     Transactors = pd.DataFrame(columns= ['transaction_id', 'transactor_id', 'role'])
     Statevariables = pd.DataFrame(columns= ['id', 'seed', 'period', 'variable_id', 'owner_id', 'value'])
@@ -15,7 +16,8 @@ def stockMarketBaselineTables():
     Objects = pd.DataFrame(columns=['id', 'object_name', 'object_type'])
     return Transactions, Transactors, Statevariables, Variabletypes, Objects
 
-def create_tables():
+
+def create_tables(cur):
     cur.executescript('''
     DROP TABLE IF EXISTS Transactions;
     DROP TABLE IF EXISTS Statevariables;
@@ -72,6 +74,7 @@ def create_tables():
 
     ''')
 
+
 def df_update_statevariables(seed, period, agent, Statevariables, Variabletypes, Objects):
     """Records all state variables for this agent in provided Statevariable and related tables and returns them"""
     variables = vars(agent)
@@ -84,7 +87,7 @@ def df_update_statevariables(seed, period, agent, Statevariables, Variabletypes,
     else:
         owner_id = list(Objects['object_name'].values).index(repr(agent))
     for variable in variables:
-        # store the variable type into the variabletypes table
+        # store the variable type into the variable types table
         if str(variable) not in Variabletypes['variable_type'].values:
             variable_type_id = len(Variabletypes) + (len(varTypes) - 1)
             varTypes.append(pd.DataFrame.from_records([(variable_type_id, str(variable))], columns=Variabletypes.columns.values))
@@ -95,6 +98,7 @@ def df_update_statevariables(seed, period, agent, Statevariables, Variabletypes,
         statevariables.append(pd.DataFrame.from_records([(variable_id, seed, period, variable_type_id, owner_id, str(variables[variable]))], columns=Statevariables.columns.values))
 
     return pd.concat(statevariables, ignore_index=True), pd.concat(varTypes, ignore_index=True), pd.concat(objects, ignore_index=True)
+
 
 def record_statevariables(period, agent):
     """Records all state variables for this agent in the Statevariable and related tables"""

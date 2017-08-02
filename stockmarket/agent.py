@@ -7,7 +7,9 @@ class Trader:
         """Creates a new trader"""
         self.name = name
         self.money = money
+        self.money_history = [money]
         self.stocks = StockDict()
+        self.portfolio_history = []
         # bid ask spread is an integer
         self.memory_size = memory
         self.bid_ask_spread = bid_ask_spread

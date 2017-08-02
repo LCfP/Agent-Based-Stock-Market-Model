@@ -9,7 +9,7 @@ from stockmarket.functions import div0
 import numpy as np
 
 
-def continuous_double_auction(agentset, stock, orderbook, period, seed, Transactions, Transactors, Objects):
+def continuous_double_auction(agentset, stock, orderbook, period, seed):
     """
     Agent, bids and asks are continuously submitted to the limit-order book. The resulting trades are executed.
     """
@@ -56,10 +56,10 @@ def continuous_double_auction(agentset, stock, orderbook, period, seed, Transact
                         matched_orders[0] * matched_orders[1])
             total_volume += matched_orders[1]
             total_money += matched_orders[0] * matched_orders[1]
-            Transactions, Transactors, Objects = df_update_transactions(seed, period, matched_orders[2].owner,
-                                                                        matched_orders[3].owner, stock, matched_orders[1],
-                                                                        matched_orders[0] * matched_orders[1],
-                                                                        Transactions, Transactors, Objects)
+            # Transactions, Transactors, Objects = df_update_transactions(seed, period, matched_orders[2].owner,
+            #                                                             matched_orders[3].owner, stock, matched_orders[1],
+            #                                                             matched_orders[0] * matched_orders[1],
+            #                                                             Transactions, Transactors, Objects)
             # add average price to the stock's memory
             stock.add_price(total_volume, total_money)
         # clean limit order book
@@ -68,7 +68,7 @@ def continuous_double_auction(agentset, stock, orderbook, period, seed, Transact
     # at the end of the day, cleanse the order-book
     orderbook.cleanse_book()
 
-    return agentset, stock, orderbook, Transactions, Transactors, Objects
+    return agentset, stock, orderbook#, Transactions, Transactors, Objects
 
 
 def overTheCounterMarket(agentset, stock, observablesetsize, set_of_traders_function, period, seed, Transactions, Transactors, Objects):

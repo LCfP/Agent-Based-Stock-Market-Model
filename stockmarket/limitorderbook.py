@@ -3,15 +3,22 @@
 import bisect
 import operator
 
+
 class LimitOrderBook:
     """Base limit order book """
     def __init__(self, stock, last_price, order_expiration):
         """Creates a new trader"""
         self.stock = stock
         self.transaction_prices = [last_price]
+        self.transaction_volumes = []
+        self.matched_bids = []
         self.order_expiration = order_expiration
         self.bids = []
         self.asks = []
+        self.unresolved_orders_history = []
+        self.transaction_prices_history = []
+        self.transaction_volumes_history = []
+        self.matched_bids_history = []
 
     def add_bid(self, price, volume, agent):
         """Add a bid to the (price low-high, age young-old) sorted bids book"""
@@ -39,6 +46,7 @@ class LimitOrderBook:
         self.asks = new_asks
 
     def cleanse_book(self):
+        self.unresolved_orders_history.append((self.bids, self.asks))
         self.bids = []
         self.asks = []
 
@@ -69,6 +77,8 @@ class LimitOrderBook:
                     del self.asks[0]
                 #del [self.bids[-1], self.asks[0]][min_index]
             self.transaction_prices.append(price)
+            self.transaction_volumes.append(volume)
+            self.matched_bids.append((winning_bid, winning_ask))
             return price, volume, winning_bid, winning_ask
 
     def __repr__(self):

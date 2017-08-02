@@ -1,9 +1,9 @@
 """This file is our main simulation file it includes the set-up and time loop"""
 
 import random
-import pandas as pd
-from stockmarket import functions, setup, marketmechanisms, randomset, database
-import stockmarket.parameters as p
+from stockmarket.limitorderbook import *
+from stockmarket import setup, marketmechanisms, database
+
 
 def stockMarketSimulation(seed,
                           simulation_time,
@@ -18,7 +18,7 @@ def stockMarketSimulation(seed,
                           initial_profit,
                           initial_book_value,
                           initial_stock_amount,
-                          observable_set_size,
+                          order_expiration_time,
                           printProgress=False):
     """Returns a set of agents at time stockMarketSimulationParameterSet['simuatlion_time'] and the values
     of their state variables for every time step in stockMarketSimulationParameterSet['simuatlion_time'].
@@ -61,7 +61,7 @@ def stockMarketSimulation(seed,
     Returns
     -------
     list
-        Pandas dataframes with records of all agent state variables and transactions over the simulation
+        agents, firms, stocks, and orderbooks
     """
 
     random.seed(seed)
@@ -83,10 +83,11 @@ def stockMarketSimulation(seed,
 
     stocks = setup.setup_stocks(firms, amount=initial_stock_amount)
 
-    setup.distribute_initial_stocks(stocks, agents)
+    order_books = []
+    for stock in stocks:
+        order_books.append(LimitOrderBook(stock, stock.price_history[-1], order_expiration_time))
 
-    # Create databases and initialize objects
-    Transactions, Transactors, Statevariables, Variabletypes, Objects = database.stock_market_baseline_tables()
+    setup.distribute_initial_stocks(stocks, agents)
 
     """
     Print set-up
@@ -105,34 +106,25 @@ def stockMarketSimulation(seed,
     """
 
     for quarter in range(simulation_time):
-        if (printProgress):
+        if printProgress:
             print('period: ', quarter)
         # 1 update dividends
         for firm in firms:
             firm.update_profits(firm.determine_growth())
-            Statevariables, Variabletypes, Objects = database.df_update_statevariables(seed, quarter,
-                                                                                       firm, Statevariables,
-                                                                                       Variabletypes, Objects)
 
         # 2 market mechanism
-        for stock in stocks:
-            agents, stock, Transactions, Transactors, Objects = marketmechanisms.overTheCounterMarket(agents, stock,
-                                                                                                      observable_set_size,
-                                                                                                      randomset.subset_traders,
-                                                                                                      quarter, seed,
-                                                                                                      Transactions,
-                                                                                                      Transactors, Objects)
-            Statevariables, Variabletypes, Objects = database.df_update_statevariables(seed, quarter,
-                                                                                       stock, Statevariables,
-                                                                                       Variabletypes, Objects)
+        for idx, stock in enumerate(stocks):
+            # marketmechanisms.continuousDoubleAuction
+            agents, stock, order_books[idx] = marketmechanisms.continuous_double_auction(agents, stock,
+                                                                                         order_books[idx],
+                                                                                         quarter, seed)
 
-        # 3 record all agent-state variables
+        # 3 record agent money and stocks
         for agent in agents:
-            Statevariables, Variabletypes, Objects = database.df_update_statevariables(seed, quarter,
-                                                                                       agent, Statevariables,
-                                                                                       Variabletypes, Objects)
+            agent.money_history.append(agent.money)
+            agent.portfolio_history.append(agent.stocks)
 
-    return Transactions, Transactors, Statevariables, Variabletypes, Objects
+    return agents, firms, stocks, order_books
 
 
 
