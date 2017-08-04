@@ -3,15 +3,22 @@
 import bisect
 import operator
 
+
 class LimitOrderBook:
     """Base limit order book """
     def __init__(self, stock, last_price, order_expiration):
         """Creates a new trader"""
         self.stock = stock
-        self.transaction_prices = [last_price]
+        self.transaction_prices = []
+        self.transaction_volumes = []
+        self.matched_bids = []
         self.order_expiration = order_expiration
         self.bids = []
         self.asks = []
+        self.unresolved_orders_history = []
+        self.transaction_prices_history = []
+        self.transaction_volumes_history = []
+        self.matched_bids_history = []
 
     def add_bid(self, price, volume, agent):
         """Add a bid to the (price low-high, age young-old) sorted bids book"""
@@ -38,13 +45,29 @@ class LimitOrderBook:
         self.bids = new_bids
         self.asks = new_asks
 
+    def cleanse_book(self):
+        # store and clean unresolved orders
+        self.unresolved_orders_history.append((self.bids, self.asks))
+        self.bids = []
+        self.asks = []
+        # store and clean recorded transaction prices
+        self.transaction_prices_history.append(self.transaction_prices)
+        self.transaction_prices = []
+        # store and clean recorded transaction volumes
+        self.transaction_volumes_history.append(self.transaction_volumes)
+        self.transaction_volumes = []
+        # store and clean matched bids
+        self.matched_bids_history.append(self.matched_bids)
+        self.matched_bids = []
+
+
     def match_orders(self):
         """Return a price, volume, bid and ask and delete them from the order book if volume of either reaches zero"""
         # first make sure that neither the bids or asks books are empty
         if not (self.bids and self.asks):
             return None
         # then match highest bid with lowest ask
-        if self.bids[-1].price >= self.asks[0].price:
+        if (self.bids[-1].price >= self.asks[0].price):
             winning_bid = self.bids[-1]
             winning_ask = self.asks[0]
             price = winning_ask.price
@@ -56,8 +79,8 @@ class LimitOrderBook:
                 del self.asks[0]
             else:
                 # decrease volume for both bid and ask
-                winning_bid.volume -= volume
-                winning_ask.volume -= volume
+                self.asks[0].volume -= volume
+                self.bids[-1].volume -= volume
                 # delete the empty bid or ask
                 if min_index == 0:
                     del self.bids[-1]
@@ -65,6 +88,8 @@ class LimitOrderBook:
                     del self.asks[0]
                 #del [self.bids[-1], self.asks[0]][min_index]
             self.transaction_prices.append(price)
+            self.transaction_volumes.append(volume)
+            self.matched_bids.append((winning_bid, winning_ask))
             return price, volume, winning_bid, winning_ask
 
     def __repr__(self):

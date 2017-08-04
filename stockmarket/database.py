@@ -7,7 +7,7 @@ import stockmarket.parameters as par
 conn = sqlite3.connect(par.database_name)
 cur = conn.cursor()
 
-def stockMarketBaselineTables():
+def stock_market_baseline_tables():
     Transactions = pd.DataFrame(columns= ['id', 'seed', 'period', 'amount_of_product', 'amount_of_money'])
     Transactors = pd.DataFrame(columns= ['transaction_id', 'transactor_id', 'role'])
     Statevariables = pd.DataFrame(columns= ['id', 'seed', 'period', 'variable_id', 'owner_id', 'value'])
@@ -15,7 +15,8 @@ def stockMarketBaselineTables():
     Objects = pd.DataFrame(columns=['id', 'object_name', 'object_type'])
     return Transactions, Transactors, Statevariables, Variabletypes, Objects
 
-def create_tables():
+
+def create_tables(cur):
     cur.executescript('''
     DROP TABLE IF EXISTS Transactions;
     DROP TABLE IF EXISTS Statevariables;
@@ -72,6 +73,141 @@ def create_tables():
 
     ''')
 
+def create_CDA_tables(cur):
+    cur.executescript('''
+        DROP TABLE IF EXISTS Statevariables;
+        DROP TABLE IF EXISTS Variabletypes;
+        DROP TABLE IF EXISTS Objects;
+
+        CREATE TABLE Statevariables (
+            id  INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT UNIQUE,
+            seed INTEGER,
+            period INTEGER,
+            variable_id INTEGER,
+            owner_id INTEGER,
+            value REAL
+        );
+
+        CREATE TABLE Variabletypes (
+            id  INTEGER NOT NULL PRIMARY KEY
+                AUTOINCREMENT UNIQUE,
+            variable_type TEXT  UNIQUE
+        );
+
+        CREATE TABLE Objects (
+            id  INTEGER NOT NULL PRIMARY KEY
+                AUTOINCREMENT UNIQUE,
+            object_name TEXT  UNIQUE,
+            object_type TEXT
+        );
+
+        ''')
+
+
+def record_state_variables(cur, seed, agents, simulation_time, firms, stocks, order_books):
+    """records all state variables from agetns, fimrs, stocks and the orderbook in an SQL database"""
+    # add agents variables to the SQL database
+    for agent in agents:
+        # 1 store the agent and type of agent in the objects table
+        cur.execute("INSERT OR IGNORE INTO Objects (object_name, object_type) VALUES (?,?)",
+                    (repr(agent), repr(agent)[:repr(agent).find('_')]))
+        cur.execute("SELECT id FROM Objects WHERE object_name = ?", (repr(agent),))
+        owner_id = cur.fetchone()[0]
+        # for the agent-variables
+        variables = vars(agent)
+        for variable in variables:
+            # store the variable type in the variable types table
+            cur.execute("INSERT OR IGNORE INTO Variabletypes (variable_type) VALUES (?)", (str(variable),))
+            cur.execute("SELECT id FROM Variabletypes WHERE variable_type = ?", (str(variable),))
+            variable_type_id = cur.fetchone()[0]
+            # store the variable content in the state variables table
+            if not 'history' in str(variable):
+                cur.execute(
+                    "INSERT INTO Statevariables (seed, period, variable_id, owner_id, value) VALUES (?,?,?,?,?)",
+                    (seed, 0, variable_type_id, owner_id, str(variables[variable])))
+            else:
+                if len(variables[variable]) > simulation_time:
+                    var = variables[variable][(len(variables[variable]) - simulation_time):]
+                else:
+                    var = variables[variable]
+                for idx, element in enumerate(var):
+                    cur.execute(
+                        "INSERT INTO Statevariables (seed, period, variable_id, owner_id, value) VALUES (?,?,?,?,?)",
+                        (seed, idx, variable_type_id, owner_id, str(element)))
+    # add stock variables to the SQL database
+    for stock in stocks:
+        # 1 store the stock and type of stock in the objects table
+        cur.execute("INSERT OR IGNORE INTO Objects (object_name, object_type) VALUES (?,?)",
+                    (repr(stock), repr(stock)[:repr(stock).find('_')]))
+        cur.execute("SELECT id FROM Objects WHERE object_name = ?", (repr(stock),))
+        owner_id = cur.fetchone()[0]
+        # for the stock-variables
+        variables = vars(stock)
+        for variable in variables:
+            # store the variable type in the variable types table
+            cur.execute("INSERT OR IGNORE INTO Variabletypes (variable_type) VALUES (?)", (str(variable),))
+            cur.execute("SELECT id FROM Variabletypes WHERE variable_type = ?", (str(variable),))
+            variable_type_id = cur.fetchone()[0]
+            # store the variable content in the state variables table
+            if not 'history' in str(variable):
+                cur.execute(
+                    "INSERT INTO Statevariables (seed, period, variable_id, owner_id, value) VALUES (?,?,?,?,?)",
+                    (seed, 0, variable_type_id, owner_id, str(variables[variable])))
+    for firm in firms:
+        # 1 store the firm and type of firm in the objects table
+        cur.execute("INSERT OR IGNORE INTO Objects (object_name, object_type) VALUES (?,?)",
+                    (repr(firm), repr(firm)[:repr(firm).find('_')]))
+        cur.execute("SELECT id FROM Objects WHERE object_name = ?", (repr(firm),))
+        owner_id = cur.fetchone()[0]
+        # for the firm-variables
+        variables = vars(firm)
+        for variable in variables:
+            # store the variable type in the variable types table
+            cur.execute("INSERT OR IGNORE INTO Variabletypes (variable_type) VALUES (?)", (str(variable),))
+            cur.execute("SELECT id FROM Variabletypes WHERE variable_type = ?", (str(variable),))
+            variable_type_id = cur.fetchone()[0]
+            # store the variable content in the state variables table
+            if not 'history' in str(variable):
+                cur.execute(
+                    "INSERT INTO Statevariables (seed, period, variable_id, owner_id, value) VALUES (?,?,?,?,?)",
+                    (seed, 0, variable_type_id, owner_id, str(variables[variable])))
+            else:
+                if len(variables[variable]) > simulation_time:
+                    var = variables[variable][(len(variables[variable]) - simulation_time):]
+                else:
+                    var = variables[variable]
+                for idx, element in enumerate(var):
+                    cur.execute(
+                        "INSERT INTO Statevariables (seed, period, variable_id, owner_id, value) VALUES (?,?,?,?,?)",
+                        (seed, idx, variable_type_id, owner_id, str(element)))
+    for book in order_books:
+        # 1 store the book and type of book in the objects table
+        cur.execute("INSERT OR IGNORE INTO Objects (object_name, object_type) VALUES (?,?)",
+                    (repr(book), repr(book)[:repr(book).find('_')]))
+        cur.execute("SELECT id FROM Objects WHERE object_name = ?", (repr(book),))
+        owner_id = cur.fetchone()[0]
+        # for the firm-variables
+        variables = vars(book)
+        for variable in variables:
+            # store the variable type in the variable types table
+            cur.execute("INSERT OR IGNORE INTO Variabletypes (variable_type) VALUES (?)", (str(variable),))
+            cur.execute("SELECT id FROM Variabletypes WHERE variable_type = ?", (str(variable),))
+            variable_type_id = cur.fetchone()[0]
+            # store the variable content in the state variables table
+            if not 'history' in str(variable):
+                cur.execute(
+                    "INSERT INTO Statevariables (seed, period, variable_id, owner_id, value) VALUES (?,?,?,?,?)",
+                    (seed, 0, variable_type_id, owner_id, str(variables[variable])))
+            else:
+                var = variables[variable]
+                # store the prices, volumes and unresolved orders in the state variables table
+                for idx, element in enumerate(var):
+                    cur.execute(
+                        "INSERT INTO Statevariables (seed, period, variable_id, owner_id, value) VALUES (?,?,?,?,?)",
+                        (seed, idx, variable_type_id, owner_id, str(element)))
+
+
+
 def df_update_statevariables(seed, period, agent, Statevariables, Variabletypes, Objects):
     """Records all state variables for this agent in provided Statevariable and related tables and returns them"""
     variables = vars(agent)
@@ -84,7 +220,7 @@ def df_update_statevariables(seed, period, agent, Statevariables, Variabletypes,
     else:
         owner_id = list(Objects['object_name'].values).index(repr(agent))
     for variable in variables:
-        # store the variable type into the variabletypes table
+        # store the variable type into the variable types table
         if str(variable) not in Variabletypes['variable_type'].values:
             variable_type_id = len(Variabletypes) + (len(varTypes) - 1)
             varTypes.append(pd.DataFrame.from_records([(variable_type_id, str(variable))], columns=Variabletypes.columns.values))
@@ -95,6 +231,7 @@ def df_update_statevariables(seed, period, agent, Statevariables, Variabletypes,
         statevariables.append(pd.DataFrame.from_records([(variable_id, seed, period, variable_type_id, owner_id, str(variables[variable]))], columns=Statevariables.columns.values))
 
     return pd.concat(statevariables, ignore_index=True), pd.concat(varTypes, ignore_index=True), pd.concat(objects, ignore_index=True)
+
 
 def record_statevariables(period, agent):
     """Records all state variables for this agent in the Statevariable and related tables"""

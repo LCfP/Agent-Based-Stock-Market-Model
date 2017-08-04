@@ -7,7 +7,9 @@ class Trader:
         """Creates a new trader"""
         self.name = name
         self.money = money
+        self.money_history = [money]
         self.stocks = StockDict()
+        self.portfolio_history = []
         # bid ask spread is an integer
         self.memory_size = memory
         self.bid_ask_spread = bid_ask_spread
@@ -59,7 +61,7 @@ class Trader:
         self.stocks[stock] -= amount
         self.money += price
 
-    def buy(self, stock, amount, price):
+    def buy(self, stock, amount, money):
         """Buys stocks
 
         Parameters
@@ -77,13 +79,13 @@ class Trader:
             If `price` is higher than money of `self`.
 
         """
-        if self.money < price:
+        if self.money < money:
             raise ValueError("not enough money to buy this amount of stocks")
         try:
             self.stocks[stock] += amount
         except KeyError:
             self.stocks[stock] = amount
-        self.money -= price
+        self.money -= money
 
     def __str__(self):
         return str(self.name)
