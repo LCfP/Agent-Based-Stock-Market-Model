@@ -9,7 +9,7 @@ class LimitOrderBook:
     def __init__(self, stock, last_price, order_expiration):
         """Creates a new trader"""
         self.stock = stock
-        self.transaction_prices = [last_price]
+        self.transaction_prices = []
         self.transaction_volumes = []
         self.matched_bids = []
         self.order_expiration = order_expiration
@@ -46,9 +46,20 @@ class LimitOrderBook:
         self.asks = new_asks
 
     def cleanse_book(self):
+        # store and clean unresolved orders
         self.unresolved_orders_history.append((self.bids, self.asks))
         self.bids = []
         self.asks = []
+        # store and clean recorded transaction prices
+        self.transaction_prices_history.append(self.transaction_prices)
+        self.transaction_prices = []
+        # store and clean recorded transaction volumes
+        self.transaction_volumes_history.append(self.transaction_volumes)
+        self.transaction_volumes = []
+        # store and clean matched bids
+        self.matched_bids_history.append(self.matched_bids)
+        self.matched_bids = []
+
 
     def match_orders(self):
         """Return a price, volume, bid and ask and delete them from the order book if volume of either reaches zero"""

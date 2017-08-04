@@ -24,7 +24,7 @@ def continuous_double_auction(agentset, stock, orderbook, period, seed):
     for agent in randomized_agent_set:
         # submit bid or ask to limit order book based on price
         # look at previous price,
-        previous_price = orderbook.transaction_prices[-1]
+        #previous_price = orderbook.transaction_prices[-1]
         # look at own price forecast
         price_forecast = agent.valuate_stocks(stock)
         # simultaneously submit a bid and ask based on the bid-ask spread
