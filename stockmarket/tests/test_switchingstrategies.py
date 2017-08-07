@@ -1,18 +1,15 @@
 import pytest
-from stockmarket.stock import Stock
-from stockmarket.firms import Firm
 from stockmarket.agent import Trader
 from stockmarket.switchingstrategies import *
 from stockmarket.valuationfunctions import *
 from numpy.testing import assert_equal
-from numpy.testing import assert_almost_equal
 from numpy.testing import assert_raises
 
 
 @pytest.fixture()
 def agents():
-    return [Trader("Agent1", 1000, 0, 2, 3, 5, lambda **x: extrapolate_average_profit(**x)),
-            Trader("Agent2", 1000, 0, 2, 3, 5, lambda **x: extrapolate_ma_price(**x)),
+    return [Trader("Agent1", 1000, 0, 2, 3, 5, extrapolate_average_profit),
+            Trader("Agent2", 1000, 0, 2, 3, 5, extrapolate_ma_price),
             Trader("WeirdAgent", 1000, 0, 2, 3, 5, None)]
 
 
