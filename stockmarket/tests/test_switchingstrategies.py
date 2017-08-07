@@ -9,7 +9,7 @@ from numpy.testing import assert_raises
 @pytest.fixture()
 def agents():
     return [Trader("Agent1", 1000, 0, 2, 3, 5, extrapolate_average_profit),
-            Trader("Agent2", 1000, 0, 2, 3, 5, extrapolate_ma_price),
+            Trader("Agent2", 1000, 0, 2, 3, 5, predict_by_moving_avg_growth),
             Trader("WeirdAgent", 1000, 0, 2, 3, 5, None)]
 
 
@@ -29,4 +29,3 @@ def test_adaptive_switching(agents):
     # the chartist agent switches strategies for sure as possibly realised returns are 100% bigger than realised returns
     assert_equal(adaptive_switching(agent=agents[1], conservativeness=2, realised_returns=0,
                                     possibly_realised_returns=1), agents[0].function)
-
