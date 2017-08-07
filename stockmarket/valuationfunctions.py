@@ -5,9 +5,6 @@ from stockmarket.functions import npv_growing_perpetuity
 from stockmarket.functions import moving_average
 
 
-__author__ = 'Schasfoort, Abeshzadeh, Broek & Peters'
-
-
 def extrapolate_average_profit(stock, memory, **_):
     # TODO
     """
