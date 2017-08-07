@@ -7,6 +7,7 @@ import stockmarket.parameters as par
 conn = sqlite3.connect(par.database_name)
 cur = conn.cursor()
 
+
 def stock_market_baseline_tables():
     Transactions = pd.DataFrame(columns= ['id', 'seed', 'period', 'amount_of_product', 'amount_of_money'])
     Transactors = pd.DataFrame(columns= ['transaction_id', 'transactor_id', 'role'])
@@ -16,114 +17,61 @@ def stock_market_baseline_tables():
     return Transactions, Transactors, Statevariables, Variabletypes, Objects
 
 
-def create_tables(cur):
-    cur.executescript('''
-    DROP TABLE IF EXISTS Transactions;
-    DROP TABLE IF EXISTS Statevariables;
-    DROP TABLE IF EXISTS Variabletypes;
-    DROP TABLE IF EXISTS Objects;
-    DROP TABLE IF EXISTS Experiments;
-    DROP TABLE IF EXISTS Transactors;
+def create_CDA_tables(cur, seed):
+    script = '''\
+            DROP TABLE IF EXISTS Statevariables{seed};
+            DROP TABLE IF EXISTS Variabletypes{seed};
+            DROP TABLE IF EXISTS Objects{seed};
 
-    CREATE TABLE Transactions (
-        id INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT UNIQUE,
-        experiment_id INTEGER,
-        seed INTEGER,
-        period INTEGER,
-        amount_of_product REAL,
-        amount_of_money REAL
-    );
+            CREATE TABLE Statevariables{seed} (
+                id  INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT UNIQUE,
+                seed INTEGER,
+                period INTEGER,
+                variable_id INTEGER,
+                owner_id INTEGER,
+                value REAL
+            );
 
-    CREATE TABLE Transactors(
-        transaction_id INTEGER NOT NULL,
-		transactor_id INTEGER NOT NULL,
-		role REAL,
-		PRIMARY KEY (transaction_id, transactor_id)
-    );
+            CREATE TABLE Variabletypes{seed} (
+                id  INTEGER NOT NULL PRIMARY KEY
+                    AUTOINCREMENT UNIQUE,
+                variable_type TEXT  UNIQUE
+            );
 
-    CREATE TABLE Statevariables (
-        id  INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT UNIQUE,
-        experiment_id INTEGER,
-        seed INTEGER,
-        period INTEGER,
-        variable_id INTEGER,
-        owner_id INTEGER,
-        value REAL
-    );
+            CREATE TABLE Objects{seed} (
+                id  INTEGER NOT NULL PRIMARY KEY
+                    AUTOINCREMENT UNIQUE,
+                object_name TEXT  UNIQUE,
+                object_type TEXT
+            );
 
-    CREATE TABLE Variabletypes (
-        id  INTEGER NOT NULL PRIMARY KEY
-            AUTOINCREMENT UNIQUE,
-        variable_type TEXT  UNIQUE
-    );
+            '''
 
-    CREATE TABLE Objects (
-        id  INTEGER NOT NULL PRIMARY KEY
-            AUTOINCREMENT UNIQUE,
-        object_name TEXT  UNIQUE,
-        object_type TEXT
-    );
-
-    CREATE TABLE Experiments (
-        id  INTEGER NOT NULL PRIMARY KEY
-            AUTOINCREMENT UNIQUE,
-        experiment TEXT  UNIQUE,
-        parameter_space TEXT
-    );
-
-    ''')
-
-def create_CDA_tables(cur):
-    cur.executescript('''
-        DROP TABLE IF EXISTS Statevariables;
-        DROP TABLE IF EXISTS Variabletypes;
-        DROP TABLE IF EXISTS Objects;
-
-        CREATE TABLE Statevariables (
-            id  INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT UNIQUE,
-            seed INTEGER,
-            period INTEGER,
-            variable_id INTEGER,
-            owner_id INTEGER,
-            value REAL
-        );
-
-        CREATE TABLE Variabletypes (
-            id  INTEGER NOT NULL PRIMARY KEY
-                AUTOINCREMENT UNIQUE,
-            variable_type TEXT  UNIQUE
-        );
-
-        CREATE TABLE Objects (
-            id  INTEGER NOT NULL PRIMARY KEY
-                AUTOINCREMENT UNIQUE,
-            object_name TEXT  UNIQUE,
-            object_type TEXT
-        );
-
-        ''')
+    seeds = {'seed': str(seed)}
+    scr = script.format(**seeds)
+    cur.executescript(scr)
 
 
 def record_state_variables(cur, seed, agents, simulation_time, firms, stocks, order_books):
-    """records all state variables from agetns, fimrs, stocks and the orderbook in an SQL database"""
+    """records all state variables from agetns, firms, stocks and the orderbook in an SQL database"""
     # add agents variables to the SQL database
     for agent in agents:
         # 1 store the agent and type of agent in the objects table
-        cur.execute("INSERT OR IGNORE INTO Objects (object_name, object_type) VALUES (?,?)",
+        cur.execute("INSERT OR IGNORE INTO Objects{} (object_name, object_type) VALUES (?,?)".format(seed),
                     (repr(agent), repr(agent)[:repr(agent).find('_')]))
-        cur.execute("SELECT id FROM Objects WHERE object_name = ?", (repr(agent),))
+        cur.execute("SELECT id FROM Objects{} WHERE object_name = ?".format(seed), (repr(agent),))
         owner_id = cur.fetchone()[0]
         # for the agent-variables
         variables = vars(agent)
         for variable in variables:
             # store the variable type in the variable types table
-            cur.execute("INSERT OR IGNORE INTO Variabletypes (variable_type) VALUES (?)", (str(variable),))
-            cur.execute("SELECT id FROM Variabletypes WHERE variable_type = ?", (str(variable),))
+            cur.execute("INSERT OR IGNORE INTO Variabletypes{} (variable_type) VALUES (?)".format(seed), (str(variable),))
+            cur.execute("SELECT id FROM Variabletypes{} WHERE variable_type = ?".format(seed), (str(variable),))
             variable_type_id = cur.fetchone()[0]
             # store the variable content in the state variables table
             if not 'history' in str(variable):
                 cur.execute(
-                    "INSERT INTO Statevariables (seed, period, variable_id, owner_id, value) VALUES (?,?,?,?,?)",
+                    "INSERT INTO Statevariables{} (seed, period, variable_id, owner_id, value) VALUES (?,?,?,?,?)".format(seed),
                     (seed, 0, variable_type_id, owner_id, str(variables[variable])))
             else:
                 if len(variables[variable]) > simulation_time:
@@ -132,44 +80,44 @@ def record_state_variables(cur, seed, agents, simulation_time, firms, stocks, or
                     var = variables[variable]
                 for idx, element in enumerate(var):
                     cur.execute(
-                        "INSERT INTO Statevariables (seed, period, variable_id, owner_id, value) VALUES (?,?,?,?,?)",
+                        "INSERT INTO Statevariables{} (seed, period, variable_id, owner_id, value) VALUES (?,?,?,?,?)".format(seed),
                         (seed, idx, variable_type_id, owner_id, str(element)))
     # add stock variables to the SQL database
     for stock in stocks:
         # 1 store the stock and type of stock in the objects table
-        cur.execute("INSERT OR IGNORE INTO Objects (object_name, object_type) VALUES (?,?)",
+        cur.execute("INSERT OR IGNORE INTO Objects{} (object_name, object_type) VALUES (?,?)".format(seed),
                     (repr(stock), repr(stock)[:repr(stock).find('_')]))
-        cur.execute("SELECT id FROM Objects WHERE object_name = ?", (repr(stock),))
+        cur.execute("SELECT id FROM Objects{} WHERE object_name = ?".format(seed), (repr(stock),))
         owner_id = cur.fetchone()[0]
         # for the stock-variables
         variables = vars(stock)
         for variable in variables:
             # store the variable type in the variable types table
-            cur.execute("INSERT OR IGNORE INTO Variabletypes (variable_type) VALUES (?)", (str(variable),))
-            cur.execute("SELECT id FROM Variabletypes WHERE variable_type = ?", (str(variable),))
+            cur.execute("INSERT OR IGNORE INTO Variabletypes{} (variable_type) VALUES (?)".format(seed), (str(variable),))
+            cur.execute("SELECT id FROM Variabletypes{} WHERE variable_type = ?".format(seed), (str(variable),))
             variable_type_id = cur.fetchone()[0]
             # store the variable content in the state variables table
             if not 'history' in str(variable):
                 cur.execute(
-                    "INSERT INTO Statevariables (seed, period, variable_id, owner_id, value) VALUES (?,?,?,?,?)",
+                    "INSERT INTO Statevariables{} (seed, period, variable_id, owner_id, value) VALUES (?,?,?,?,?)".format(seed),
                     (seed, 0, variable_type_id, owner_id, str(variables[variable])))
     for firm in firms:
         # 1 store the firm and type of firm in the objects table
-        cur.execute("INSERT OR IGNORE INTO Objects (object_name, object_type) VALUES (?,?)",
+        cur.execute("INSERT OR IGNORE INTO Objects{} (object_name, object_type) VALUES (?,?)".format(seed),
                     (repr(firm), repr(firm)[:repr(firm).find('_')]))
-        cur.execute("SELECT id FROM Objects WHERE object_name = ?", (repr(firm),))
+        cur.execute("SELECT id FROM Objects{} WHERE object_name = ?".format(seed), (repr(firm),))
         owner_id = cur.fetchone()[0]
         # for the firm-variables
         variables = vars(firm)
         for variable in variables:
             # store the variable type in the variable types table
-            cur.execute("INSERT OR IGNORE INTO Variabletypes (variable_type) VALUES (?)", (str(variable),))
-            cur.execute("SELECT id FROM Variabletypes WHERE variable_type = ?", (str(variable),))
+            cur.execute("INSERT OR IGNORE INTO Variabletypes{} (variable_type) VALUES (?)".format(seed), (str(variable),))
+            cur.execute("SELECT id FROM Variabletypes{} WHERE variable_type = ?".format(seed), (str(variable),))
             variable_type_id = cur.fetchone()[0]
             # store the variable content in the state variables table
             if not 'history' in str(variable):
                 cur.execute(
-                    "INSERT INTO Statevariables (seed, period, variable_id, owner_id, value) VALUES (?,?,?,?,?)",
+                    "INSERT INTO Statevariables{} (seed, period, variable_id, owner_id, value) VALUES (?,?,?,?,?)".format(seed),
                     (seed, 0, variable_type_id, owner_id, str(variables[variable])))
             else:
                 if len(variables[variable]) > simulation_time:
@@ -178,34 +126,33 @@ def record_state_variables(cur, seed, agents, simulation_time, firms, stocks, or
                     var = variables[variable]
                 for idx, element in enumerate(var):
                     cur.execute(
-                        "INSERT INTO Statevariables (seed, period, variable_id, owner_id, value) VALUES (?,?,?,?,?)",
+                        "INSERT INTO Statevariables{} (seed, period, variable_id, owner_id, value) VALUES (?,?,?,?,?)".format(seed),
                         (seed, idx, variable_type_id, owner_id, str(element)))
     for book in order_books:
         # 1 store the book and type of book in the objects table
-        cur.execute("INSERT OR IGNORE INTO Objects (object_name, object_type) VALUES (?,?)",
+        cur.execute("INSERT OR IGNORE INTO Objects{} (object_name, object_type) VALUES (?,?)".format(seed),
                     (repr(book), repr(book)[:repr(book).find('_')]))
-        cur.execute("SELECT id FROM Objects WHERE object_name = ?", (repr(book),))
+        cur.execute("SELECT id FROM Objects{} WHERE object_name = ?".format(seed), (repr(book),))
         owner_id = cur.fetchone()[0]
         # for the firm-variables
         variables = vars(book)
         for variable in variables:
             # store the variable type in the variable types table
-            cur.execute("INSERT OR IGNORE INTO Variabletypes (variable_type) VALUES (?)", (str(variable),))
-            cur.execute("SELECT id FROM Variabletypes WHERE variable_type = ?", (str(variable),))
+            cur.execute("INSERT OR IGNORE INTO Variabletypes{} (variable_type) VALUES (?)".format(seed), (str(variable),))
+            cur.execute("SELECT id FROM Variabletypes{} WHERE variable_type = ?".format(seed), (str(variable),))
             variable_type_id = cur.fetchone()[0]
             # store the variable content in the state variables table
             if not 'history' in str(variable):
                 cur.execute(
-                    "INSERT INTO Statevariables (seed, period, variable_id, owner_id, value) VALUES (?,?,?,?,?)",
+                    "INSERT INTO Statevariables{} (seed, period, variable_id, owner_id, value) VALUES (?,?,?,?,?)".format(seed),
                     (seed, 0, variable_type_id, owner_id, str(variables[variable])))
             else:
                 var = variables[variable]
                 # store the prices, volumes and unresolved orders in the state variables table
                 for idx, element in enumerate(var):
                     cur.execute(
-                        "INSERT INTO Statevariables (seed, period, variable_id, owner_id, value) VALUES (?,?,?,?,?)",
+                        "INSERT INTO Statevariables{} (seed, period, variable_id, owner_id, value) VALUES (?,?,?,?,?)".format(seed),
                         (seed, idx, variable_type_id, owner_id, str(element)))
-
 
 
 def df_update_statevariables(seed, period, agent, Statevariables, Variabletypes, Objects):
@@ -231,26 +178,6 @@ def df_update_statevariables(seed, period, agent, Statevariables, Variabletypes,
         statevariables.append(pd.DataFrame.from_records([(variable_id, seed, period, variable_type_id, owner_id, str(variables[variable]))], columns=Statevariables.columns.values))
 
     return pd.concat(statevariables, ignore_index=True), pd.concat(varTypes, ignore_index=True), pd.concat(objects, ignore_index=True)
-
-
-def record_statevariables(period, agent):
-    """Records all state variables for this agent in the Statevariable and related tables"""
-    variables = vars(agent)
-    for variable in variables:
-        # store the variable type into the variabletypes table
-        cur.execute("INSERT OR IGNORE INTO Variabletypes (variable_type) VALUES (?)", (str(variable), ))
-        cur.execute("SELECT id FROM Variabletypes WHERE variable_type = ?", (str(variable),))
-        variable_type_id = cur.fetchone()[0]
-
-        # store the agent and type of agent in the objects table
-        cur.execute("INSERT OR IGNORE INTO Objects (object_name, object_type) VALUES (?,?)", (repr(agent), repr(agent)[:repr(agent).find('_')]))
-        cur.execute("SELECT id FROM Objects WHERE object_name = ?", (repr(agent),))
-        owner_id = cur.fetchone()[0]
-
-        # store the state variables in the state variables table
-        cur.execute("INSERT INTO Statevariables (experiment_id, seed, period, "
-                    "variable_id, owner_id, value) VALUES (?,?,?,?,?,?)",
-                    (par.experiment_id, par.seed, period, variable_type_id, owner_id, str(variables[variable])))
 
 
 def df_update_transactions(seed, period, buyer, seller, stock, amount_of_product, amount_of_money, Transactions, Transactors, Objects):
@@ -288,41 +215,6 @@ def df_update_transactions(seed, period, buyer, seller, stock, amount_of_product
         transactors.append(pd.DataFrame.from_records([(transaction_id, actor_id, role)], columns=Transactors.columns.values))
 
     return pd.concat(transactions, ignore_index=True), pd.concat(transactors, ignore_index=True), pd.concat(objects, ignore_index=True)
-
-
-def record_transaction(buyer, seller, stock, amount_of_product, amount_of_money, quarter):
-    # store the buyer in the objects table
-    cur.execute("INSERT OR IGNORE INTO Objects (object_name, object_type) VALUES (?,?)",
-                (repr(buyer), repr(buyer)[:repr(buyer).find('_')]))
-    cur.execute("SELECT id FROM Objects WHERE object_name = ?", (repr(buyer),))
-    buyer_id = cur.fetchone()[0]
-
-    # store the seller in the objects table
-    cur.execute("INSERT OR IGNORE INTO Objects (object_name, object_type) VALUES (?,?)",
-                (repr(seller), repr(seller)[:repr(seller).find('_')]))
-    cur.execute("SELECT id FROM Objects WHERE object_name = ?", (repr(seller),))
-    seller_id = cur.fetchone()[0]
-
-    # Store the stock in the objects table
-    cur.execute("INSERT OR IGNORE INTO Objects (object_name, object_type) VALUES (?,?)",
-                (repr(stock), repr(stock)[:repr(stock).find('_')]))
-    cur.execute("SELECT id FROM Objects WHERE object_name = ?", (repr(stock),))
-    stock_id = cur.fetchone()[0]
-
-    # Store the transaction details in the Transactions Table
-    cur.execute("INSERT INTO Transactions (experiment_id, seed, period, amount_of_product, "
-                "amount_of_money) VALUES (?,?,?,?,?)",
-                (par.experiment_id, par.seed, quarter,
-                 amount_of_product, amount_of_money))
-    cur.execute("SELECT MAX(id) FROM Transactions")
-    transaction_id = cur.fetchone()[0]
-
-    cur.execute("INSERT OR IGNORE INTO Transactors (transaction_id, transactor_id, role) VALUES (?,?,?)",
-                (transaction_id, buyer_id, 'buyer'))
-    cur.execute("INSERT OR IGNORE INTO Transactors (transaction_id, transactor_id, role) VALUES (?,?,?)",
-                (transaction_id, seller_id, 'seller'))
-    cur.execute("INSERT OR IGNORE INTO Transactors (transaction_id, transactor_id, role) VALUES (?,?,?)",
-                (transaction_id, stock_id, 'stock'))
 
 
 def commit():
