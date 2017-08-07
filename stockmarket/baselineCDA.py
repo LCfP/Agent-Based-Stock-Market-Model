@@ -121,8 +121,8 @@ def stockMarketSimulation(seed,
 
         # 3 record agent money and stocks
         for agent in agents:
+            agent.portfolio_history.append(agent.stocks.copy())
             agent.money_history.append(agent.money)
-            agent.portfolio_history.append(agent.stocks)
 
     return agents, firms, stocks, order_books
 
