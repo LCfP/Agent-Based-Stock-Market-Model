@@ -4,7 +4,7 @@ These functions take in agent sets and output matched pairs of agents"""
 import math
 import random
 import stockmarket.parameters as par
-from stockmarket.database import record_transaction, df_update_transactions
+from stockmarket.database import df_update_transactions
 from stockmarket.functions import div0
 import numpy as np
 
