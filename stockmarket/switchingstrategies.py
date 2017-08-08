@@ -3,6 +3,7 @@
 import numpy as np
 from stockmarket.valuationfunctions import *
 
+
 def adaptive_switching(agent, conservativeness, realised_returns, possibly_realised_returns):
     """The agent switches strategy if its returns where below what it could have earned"""
     fundamentalist = extrapolate_average_profit

@@ -12,9 +12,9 @@ from stockmarket.functions import *
 @pytest.fixture()
 def set_up_agents():
     demander = Trader(name='demander', money=10, bid_ask_spread=0, memory=2, ma_short=3, ma_long=5,
-                      function=lambda x: extrapolate_average_profit(x, 2))
+                      valuation_function=lambda x: extrapolate_average_profit(x, 2))
     supplier = Trader(name='supplier', money=10, bid_ask_spread=0, memory=2, ma_short=3, ma_long=5,
-                      function=lambda x: extrapolate_average_profit(x, 1))
+                      valuation_function=lambda x: extrapolate_average_profit(x, 1))
     agents = [demander, supplier]
     firm = Firm(name='firm', book_value=200, profits=[0, 5, 0, 0], seed=1, dividend_rate=1)
     stocks = setup_stocks([firm], amount=4)

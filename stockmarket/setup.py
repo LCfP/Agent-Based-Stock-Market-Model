@@ -2,7 +2,7 @@
 
 import random
 import itertools
-from stockmarket import firms, stock, valuationfunctions
+from stockmarket import firms, stock, valuationfunctions, switchingstrategies
 from stockmarket.agent import Trader
 
 
@@ -16,7 +16,7 @@ def setup_agents(init_money, init_bid_ask_spread, init_memory_size, init_ma_s, i
                                        memory=randomize_init_variable(init_memory_size[0], init_memory_size[1]),
                                        ma_short=randomize_init_variable(init_ma_s[0], init_ma_s[1]),
                                        ma_long=randomize_init_variable(init_ma_l[0], init_ma_l[1]),
-                                       function=y))
+                                       valuation_function=y, switching_strategy=switchingstrategies.adaptive_switching))
     for agent in range(fundamentalist):
         init_agent(agent, valuationfunctions.extrapolate_average_profit)
     for agent in range(fundamentalist, chartist+fundamentalist):
@@ -58,5 +58,8 @@ def distribute_initial_stocks(stocks, agents):
         rest = int(stock.amount % agent_number)
         for x in range(0, rest):
             agents[x].stocks[stock] = amount_each + 1
+            agents[x].portfolio_value_history[0] += stock.price_history[-1]
         for x in range(rest, agent_number):
             agents[x].stocks[stock] = amount_each
+            agents[x].portfolio_value_history[0] += stock.price_history[-1]
+        # initialize the agents portfolio value history

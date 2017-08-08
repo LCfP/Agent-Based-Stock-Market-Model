@@ -15,13 +15,13 @@ from stockmarket.valuationfunctions import extrapolate_ma_price
 @pytest.fixture()
 def fundamentalist():
     return Trader(name='supplier', money=10, bid_ask_spread=10, memory=2, ma_short=3, ma_long=5,
-                  function=extrapolate_average_profit)
+                  valuation_function=extrapolate_average_profit)
 
 
 @pytest.fixture()
 def chartist():
     return Trader(name='demander', money=10, bid_ask_spread=10, memory=2, ma_short=3, ma_long=5,
-                  function=extrapolate_ma_price)
+                  valuation_function=extrapolate_ma_price)
 
 
 @pytest.fixture()

@@ -1,6 +1,7 @@
 """This file is our main simulation file it includes the set-up and time loop"""
 
 import random
+import numpy as np
 from stockmarket.limitorderbook import *
 from stockmarket import setup, marketmechanisms, database
 
@@ -65,6 +66,7 @@ def stockMarketSimulation(seed,
     """
 
     random.seed(seed)
+    np.random.seed(seed)
 
     """
     Setup
@@ -119,10 +121,33 @@ def stockMarketSimulation(seed,
                                                                                          order_books[idx],
                                                                                          quarter, seed)
 
-        # 3 record agent money and stocks
+        # 3 record and update variables
         for agent in agents:
+            # record agent stocks
             agent.portfolio_history.append(agent.stocks.copy())
-            agent.money_history.append(agent.money)
+            # evaluate and record agent returns
+            money = agent.money
+            portfolio_value = 0
+            for stock in stocks:
+                portfolio_value += agent.stocks[stock] * stock.price_history[-1]
+            income = money - agent.money_history[-1] + portfolio_value - agent.portfolio_value_history[-1]
+            average_total_assets = np.mean([money,agent.money_history[-1]]) + \
+                                   np.mean([portfolio_value, agent.portfolio_value_history[-1]])
+            agent.return_on_assets.append(income / average_total_assets)
+            agent.money_history.append(money)
+            agent.portfolio_value_history.append(portfolio_value)
+            # compare to market return
+            market_returns = []
+            for stock in stocks:
+                current = stock.price_history[-1]
+                previous = stock.price_history[-2]
+                diff = (current - previous) / previous if previous != 0 else (current - (previous + 0.00001)) / (
+                previous + 0.00001) if current != 0 else 0.0
+                market_returns.append(diff)
+            av_market_return = np.mean(market_returns)
+            # update strategies
+            agent.update_strategy(av_market_return)
+
 
     return agents, firms, stocks, order_books
 
