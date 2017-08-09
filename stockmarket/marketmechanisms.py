@@ -3,13 +3,12 @@ These functions take in agent sets and output matched pairs of agents"""
 
 import math
 import random
-import stockmarket.parameters as par
 from stockmarket.database import df_update_transactions
 from stockmarket.functions import div0
 import numpy as np
 
 
-def continuous_double_auction(agentset, stock, orderbook, period, seed):
+def continuous_double_auction(agentset, stock, orderbook):
     """
     Agent, bids and asks are continuously submitted to the limit-order book. The resulting trades are executed.
     """
@@ -22,10 +21,7 @@ def continuous_double_auction(agentset, stock, orderbook, period, seed):
     total_money = 0
 
     for agent in randomized_agent_set:
-        # submit bid or ask to limit order book based on price
-        # look at previous price,
-        #previous_price = orderbook.transaction_prices[-1]
-        # look at own price forecast
+        # submit bid and ask to limit order book based on price
         price_forecast = agent.valuate_stocks(stock)
         # simultaneously submit a bid and ask based on the bid-ask spread
         bid_price = price_forecast * ((100 - agent.bid_ask_spread) / 100)
@@ -33,19 +29,7 @@ def continuous_double_auction(agentset, stock, orderbook, period, seed):
         orderbook.add_bid(bid_price, bid_volume, agent)
         ask_price = price_forecast * ((100 + agent.bid_ask_spread) / 100)
         orderbook.add_ask(ask_price, agent.stocks[stock], agent)
-        # if forecast price > previous submit bid with price random between previous price and forecast
-        # volume is max possible volume the agent can buy at bid price
-        # if price_forecast > previous_price:
-        #     bid_price = random.uniform(price_forecast, previous_price)
-        #     # determine bid_volume as agent.money / bid price
-        #     bid_volume = int(div0(agent.money, int(bid_price)))
-        #     orderbook.add_bid(bid_price, bid_volume, agent)
-        # if forecast price < previous submit ask with price random between previous price and forecast
-        # volume is full inventory of stocks
-        # if price_forecast < previous_price:
-        #     ask_price = random.uniform(price_forecast, previous_price)
-        #     orderbook.add_ask(ask_price, agent.stocks[stock], agent)
-        # apply continuous double auction mechanism and execute the subsequent trade till None is returned
+
         while True:
             matched_orders = orderbook.match_orders()
             if matched_orders is None:
@@ -56,19 +40,16 @@ def continuous_double_auction(agentset, stock, orderbook, period, seed):
                         matched_orders[0] * matched_orders[1])
             total_volume += matched_orders[1]
             total_money += matched_orders[0] * matched_orders[1]
-            # Transactions, Transactors, Objects = df_update_transactions(seed, period, matched_orders[2].owner,
-            #                                                             matched_orders[3].owner, stock, matched_orders[1],
-            #                                                             matched_orders[0] * matched_orders[1],
-            #                                                             Transactions, Transactors, Objects)
-            # add average price to the stock's memory
-            stock.add_price(total_volume, total_money)
+
         # clean limit order book
         orderbook.clean_book()
 
+    # add average price to the stock's memory
+    stock.add_price(total_volume, total_money)
     # at the end of the day, cleanse the order-book
     orderbook.cleanse_book()
 
-    return agentset, stock, orderbook#, Transactions, Transactors, Objects
+    return agentset, stock, orderbook
 
 
 def overTheCounterMarket(agentset, stock, observablesetsize, set_of_traders_function, period, seed, Transactions, Transactors, Objects):
@@ -128,8 +109,6 @@ def trade_stock(agentset, observablesetsize, stock, set_of_traders_function, qua
             transaction(demander, trade[0], stock, trade[1], trade[1] * trade[2])
             total_volumn += trade[1]
             total_money += trade[1] * trade[2]
-            if par.record_data:
-                record_transaction(demander, trade[0], stock, trade[1], trade[1] * trade[2], quarter)
 
     stock.add_price(total_volumn, total_money)
 

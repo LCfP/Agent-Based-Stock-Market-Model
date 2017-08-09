@@ -4,7 +4,7 @@ import numpy as np
 from stockmarket.valuationfunctions import *
 
 
-def adaptive_switching(agent, conservativeness, realised_returns, possibly_realised_returns):
+def adaptive_switching(agent, propensity_to_switch, realised_returns, possibly_realised_returns):
     """The agent switches strategy if its returns where below what it could have earned"""
     fundamentalist = extrapolate_average_profit
     chartist = predict_by_moving_avg_growth
@@ -14,7 +14,7 @@ def adaptive_switching(agent, conservativeness, realised_returns, possibly_reali
         raise ValueError("agent is neither a chartist nor a fundamentalist")
 
     missed_returns = max((possibly_realised_returns - realised_returns), 0)
-    prob_status_quo_choice = max(1 - missed_returns ** conservativeness, 0)
+    prob_status_quo_choice = max(1 - missed_returns * propensity_to_switch, 0)
 
     if str(fundamentalist) in agent_type:
         prob_fundamentalist = prob_status_quo_choice

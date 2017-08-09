@@ -20,6 +20,7 @@ def stockMarketSimulation(seed,
                           initial_book_value,
                           initial_stock_amount,
                           order_expiration_time,
+                          init_propensity_to_switch,
                           printProgress=False):
     """Returns a set of agents at time stockMarketSimulationParameterSet['simuatlion_time'] and the values
     of their state variables for every time step in stockMarketSimulationParameterSet['simuatlion_time'].
@@ -77,7 +78,7 @@ def stockMarketSimulation(seed,
                                 init_ma_s=initial_ma_short,
                                 init_ma_l=initial_ma_long,
                                 fundamentalist=amount_fundamentalists,
-                                chartist=amount_chartists)
+                                chartist=amount_chartists, init_propensity_to_switch=init_propensity_to_switch)
 
     firms = setup.setup_firms(init_book_value=initial_book_value,
                               init_profit=initial_profit,
@@ -115,11 +116,17 @@ def stockMarketSimulation(seed,
             firm.update_profits(firm.determine_growth())
 
         # 2 market mechanism
+        market_returns = []
         for idx, stock in enumerate(stocks):
             # marketmechanisms.continuousDoubleAuction
             agents, stock, order_books[idx] = marketmechanisms.continuous_double_auction(agents, stock,
-                                                                                         order_books[idx],
-                                                                                         quarter, seed)
+                                                                                         order_books[idx])
+            current = stock.price_history[-1]
+            previous = stock.price_history[-2]
+            diff = (current - previous) / previous if previous != 0 else (current - (previous + 0.00001)) / (
+                previous + 0.00001) if current != 0 else 0.0
+            market_returns.append(diff)
+        av_market_return = np.mean(market_returns)
 
         # 3 record and update variables
         for agent in agents:
@@ -136,15 +143,7 @@ def stockMarketSimulation(seed,
             agent.return_on_assets.append(income / average_total_assets)
             agent.money_history.append(money)
             agent.portfolio_value_history.append(portfolio_value)
-            # compare to market return
-            market_returns = []
-            for stock in stocks:
-                current = stock.price_history[-1]
-                previous = stock.price_history[-2]
-                diff = (current - previous) / previous if previous != 0 else (current - (previous + 0.00001)) / (
-                previous + 0.00001) if current != 0 else 0.0
-                market_returns.append(diff)
-            av_market_return = np.mean(market_returns)
+            agent.function_history.append(agent.function)
             # update strategies
             agent.update_strategy(av_market_return)
 

@@ -6,7 +6,7 @@ from stockmarket import firms, stock, valuationfunctions, switchingstrategies
 from stockmarket.agent import Trader
 
 
-def setup_agents(init_money, init_bid_ask_spread, init_memory_size, init_ma_s, init_ma_l, fundamentalist=3, chartist=3):
+def setup_agents(init_money, init_bid_ask_spread, init_memory_size, init_ma_s, init_ma_l, init_propensity_to_switch, fundamentalist=3, chartist=3):
     """This returns an initialized agent set"""
     agent_set = []
     init_agent = lambda x, y: agent_set.append(
@@ -16,7 +16,8 @@ def setup_agents(init_money, init_bid_ask_spread, init_memory_size, init_ma_s, i
                                        memory=randomize_init_variable(init_memory_size[0], init_memory_size[1]),
                                        ma_short=randomize_init_variable(init_ma_s[0], init_ma_s[1]),
                                        ma_long=randomize_init_variable(init_ma_l[0], init_ma_l[1]),
-                                       valuation_function=y, switching_strategy=switchingstrategies.adaptive_switching))
+                                       valuation_function=y, propensity_to_switch=init_propensity_to_switch,
+                                       switching_strategy=switchingstrategies.adaptive_switching))
     for agent in range(fundamentalist):
         init_agent(agent, valuationfunctions.extrapolate_average_profit)
     for agent in range(fundamentalist, chartist+fundamentalist):

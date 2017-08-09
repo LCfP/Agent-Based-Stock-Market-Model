@@ -3,9 +3,9 @@ from stockmarket import switchingstrategies
 
 class Trader:
     """a base class for Traders"""
-    def __init__(self, name, money, bid_ask_spread, memory, ma_short, ma_long, valuation_function,
+    def __init__(self, name, money, bid_ask_spread, memory, ma_short, ma_long, valuation_function, propensity_to_switch,
                  switching_strategy=switchingstrategies.adaptive_switching,
-                 conservativeness=2):
+                 ):
         """Creates a new trader"""
         self.name = name
         self.money = money
@@ -17,11 +17,12 @@ class Trader:
         # bid ask spread is an integer
         self.bid_ask_spread = bid_ask_spread
         self.function = valuation_function
+        self.function_history = []
         self.ma_short = ma_short
         self.ma_long = ma_long
         self.switching_strategy = switching_strategy
         # TODO properly initiate conservativeness
-        self.conservativeness = conservativeness
+        self.propensity_to_switch = propensity_to_switch
         self.return_on_assets = []
 
     def valuate_stocks(self, stock):
@@ -95,8 +96,9 @@ class Trader:
         self.money -= money
 
     def update_strategy(self, market_return):
-        self.function = self.switching_strategy(self, self.conservativeness,
+        self.function = self.switching_strategy(self, self.propensity_to_switch,
                                                 self.return_on_assets[-1], market_return)
+
 
     def __str__(self):
         return str(self.name)
