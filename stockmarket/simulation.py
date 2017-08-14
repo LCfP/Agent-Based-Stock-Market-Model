@@ -9,5 +9,5 @@ agents, firms, stocks, order_books = baselineCDA.stockMarketSimulation(seed=0, s
                                                                        firm_profit_drift_alpha=0.0109,
                                                                        firm_profit_drift_mu=0.02,
                                                                        firm_profit_error_delta=0.25,
-                                                                       firm_profit_error_dt=0.1,
+                                                                       firm_profit_error_dt=0.1
                                                                        )
