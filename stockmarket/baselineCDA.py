@@ -21,10 +21,9 @@ def stockMarketSimulation(seed,
                           initial_stock_amount,
                           order_expiration_time,
                           init_propensity_to_switch,
-                          firm_profit_drift_alpha,
-                          firm_profit_drift_mu,
-                          firm_profit_error_delta,
-                          firm_profit_error_dt,
+                          firm_profit_mu,
+                          firm_profit_delta,
+                          firm_profit_sigma,
                           printProgress=False):
     """Returns a set of agents at time stockMarketSimulationParameterSet['simuatlion_time'] and the values
     of their state variables for every time step in stockMarketSimulationParameterSet['simuatlion_time'].
@@ -86,10 +85,9 @@ def stockMarketSimulation(seed,
 
     firms = setup.setup_firms(init_book_value=initial_book_value,
                               init_profit=initial_profit,
-                              firm_drift_alpha=firm_profit_drift_alpha,
-                              firm_drift_mu=firm_profit_drift_mu,
-                              firm_profit_error_delta=firm_profit_error_delta,
-                              firm_profit_error_sigma=firm_profit_error_dt,
+                              firm_profit_mu=firm_profit_mu,
+                              firm_profit_delta=firm_profit_delta,
+                              firm_profit_sigma=firm_profit_sigma,
                               amount_of_firms=amount_firms
                               )
 
@@ -122,7 +120,7 @@ def stockMarketSimulation(seed,
             print('period: ', quarter)
         # 1 update dividends
         for firm in firms:
-            firm.update_profits(firm.determine_growth())
+            firm.update_profits(firm.determine_profit())
 
         # 2 market mechanism
         market_returns = []

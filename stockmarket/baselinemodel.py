@@ -109,7 +109,7 @@ def stockMarketSimulation(seed,
             print('period: ', quarter)
         # 1 update dividends
         for firm in firms:
-            firm.update_profits(firm.determine_growth())
+            firm.update_profits(firm.determine_profit())
             Statevariables, Variabletypes, Objects = database.df_update_statevariables(seed, quarter,
                                                                                        firm, Statevariables,
                                                                                        Variabletypes, Objects)
