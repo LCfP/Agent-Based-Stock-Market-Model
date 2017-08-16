@@ -10,13 +10,13 @@ from numpy.testing import assert_equal
 
 @pytest.fixture()
 def agents():
-    return [Trader("Agent1", 1000, 0, 2, 3, 5, lambda **x: extrapolate_average_profit(**x)),
-            Trader("Agent2", 1000, 0, 2, 3, 5, lambda **x: extrapolate_ma_price(**x))]
+    return [Trader("Agent1", 1000, 0, 2, 3, 5, lambda **x: extrapolate_average_profit(**x), propensity_to_switch=1.1),
+            Trader("Agent2", 1000, 0, 2, 3, 5, lambda **x: extrapolate_ma_price(**x), propensity_to_switch=1.1)]
 
 @pytest.fixture()
 def limitorderbooks():
     # create a firm
-    firm = Firm("Firm1", 10000, [200, 300, 400, 300], 1)
+    firm = Firm("Firm1", 10000, [200, 300, 400, 300])
     # create a stock of that firm
     stocks = Stock(firm, 1000)
     return [LimitOrderBook(stocks, 100, 120)]

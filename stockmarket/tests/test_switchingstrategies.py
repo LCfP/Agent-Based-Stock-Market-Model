@@ -8,9 +8,9 @@ from numpy.testing import assert_raises
 
 @pytest.fixture()
 def agents():
-    return [Trader("Agent1", 1000, 0, 2, 3, 5, extrapolate_average_profit),
-            Trader("Agent2", 1000, 0, 2, 3, 5, predict_by_moving_avg_growth),
-            Trader("WeirdAgent", 1000, 0, 2, 3, 5, None)]
+    return [Trader("Agent1", 1000, 0, 2, 3, 5, extrapolate_average_profit, propensity_to_switch=1.1),
+            Trader("Agent2", 1000, 0, 2, 3, 5, predict_by_moving_avg_growth, propensity_to_switch=1.1),
+            Trader("WeirdAgent", 1000, 0, 2, 3, 5, None, propensity_to_switch=1.1)]
 
 
 def test_adaptive_switching(agents):

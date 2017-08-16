@@ -1,4 +1,4 @@
-"""In this file, we define the switching functions for switching strategiew"""
+"""In this file, we define the switching functions for switching strategy"""
 
 import numpy as np
 from stockmarket.valuationfunctions import *

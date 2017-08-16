@@ -9,7 +9,8 @@ import numpy.random as nrand
 class Firm:
     """a base class for Firms"""
 
-    def __init__(self, name, book_value, profits, mu, brownian_delta, brownian_sigma, dividend_rate=1):
+    def __init__(self, name, book_value, profits,
+                 mu=0.058, brownian_delta=0.00396825396, brownian_sigma=0.125, dividend_rate=1):
         """Creates a new trader"""
         self.name = name
         self.book_value = book_value

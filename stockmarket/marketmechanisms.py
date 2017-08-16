@@ -26,9 +26,12 @@ def continuous_double_auction(agentset, stock, orderbook):
         # simultaneously submit a bid and ask based on the bid-ask spread
         bid_price = price_forecast * ((100 - agent.bid_ask_spread) / 100)
         bid_volume = int(div0(agent.money, bid_price))
-        orderbook.add_bid(bid_price, bid_volume, agent)
+        if bid_volume > 0:
+            orderbook.add_bid(bid_price, bid_volume, agent)
         ask_price = price_forecast * ((100 + agent.bid_ask_spread) / 100)
-        orderbook.add_ask(ask_price, agent.stocks[stock], agent)
+        ask_volume = agent.stocks[stock]
+        if ask_volume > 0:
+            orderbook.add_ask(ask_price, ask_volume, agent)
 
         while True:
             matched_orders = orderbook.match_orders()

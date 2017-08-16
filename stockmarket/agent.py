@@ -14,14 +14,13 @@ class Trader:
         self.portfolio_history = []
         self.portfolio_value_history = [0]
         self.memory_size = memory
-        # bid ask spread is an integer
-        self.bid_ask_spread = bid_ask_spread
+        # bid ask spread is measured in basis points
+        self.bid_ask_spread = bid_ask_spread / 100
         self.function = valuation_function
         self.function_history = []
         self.ma_short = ma_short
         self.ma_long = ma_long
         self.switching_strategy = switching_strategy
-        # TODO properly initiate conservativeness
         self.propensity_to_switch = propensity_to_switch
         self.return_on_assets = []
 
@@ -98,7 +97,6 @@ class Trader:
     def update_strategy(self, market_return):
         self.function = self.switching_strategy(self, self.propensity_to_switch,
                                                 self.return_on_assets[-1], market_return)
-
 
     def __str__(self):
         return str(self.name)
