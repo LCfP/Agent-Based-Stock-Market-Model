@@ -1,21 +1,28 @@
 """In this file, we define the benchmark stock market model agent classes"""
-
+from stockmarket import switchingstrategies
 
 class Trader:
     """a base class for Traders"""
-    def __init__(self, name, money, bid_ask_spread, memory, ma_short, ma_long, function):
+    def __init__(self, name, money, bid_ask_spread, memory, ma_short, ma_long, valuation_function, propensity_to_switch,
+                 switching_strategy=switchingstrategies.adaptive_switching,
+                 ):
         """Creates a new trader"""
         self.name = name
         self.money = money
         self.money_history = [money]
         self.stocks = StockDict()
         self.portfolio_history = []
-        # bid ask spread is an integer
+        self.portfolio_value_history = [0]
         self.memory_size = memory
-        self.bid_ask_spread = bid_ask_spread
-        self.function = function
+        # bid ask spread is measured in basis points
+        self.bid_ask_spread = bid_ask_spread / 100
+        self.function = valuation_function
+        self.function_history = []
         self.ma_short = ma_short
         self.ma_long = ma_long
+        self.switching_strategy = switching_strategy
+        self.propensity_to_switch = propensity_to_switch
+        self.return_on_assets = []
 
     def valuate_stocks(self, stock):
         """Returns value of a stock.
@@ -86,6 +93,10 @@ class Trader:
         except KeyError:
             self.stocks[stock] = amount
         self.money -= money
+
+    def update_strategy(self, market_return):
+        self.function = self.switching_strategy(self, self.propensity_to_switch,
+                                                self.return_on_assets[-1], market_return)
 
     def __str__(self):
         return str(self.name)
