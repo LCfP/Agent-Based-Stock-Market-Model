@@ -7,24 +7,19 @@ the model works. Feel free to copy or use the code under the terms of the licenc
  
 # How to use the model
 1. Download the repository to your system.
-2. Run the simulation_notebook 
-3. Set the amount of runs you want and simulate those.
-4. The results will be added to an sql lite database on your system.
-5. Use the data_notebook.ipynb (Jupyter Notebook) to analyse this data. 
+2. Run the simulate_cdoubleauction notebook or simulation.py script and fill in the model parameters to your tase. 
+3. The results will be added to an sql lite database on your system.
+4. Use the data_notebook.ipynb (Jupyter Notebook) to analyse this data. 
 
 # Repository structure
 
-* The **ODD.md** file contains the model description
-* The **simulation.py** file can be used to run the model and corresponds to the Process overview and scheduling in the ODD. 
+* The **ODD.md** file contains (an early version of) the model description
 * The **stockmarket** folder contains supporting scripts, classes and functions.
 
 For clarity reasons, we tried to stick to a functional programming style as much as possible. Therefore, most of the action takes 
 place in the simulation.py file. Exceptions are the functions.transaction, and datawriting functions in database.py.
 
 ## To do
-- [x] Build minimal model
-- [x] Build SQL database
-- [ ] Test the existing code
-- [ ] Add different traders to the model (fundamentalist and chartists) 
-- [ ] New trading mechanism
+- [ ] Reach 100% testing coverage
+- [ ] Calibrate the model to match stylized facts of real markets
 
