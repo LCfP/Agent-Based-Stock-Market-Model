@@ -1,8 +1,6 @@
 """In this file, we define the benchmark stock market model firm classes"""
 
-import random
 import math
-from scipy.stats import norm
 import numpy as np
 import numpy.random as nrand
 
@@ -24,8 +22,7 @@ class Firm:
 
     def determine_profit(self):
         """
-        Accounting rate of return growth process inspired by:
-        Feenstra, D., Huijgen, C. and Wang, H., 2000. An evaluation of the accounting rate of return.
+        Geometric Brownian motion to determine the next profit.
 
         Parameters
         ----------
