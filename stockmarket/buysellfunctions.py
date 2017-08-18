@@ -3,7 +3,7 @@
 import numpy as np
 
 
-def mean_reversion(prices, shortMA, upper_threshold, lower_threshold):
+def mean_reversion(prices, shortMA, longMA, upper_threshold, lower_threshold):
     """Buy or sell against the trend"""
     prices = prices[(len(prices)-shortMA):]
     t = np.array(range(len(prices)))

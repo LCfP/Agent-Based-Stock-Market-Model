@@ -127,7 +127,8 @@ def stockMarketSimulation(seed,
         for idx, stock in enumerate(stocks):
             # marketmechanisms.continuousDoubleAuction
             agents, stock, order_books[idx] = marketmechanisms.continuous_double_auction(agents, stock,
-                                                                                         order_books[idx])
+                                                                                         order_books[idx],
+                                                                                         marketmechanisms.orders_based_on_stock_valuation)
             current = stock.price_history[-1]
             previous = stock.price_history[-2]
             diff = (current - previous) / previous if previous != 0 else (current - (previous + 0.00001)) / (

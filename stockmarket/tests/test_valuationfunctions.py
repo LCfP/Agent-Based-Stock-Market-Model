@@ -18,7 +18,7 @@ def test_extrapolate(stock):
     # natural number
     assert_equal(extrapolate_average_profit(stock[0], 4), 60)
     # faction
-    assert_almost_equal(extrapolate_average_profit(stock[1], 3), 55.8666666)
+    assert_equal(int(extrapolate_average_profit(stock[1], 3)), int(55.8666666))
     # memory > history
     assert_equal(extrapolate_average_profit(stock[0], 6), 60)
 
@@ -44,7 +44,7 @@ def test_moving_average_growth(stock):
     assert_equal(predict_by_moving_avg_growth(stock[0], 4), 250)
 
     stock[0].price_history = [100, 150, 100, 250, 125]
-    assert_almost_equal(predict_by_moving_avg_growth(stock[0], 3), 141.6666666)
+    assert_almost_equal(int(predict_by_moving_avg_growth(stock[0], 3)), int(141.6666666))
 
     stock[0].price_history = [200, 150, 100, 50, 25]
     # predicted price would be negative

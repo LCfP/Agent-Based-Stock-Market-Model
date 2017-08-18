@@ -10,7 +10,7 @@ from stockmarket.stock import Stock
 from stockmarket.setup import distribute_initial_stocks
 from stockmarket.valuationfunctions import extrapolate_average_profit
 from stockmarket.valuationfunctions import extrapolate_ma_price
-
+from stockmarket.limitorderbook import LimitOrderBook
 
 @pytest.fixture()
 def fundamentalist():
@@ -23,6 +23,11 @@ def chartist():
     return Trader(name='demander', money=10, bid_ask_spread=10, memory=2, ma_short=3, ma_long=5,
                   valuation_function=extrapolate_ma_price, propensity_to_switch=1.1)
 
+@pytest.fixture()
+def chartist_two():
+    return Trader(name='demander', money=10, bid_ask_spread=10, memory=2, ma_short=3, ma_long=4,
+                  valuation_function=extrapolate_ma_price, propensity_to_switch=1.1)
+
 
 @pytest.fixture()
 def firm():
@@ -32,6 +37,23 @@ def firm():
 @pytest.fixture()
 def stock(firm):
     return Stock(firm, 200)
+
+@pytest.fixture()
+def limitorderbooks(stock):
+    # create a firm
+    firmpje = Firm("Firm1", 10000, [200, 300, 400, 300])
+    # create a stock of that firm
+    stocks = Stock(firmpje, 1000)
+    return [LimitOrderBook(stocks, 100, 120), LimitOrderBook(stock, 100, 120)]
+
+
+def test_orders_based_on_stock_valuation(fundamentalist, chartist_two, stock, limitorderbooks):
+    new_orderbook = orders_based_on_stock_valuation(fundamentalist, limitorderbooks[1], stock)
+    assert_equal(len(new_orderbook.bids), 1)
+    assert_equal(len(new_orderbook.asks), 0)
+    chart_orderbook = orders_based_on_stock_valuation(chartist_two, limitorderbooks[1], stock)
+    assert_equal(len(chart_orderbook.bids), 1)
+    assert_equal(len(chart_orderbook.asks), 0)
 
 
 def test_best_trade():

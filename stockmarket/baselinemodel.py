@@ -1,9 +1,10 @@
 """This file is our main simulation file it includes the set-up and time loop"""
 
 import random
-import pandas as pd
-from stockmarket import functions, setup, marketmechanisms, randomset, database
-import stockmarket.parameters as p
+import numpy as np
+from stockmarket.limitorderbook import *
+from stockmarket import setup, marketmechanisms
+
 
 def stockMarketSimulation(seed,
                           simulation_time,
@@ -18,7 +19,11 @@ def stockMarketSimulation(seed,
                           initial_profit,
                           initial_book_value,
                           initial_stock_amount,
-                          observable_set_size,
+                          order_expiration_time,
+                          init_propensity_to_switch,
+                          firm_profit_mu,
+                          firm_profit_delta,
+                          firm_profit_sigma,
                           printProgress=False):
     """Returns a set of agents at time stockMarketSimulationParameterSet['simuatlion_time'] and the values
     of their state variables for every time step in stockMarketSimulationParameterSet['simuatlion_time'].
@@ -61,10 +66,11 @@ def stockMarketSimulation(seed,
     Returns
     -------
     list
-        Pandas dataframes with records of all agent state variables and transactions over the simulation
+        agents, firms, stocks, and orderbooks
     """
 
     random.seed(seed)
+    np.random.seed(seed)
 
     """
     Setup
@@ -75,18 +81,23 @@ def stockMarketSimulation(seed,
                                 init_ma_s=initial_ma_short,
                                 init_ma_l=initial_ma_long,
                                 fundamentalist=amount_fundamentalists,
-                                chartist=amount_chartists)
+                                chartist=amount_chartists, init_propensity_to_switch=init_propensity_to_switch)
 
     firms = setup.setup_firms(init_book_value=initial_book_value,
                               init_profit=initial_profit,
-                              amount_of_firms=amount_firms)
+                              firm_profit_mu=firm_profit_mu,
+                              firm_profit_delta=firm_profit_delta,
+                              firm_profit_sigma=firm_profit_sigma,
+                              amount_of_firms=amount_firms
+                              )
 
     stocks = setup.setup_stocks(firms, amount=initial_stock_amount)
 
-    setup.distribute_initial_stocks(stocks, agents)
+    order_books = []
+    for stock in stocks:
+        order_books.append(LimitOrderBook(stock, stock.price_history[-1], order_expiration_time))
 
-    # Create databases and initialize objects
-    Transactions, Transactors, Statevariables, Variabletypes, Objects = database.stock_market_baseline_tables()
+    setup.distribute_initial_stocks(stocks, agents)
 
     """
     Print set-up
@@ -105,34 +116,46 @@ def stockMarketSimulation(seed,
     """
 
     for quarter in range(simulation_time):
-        if (printProgress):
+        if printProgress:
             print('period: ', quarter)
         # 1 update dividends
         for firm in firms:
             firm.update_profits(firm.determine_profit())
-            Statevariables, Variabletypes, Objects = database.df_update_statevariables(seed, quarter,
-                                                                                       firm, Statevariables,
-                                                                                       Variabletypes, Objects)
 
         # 2 market mechanism
-        for stock in stocks:
-            agents, stock, Transactions, Transactors, Objects = marketmechanisms.overTheCounterMarket(agents, stock,
-                                                                                                      observable_set_size,
-                                                                                                      randomset.subset_traders,
-                                                                                                      quarter, seed,
-                                                                                                      Transactions,
-                                                                                                      Transactors, Objects)
-            Statevariables, Variabletypes, Objects = database.df_update_statevariables(seed, quarter,
-                                                                                       stock, Statevariables,
-                                                                                       Variabletypes, Objects)
+        market_returns = []
+        for idx, stock in enumerate(stocks):
+            # marketmechanisms.continuousDoubleAuction
+            agents, stock, order_books[idx] = marketmechanisms.continuous_double_auction(agents, stock,
+                                                                                         order_books[idx])
+            current = stock.price_history[-1]
+            previous = stock.price_history[-2]
+            diff = (current - previous) / previous if previous != 0 else (current - (previous + 0.00001)) / (
+                previous + 0.00001) if current != 0 else 0.0
+            market_returns.append(diff)
+        av_market_return = np.mean(market_returns)
 
-        # 3 record all agent-state variables
+        # 3 record and update variables
         for agent in agents:
-            Statevariables, Variabletypes, Objects = database.df_update_statevariables(seed, quarter,
-                                                                                       agent, Statevariables,
-                                                                                       Variabletypes, Objects)
+            # record agent stocks
+            agent.portfolio_history.append(agent.stocks.copy())
+            # evaluate and record agent returns
+            money = agent.money
+            portfolio_value = 0
+            for stock in stocks:
+                portfolio_value += agent.stocks[stock] * stock.price_history[-1]
+            income = money - agent.money_history[-1] + portfolio_value - agent.portfolio_value_history[-1]
+            average_total_assets = np.mean([money,agent.money_history[-1]]) + \
+                                   np.mean([portfolio_value, agent.portfolio_value_history[-1]])
+            agent.return_on_assets.append(income / average_total_assets)
+            agent.money_history.append(money)
+            agent.portfolio_value_history.append(portfolio_value)
+            agent.function_history.append(agent.function)
+            # update strategies
+            agent.update_strategy(av_market_return)
 
-    return Transactions, Transactors, Statevariables, Variabletypes, Objects
+
+    return agents, firms, stocks, order_books
 
 
 

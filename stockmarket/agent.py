@@ -25,7 +25,7 @@ class Trader:
         self.return_on_assets = []
 
     def valuate_stocks(self, stock):
-        """Returns value of a stock.
+        """
 
         Returns the value the Trader thinks `stock` has.
 
@@ -42,6 +42,24 @@ class Trader:
         """
         # calls valuation function currently assigned to the Trader.
         return self.function(stock=stock, memory=self.memory_size, s=self.ma_short, l=self.ma_long)
+
+    def buy_sell_or_hold(self, price_series, shortMA=20, longMA=200, upper_threshold=1.05, lower_threshold=0.95):
+        """
+
+        Determine to place a buy, sell or no order for a stock
+
+        Parameters
+        ----------
+        stock : :obj:`stock`
+            Stock to be valuated.
+
+        Returns
+        -------
+        string
+            buy, sell or hold
+
+        """
+        return self.function(price_series, shortMA, longMA,upper_threshold, lower_threshold)
 
     def sell(self, stock, amount, price):
         """Sells stocks

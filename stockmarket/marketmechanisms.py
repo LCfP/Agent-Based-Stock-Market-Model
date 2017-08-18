@@ -6,9 +6,10 @@ import random
 from stockmarket.database import df_update_transactions
 from stockmarket.functions import div0
 import numpy as np
+import copy
 
 
-def continuous_double_auction(agentset, stock, orderbook):
+def continuous_double_auction(agentset, stock, orderbook, valuation_type_function):
     """
     Agent, bids and asks are continuously submitted to the limit-order book. The resulting trades are executed.
     """
@@ -21,17 +22,19 @@ def continuous_double_auction(agentset, stock, orderbook):
     total_money = 0
 
     for agent in randomized_agent_set:
-        # submit bid and ask to limit order book based on price
-        price_forecast = agent.valuate_stocks(stock)
-        # simultaneously submit a bid and ask based on the bid-ask spread
-        bid_price = price_forecast * ((100 - agent.bid_ask_spread) / 100)
-        bid_volume = int(div0(agent.money, bid_price))
-        if bid_volume > 0:
-            orderbook.add_bid(bid_price, bid_volume, agent)
-        ask_price = price_forecast * ((100 + agent.bid_ask_spread) / 100)
-        ask_volume = agent.stocks[stock]
-        if ask_volume > 0:
-            orderbook.add_ask(ask_price, ask_volume, agent)
+        # orderbook = function(agent, orderbook, stock)
+        orderbook = valuation_type_function(agent, orderbook, stock)
+        # # submit bid and ask to limit order book based on price
+        # price_forecast = agent.valuate_stocks(stock)
+        # # simultaneously submit a bid and ask based on the bid-ask spread
+        # bid_price = price_forecast * ((100 - agent.bid_ask_spread) / 100)
+        # bid_volume = int(div0(agent.money, bid_price))
+        # if bid_volume > 0:
+        #     orderbook.add_bid(bid_price, bid_volume, agent)
+        # ask_price = price_forecast * ((100 + agent.bid_ask_spread) / 100)
+        # ask_volume = agent.stocks[stock]
+        # if ask_volume > 0:
+        #     orderbook.add_ask(ask_price, ask_volume, agent)
 
         while True:
             matched_orders = orderbook.match_orders()
@@ -248,6 +251,44 @@ def selling_price(stock, supplier):
         return supplier.valuate_stocks(stock) * (1 + (supplier.bid_ask_spread / 200))
     else:
         return None
+
+def orders_based_on_stock_valuation(agent, orderbook, stock):
+    """Add orders to the orderbook based on stock valuation"""
+    orderbook = copy.deepcopy(orderbook)
+    price_forecast = agent.valuate_stocks(stock)
+    # simultaneously submit a bid and ask based on the bid-ask spread
+    bid_price = price_forecast * ((100 - agent.bid_ask_spread) / 100)
+    bid_volume = int(div0(agent.money, bid_price))
+    if bid_volume > 0:
+        orderbook.add_bid(bid_price, bid_volume, agent)
+    ask_price = price_forecast * ((100 + agent.bid_ask_spread) / 100)
+    ask_volume = agent.stocks[stock]
+    if ask_volume > 0:
+        orderbook.add_ask(ask_price, ask_volume, agent)
+
+    return orderbook
+
+
+def orders_based_on_sentiment_and_fundamentals(agent, orderbook, stock):
+    """Add orders to the orderbook based on stock price movement and deviation from fundamentals"""
+    orderbook = orderbook
+    if not orderbook.transaction_prices:
+        current_price = orderbook.transaction_prices[-1]
+    else:
+        current_price = orderbook.transaction_prices_history[-1]
+    buy_or_sell = agent.buy_sell_or_hold()
+    if buy_or_sell == 'buy':
+        bid_price = current_price * ((100 + agent.bid_ask_spread) / 100)
+        bid_volume = int(div0(agent.money, bid_price))
+        if bid_volume > 0:
+            orderbook.add_bid(bid_price, bid_volume, agent)
+    elif buy_or_sell == 'sell':
+        ask_price = current_price * ((100 + agent.bid_ask_spread) / 100)
+        ask_volume = agent.stocks[stock]
+        if ask_volume > 0:
+            orderbook.add_ask(ask_price, ask_volume, agent)
+
+    return orderbook
 
 
 def transaction(buyer, seller, stock, amount_of_product, amount_of_money):
