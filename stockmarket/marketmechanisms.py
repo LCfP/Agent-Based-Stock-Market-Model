@@ -22,19 +22,8 @@ def continuous_double_auction(agentset, stock, orderbook, valuation_type_functio
     total_money = 0
 
     for agent in randomized_agent_set:
-        # orderbook = function(agent, orderbook, stock)
+        # add orders to the orderbook according to the type of valuation function
         orderbook = valuation_type_function(agent, orderbook, stock)
-        # # submit bid and ask to limit order book based on price
-        # price_forecast = agent.valuate_stocks(stock)
-        # # simultaneously submit a bid and ask based on the bid-ask spread
-        # bid_price = price_forecast * ((100 - agent.bid_ask_spread) / 100)
-        # bid_volume = int(div0(agent.money, bid_price))
-        # if bid_volume > 0:
-        #     orderbook.add_bid(bid_price, bid_volume, agent)
-        # ask_price = price_forecast * ((100 + agent.bid_ask_spread) / 100)
-        # ask_volume = agent.stocks[stock]
-        # if ask_volume > 0:
-        #     orderbook.add_ask(ask_price, ask_volume, agent)
 
         while True:
             matched_orders = orderbook.match_orders()
@@ -252,6 +241,7 @@ def selling_price(stock, supplier):
     else:
         return None
 
+
 def orders_based_on_stock_valuation(agent, orderbook, stock):
     """Add orders to the orderbook based on stock valuation"""
     orderbook = copy.deepcopy(orderbook)
@@ -271,12 +261,23 @@ def orders_based_on_stock_valuation(agent, orderbook, stock):
 
 def orders_based_on_sentiment_and_fundamentals(agent, orderbook, stock):
     """Add orders to the orderbook based on stock price movement and deviation from fundamentals"""
-    orderbook = orderbook
-    if not orderbook.transaction_prices:
+    orderbook = copy.deepcopy(orderbook)
+    # 1 establish the current price
+    if len(orderbook.transaction_prices):
         current_price = orderbook.transaction_prices[-1]
-    else:
+    elif len(orderbook.transaction_prices_history):
         current_price = orderbook.transaction_prices_history[-1]
-    buy_or_sell = agent.buy_sell_or_hold()
+    else:
+        current_price = stock.price_history[-1]
+    # 2 Check if the P/E ratio is too high (sell) or too low (buy). Otherwise, follow chartist strategy.
+    if (current_price / stock.firm.profit) > agent.price_to_earnings_window[1]:
+        buy_or_sell = 'sell'
+    elif (current_price / stock.firm.profit) < agent.price_to_earnings_window[0]:
+        buy_or_sell = 'buy'
+    else:
+        price_series = stock.price_history + [current_price]
+        buy_or_sell = agent.buy_sell_or_hold(price_series, shortMA=agent.ma_short, longMA=agent.ma_long, upper_threshold=1.05, lower_threshold=0.95)
+    # 3 If any, submit buy or sell order to the orderbook.
     if buy_or_sell == 'buy':
         bid_price = current_price * ((100 + agent.bid_ask_spread) / 100)
         bid_volume = int(div0(agent.money, bid_price))

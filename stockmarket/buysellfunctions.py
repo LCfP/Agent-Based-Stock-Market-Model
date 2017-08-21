@@ -21,8 +21,8 @@ def mean_reversion(prices, shortMA, longMA, upper_threshold, lower_threshold):
 
 def momentum(prices, shortMA, longMA, upper_threshold, lower_threshold):
     """If momentum is positive, buy, if momentum is negative, sell, otherwise hold"""
-    short_ma = sum(prices[-shortMA:]) / shortMA
-    long_ma = sum(prices[-longMA:]) / longMA
+    short_ma = sum(prices[len(prices)-shortMA:]) / shortMA
+    long_ma = sum(prices[len(prices)-longMA:]) / longMA
     momentum = short_ma / long_ma
     if momentum > upper_threshold:
         return 'buy'

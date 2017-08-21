@@ -51,7 +51,8 @@ class LimitOrderBook:
         self.bids = []
         self.asks = []
         # store and clean recorded transaction prices
-        self.transaction_prices_history.append(self.transaction_prices)
+        if len(self.transaction_prices):
+            self.transaction_prices_history.append(self.transaction_prices)
         self.transaction_prices = []
         # store and clean recorded transaction volumes
         self.transaction_volumes_history.append(self.transaction_volumes)
