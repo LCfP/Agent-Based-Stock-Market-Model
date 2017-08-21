@@ -10,7 +10,7 @@ def adaptive_switching(agent, propensity_to_switch, realised_returns, possibly_r
     agent_type = str(agent.function)
 
     if (str(mean_reverter) not in agent_type) and (str(momentum_trader) not in agent_type):
-        raise ValueError("agent is neither a chartist nor a fundamentalist")
+        raise ValueError("agent type is unknown")
 
     missed_returns = max((possibly_realised_returns - realised_returns), 0)
     prob_status_quo_choice = max(1 - missed_returns * propensity_to_switch, 0)

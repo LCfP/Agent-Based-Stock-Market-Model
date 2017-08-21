@@ -15,18 +15,18 @@ from stockmarket.limitorderbook import LimitOrderBook
 @pytest.fixture()
 def fundamentalist():
     return Trader(name='supplier', money=10, bid_ask_spread=10, memory=2, ma_short=3, ma_long=5,
-                  valuation_function=extrapolate_average_profit, propensity_to_switch=1.1)
+                  valuation_function=extrapolate_average_profit, price_to_earnings_window=(6,12), propensity_to_switch=1.1)
 
 
 @pytest.fixture()
 def chartist():
     return Trader(name='demander', money=10, bid_ask_spread=10, memory=2, ma_short=3, ma_long=5,
-                  valuation_function=extrapolate_ma_price, propensity_to_switch=1.1)
+                  valuation_function=extrapolate_ma_price, price_to_earnings_window=(6,12), propensity_to_switch=1.1)
 
 @pytest.fixture()
 def chartist_two():
     return Trader(name='demander', money=10, bid_ask_spread=10, memory=2, ma_short=3, ma_long=4,
-                  valuation_function=extrapolate_ma_price, propensity_to_switch=1.1)
+                  valuation_function=extrapolate_ma_price, price_to_earnings_window=(6,12), propensity_to_switch=1.1)
 
 
 @pytest.fixture()
@@ -57,9 +57,9 @@ def test_orders_based_on_stock_valuation(fundamentalist, chartist_two, stock, li
 
 
 def test_best_trade():
-    seller1 = Trader("1", 100, 10, 2, 3, 5, extrapolate_average_profit, propensity_to_switch=1.1)
-    seller2 = Trader("2", 100, 5, 2, 3, 5, extrapolate_average_profit, propensity_to_switch=1.1)
-    demander = Trader("d", 100, 10, 1, 3, 5, extrapolate_average_profit, propensity_to_switch=1.1)
+    seller1 = Trader("1", 100, 10, 2, 3, 5, extrapolate_average_profit, price_to_earnings_window=(6,12), propensity_to_switch=1.1)
+    seller2 = Trader("2", 100, 5, 2, 3, 5, extrapolate_average_profit, price_to_earnings_window=(6,12), propensity_to_switch=1.1)
+    demander = Trader("d", 100, 10, 1, 3, 5, extrapolate_average_profit, price_to_earnings_window=(6,12), propensity_to_switch=1.1)
     firm = Firm("1", 200, [10, 20])
     stock = Stock(firm, 10)
     seller1.stocks[stock] = 3
@@ -81,15 +81,15 @@ def test_buying_price(stock, fundamentalist, chartist):
 
 
 def test_best_supplier(fundamentalist, chartist, stock):
-    low_price = Trader('low', 10, 5, 1, 3, 5, extrapolate_average_profit, propensity_to_switch=1.1)
+    low_price = Trader('low', 10, 5, 1, 3, 5, extrapolate_average_profit, price_to_earnings_window=(6,12), propensity_to_switch=1.1)
     distribute_initial_stocks([stock], [low_price, chartist])
     assert_equal(best_supplier([fundamentalist, chartist, low_price], stock), low_price)
     assert_equal(best_supplier([chartist, low_price, fundamentalist], stock), low_price)
 
 
 def test_volume_price():
-    seller = Trader("1", 100, 10, 2, 3, 5, extrapolate_average_profit, propensity_to_switch=1.1)
-    demander = Trader("2", 100, 10, 1, 3, 5, extrapolate_average_profit, propensity_to_switch=1.1)
+    seller = Trader("1", 100, 10, 2, 3, 5, extrapolate_average_profit, price_to_earnings_window=(6,12), propensity_to_switch=1.1)
+    demander = Trader("2", 100, 10, 1, 3, 5, extrapolate_average_profit, price_to_earnings_window=(6,12), propensity_to_switch=1.1)
     firm = Firm("1", 200, [10, 20])
     stock = Stock(firm, 10)
     seller.stocks[stock] = 5

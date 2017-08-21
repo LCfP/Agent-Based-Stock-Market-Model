@@ -23,7 +23,13 @@ def continuous_double_auction(agentset, stock, orderbook, valuation_type_functio
 
     for agent in randomized_agent_set:
         # add orders to the orderbook according to the type of valuation function
-        orderbook = valuation_type_function(agent, orderbook, stock)
+        buy_or_sell, price, volume = valuation_type_function(agent, orderbook, stock)
+
+        if volume > 0 and price > 0:
+            if buy_or_sell == 'buy':
+                orderbook.add_bid(price, volume, agent)
+            elif buy_or_sell == 'sell':
+                orderbook.add_ask(price, volume, agent)
 
         while True:
             matched_orders = orderbook.match_orders()
@@ -261,7 +267,6 @@ def orders_based_on_stock_valuation(agent, orderbook, stock):
 
 def orders_based_on_sentiment_and_fundamentals(agent, orderbook, stock):
     """Add orders to the orderbook based on stock price movement and deviation from fundamentals"""
-    orderbook = copy.deepcopy(orderbook)
     # 1 establish the current price
     if len(orderbook.transaction_prices):
         current_price = orderbook.transaction_prices[-1]
@@ -277,19 +282,15 @@ def orders_based_on_sentiment_and_fundamentals(agent, orderbook, stock):
     else:
         price_series = stock.price_history + [current_price]
         buy_or_sell = agent.buy_sell_or_hold(price_series, shortMA=agent.ma_short, longMA=agent.ma_long, upper_threshold=1.05, lower_threshold=0.95)
-    # 3 If any, submit buy or sell order to the orderbook.
+    # 3 Determine price and volume of the order
     if buy_or_sell == 'buy':
-        bid_price = current_price * ((100 + agent.bid_ask_spread) / 100)
-        bid_volume = int(div0(agent.money, bid_price))
-        if bid_volume > 0:
-            orderbook.add_bid(bid_price, bid_volume, agent)
+        price = current_price * ((100 + agent.bid_ask_spread) / 100)
+        volume = int(div0(agent.money, price))
     elif buy_or_sell == 'sell':
-        ask_price = current_price * ((100 + agent.bid_ask_spread) / 100)
-        ask_volume = agent.stocks[stock]
-        if ask_volume > 0:
-            orderbook.add_ask(ask_price, ask_volume, agent)
+        price = current_price * ((100 + agent.bid_ask_spread) / 100)
+        volume = agent.stocks[stock]
 
-    return orderbook
+    return buy_or_sell, price, volume
 
 
 def transaction(buyer, seller, stock, amount_of_product, amount_of_money):
