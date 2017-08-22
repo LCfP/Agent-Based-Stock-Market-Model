@@ -103,12 +103,6 @@ def stockMarketSimulation(seed,
     setup.distribute_initial_stocks(stocks, agents)
 
     """
-    Print set-up
-    """
-    #if (printProgress):
-    #    functions.print_setup(agents, firms, stocks)
-
-    """
     Simulation
 
     Process overview and scheduling from the ODD
@@ -118,14 +112,14 @@ def stockMarketSimulation(seed,
     4. Store market prices t-1
     """
 
-    for quarter in range(simulation_time):
+    for day in range(simulation_time):
         if printProgress:
-            print('period: ', quarter)
-        # 1 update dividends
+            print('period: ', day)
+        # 1 update profits after 20 working days
         for firm in firms:
             firm.update_profits(firm.determine_profit())
 
-        # 2 market mechanism
+        # 2 continuous double auction market mechanism
         market_returns = []
         for idx, stock in enumerate(stocks):
             # marketmechanisms.continuousDoubleAuction

@@ -275,9 +275,10 @@ def orders_based_on_sentiment_and_fundamentals(agent, orderbook, stock):
     else:
         current_price = stock.price_history[-1]
     # 2 Check if the P/E ratio is too high (sell) or too low (buy). Otherwise, follow chartist strategy.
-    if (current_price / stock.firm.profit) > agent.price_to_earnings_window[1]:
+    earnings_per_stock = stock.firm.profit / stock.amount
+    if (current_price / earnings_per_stock) > agent.price_to_earnings_window[1]:
         buy_or_sell = 'sell'
-    elif (current_price / stock.firm.profit) < agent.price_to_earnings_window[0]:
+    elif (current_price / earnings_per_stock) < agent.price_to_earnings_window[0]:
         buy_or_sell = 'buy'
     else:
         price_series = stock.price_history + [current_price]
