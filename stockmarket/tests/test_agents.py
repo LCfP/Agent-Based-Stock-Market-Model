@@ -10,8 +10,8 @@ from numpy.testing import assert_raises
 
 @pytest.fixture()
 def agents():
-    return [Trader("Agent1", 1000, 0, 2, 3, 5, lambda **x: extrapolate_average_profit(**x), propensity_to_switch=1.1),
-            Trader("Agent2", 1000, 0, 2, 3, 5, lambda **x: extrapolate_ma_price(**x), propensity_to_switch=1.1)]
+    return [Trader("Agent1", 1000, 0, 2, 3, 5, lambda **x: extrapolate_average_profit(**x), price_to_earnings_window=(6,12), propensity_to_switch=1.1),
+            Trader("Agent2", 1000, 0, 2, 3, 5, lambda **x: extrapolate_ma_price(**x), price_to_earnings_window=(6,12), propensity_to_switch=1.1)]
 
 
 @pytest.fixture()

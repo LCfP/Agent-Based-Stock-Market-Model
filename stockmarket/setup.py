@@ -2,11 +2,12 @@
 
 import random
 import itertools
-from stockmarket import firms, stock, valuationfunctions, switchingstrategies
+from stockmarket import firms, stock, valuationfunctions, switchingstrategies, buysellfunctions
 from stockmarket.agent import Trader
 
 
-def setup_agents(init_money, init_bid_ask_spread, init_memory_size, init_ma_s, init_ma_l, init_propensity_to_switch, fundamentalist=3, chartist=3):
+def setup_agents(init_money, init_bid_ask_spread, init_memory_size, init_ma_s, init_ma_l, init_propensity_to_switch,
+                 init_price_to_earnings_window, momentum_traders=3, reversion_traders=3):
     """This returns an initialized agent set"""
     agent_set = []
     init_agent = lambda x, y: agent_set.append(
@@ -17,11 +18,12 @@ def setup_agents(init_money, init_bid_ask_spread, init_memory_size, init_ma_s, i
                                        ma_short=randomize_init_variable(init_ma_s[0], init_ma_s[1]),
                                        ma_long=randomize_init_variable(init_ma_l[0], init_ma_l[1]),
                                        valuation_function=y, propensity_to_switch=init_propensity_to_switch,
+                                       price_to_earnings_window=init_price_to_earnings_window,
                                        switching_strategy=switchingstrategies.adaptive_switching))
-    for agent in range(fundamentalist):
-        init_agent(agent, valuationfunctions.extrapolate_average_profit)
-    for agent in range(fundamentalist, chartist+fundamentalist):
-        init_agent(agent, valuationfunctions.predict_by_moving_avg_growth)
+    for agent in range(momentum_traders):
+        init_agent(agent, buysellfunctions.momentum)
+    for agent in range(momentum_traders, reversion_traders+momentum_traders):
+        init_agent(agent, buysellfunctions.mean_reversion)
     return agent_set
 
 
