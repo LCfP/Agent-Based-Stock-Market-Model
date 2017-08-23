@@ -21,6 +21,7 @@ def stockMarketSimulation(seed,
                           initial_stock_amount,
                           order_expiration_time,
                           init_propensity_to_switch,
+                          init_price_to_earnings_window,
                           firm_profit_mu,
                           firm_profit_delta,
                           firm_profit_sigma,
@@ -80,8 +81,9 @@ def stockMarketSimulation(seed,
                                 init_memory_size=initial_memory,
                                 init_ma_s=initial_ma_short,
                                 init_ma_l=initial_ma_long,
-                                fundamentalist=amount_fundamentalists,
-                                chartist=amount_chartists, init_propensity_to_switch=init_propensity_to_switch)
+                                momentum_traders=amount_fundamentalists,
+                                reversion_traders=amount_chartists, init_propensity_to_switch=init_propensity_to_switch,
+                                init_price_to_earnings_window=init_price_to_earnings_window)
 
     firms = setup.setup_firms(init_book_value=initial_book_value,
                               init_profit=initial_profit,
@@ -127,7 +129,8 @@ def stockMarketSimulation(seed,
         for idx, stock in enumerate(stocks):
             # marketmechanisms.continuousDoubleAuction
             agents, stock, order_books[idx] = marketmechanisms.continuous_double_auction(agents, stock,
-                                                                                         order_books[idx])
+                                                                                         order_books[idx],
+                                                                                         marketmechanisms.orders_based_on_stock_valuation)
             current = stock.price_history[-1]
             previous = stock.price_history[-2]
             diff = (current - previous) / previous if previous != 0 else (current - (previous + 0.00001)) / (

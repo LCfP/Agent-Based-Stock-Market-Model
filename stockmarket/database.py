@@ -2,10 +2,9 @@
 
 import sqlite3
 import pandas as pd
-import stockmarket.parameters as par
 
-conn = sqlite3.connect(par.database_name)
-cur = conn.cursor()
+#conn = sqlite3.connect(par.database_name)
+#cur = conn.cursor()
 
 
 def stock_market_baseline_tables():
