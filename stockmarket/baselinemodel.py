@@ -3,8 +3,7 @@
 import random
 import numpy as np
 from stockmarket.limitorderbook import *
-from stockmarket import setup, marketmechanisms
-
+from stockmarket import setup, marketmechanisms, marketmaker
 
 def stockMarketSimulation(seed,
                           simulation_time,
@@ -25,6 +24,13 @@ def stockMarketSimulation(seed,
                           firm_profit_mu,
                           firm_profit_delta,
                           firm_profit_sigma,
+                          profit_announcement_working_days,
+                          init_market_maker_money,
+                          market_maker_bid_ask_spread,
+                          market_maker_price_to_earnings_window,
+                          market_maker_inventory_sensitivity,
+                          market_maker_inventory_buffer_of_total_target,
+                          m_m_standard_order_percentage_total,
                           printProgress=False):
     """Returns a set of agents at time stockMarketSimulationParameterSet['simuatlion_time'] and the values
     of their state variables for every time step in stockMarketSimulationParameterSet['simuatlion_time'].
@@ -96,6 +102,13 @@ def stockMarketSimulation(seed,
 
     stocks = setup.setup_stocks(firms, amount=initial_stock_amount)
 
+    market_maker = marketmaker.Marketmaker(name=1, money=init_market_maker_money,
+                                           bid_ask_spread=market_maker_bid_ask_spread,
+                                           price_to_earnings_window=market_maker_price_to_earnings_window,
+                                           inventory_sensitivity=market_maker_inventory_sensitivity,
+                                           inventory_buffer_target=market_maker_inventory_buffer_of_total_target * initial_stock_amount,
+                                           standard_order_size=int(m_m_standard_order_percentage_total * initial_stock_amount))
+
     order_books = []
     for stock in stocks:
         order_books.append(LimitOrderBook(stock, stock.price_history[-1], order_expiration_time))
@@ -115,15 +128,15 @@ def stockMarketSimulation(seed,
     for day in range(simulation_time):
         if printProgress:
             print('period: ', day)
-        # 1 update profits after 20 working days
-        for firm in firms:
-            firm.update_profits(firm.determine_profit())
+        # 1 update profits after a number of working days
+        if day % profit_announcement_working_days == 0:
+            for firm in firms:
+                firm.update_profits(firm.determine_profit())
 
         # 2 continuous double auction market mechanism
         market_returns = []
         for idx, stock in enumerate(stocks):
-            # marketmechanisms.continuousDoubleAuction
-            agents, stock, order_books[idx] = marketmechanisms.continuous_double_auction(agents, stock,
+            agents, stock, order_books[idx] = marketmechanisms.continuous_double_auction(market_maker, agents, stock,
                                                                                          order_books[idx],
                                                                                          marketmechanisms.orders_based_on_sentiment_and_fundamentals)
             current = stock.price_history[-1]

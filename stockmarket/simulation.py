@@ -1,8 +1,8 @@
 from stockmarket import baselinemodel
 
 agents, firms, stocks, order_books = baselinemodel.stockMarketSimulation(seed=0, simulation_time=100,
-                                                                         amount_momentum=40,
-                                                                         amount_mean_reversion=40, amount_firms=1,
+                                                                         amount_momentum=10,
+                                                                         amount_mean_reversion=10, amount_firms=1,
                                                                          initial_money=(100, 200),
                                                                          initial_bid_ask=(1,1), initial_memory=(3,7),
                                                                          initial_ma_short=(2,3), initial_ma_long=(6,7),
@@ -15,5 +15,12 @@ agents, firms, stocks, order_books = baselinemodel.stockMarketSimulation(seed=0,
                                                                          firm_profit_mu=0.058,
                                                                          firm_profit_delta=0.00396825396,
                                                                          firm_profit_sigma=0.125,
+                                                                         profit_announcement_working_days=20,
+                                                                         init_market_maker_money=5000,
+                                                                         market_maker_bid_ask_spread=3,
+                                                                         market_maker_price_to_earnings_window=(5,13),
+                                                                         market_maker_inventory_sensitivity=0.30,
+                                                                         market_maker_inventory_buffer_of_total_target=0.10,
+                                                                         m_m_standard_order_percentage_total=0.05,
                                                                          printProgress=True
                                                                          )

@@ -9,8 +9,8 @@ from numpy.testing import assert_raises
 
 @pytest.fixture()
 def marketmakers():
-    return [Marketmaker("market_maker1", 1000, 3, (2,15), 0.5, 50),
-            Marketmaker("market_maker2", 1000, 3, 2, 3, 5, )]
+    return [Marketmaker("market_maker1", 1000, 3, (2,15), 0.5, 50, 2),
+            Marketmaker("market_maker2", 1000, 3, (2,15), 0.5, 50, 2)]
 
 @pytest.fixture()
 def stock():

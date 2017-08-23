@@ -4,7 +4,8 @@ from stockmarket.functions import div0
 
 class Marketmaker:
     """a base class for Traders"""
-    def __init__(self, name, money, bid_ask_spread, price_to_earnings_window, inventory_sensitivity, inventory_buffer_target):
+    def __init__(self, name, money, bid_ask_spread, price_to_earnings_window, inventory_sensitivity,
+                 inventory_buffer_target, standard_order_size):
         """Creates a new market maker"""
         self.name = name
         self.money = money
@@ -18,7 +19,7 @@ class Marketmaker:
         self.price_to_earnings_window = price_to_earnings_window
         self.inventory_sensitivity = inventory_sensitivity
         self.inventory_buffer_target = inventory_buffer_target
-
+        self.standard_order_size = standard_order_size
 
     def determine_spread(self, current_price, stock):
         """
@@ -38,10 +39,14 @@ class Marketmaker:
         """
         inventory = self.stocks[stock]
         inventory_deviation_from_target = inventory - self.inventory_buffer_target
-        inventory_mark_up_factor = self.inventory_sensitivity * div0(inventory_deviation_from_target, self.inventory_buffer_target)
-        core_price = current_price + (current_price * inventory_mark_up_factor)
-        bid_price = core_price + self.bid_ask_spread
-        ask_price = core_price - self.bid_ask_spread
+        inventory_mark_up_factor = self.inventory_sensitivity * div0(abs(inventory_deviation_from_target), self.inventory_buffer_target)
+        if inventory_deviation_from_target > 0:
+            multiplication_factor = 1 - inventory_mark_up_factor
+        else:
+            multiplication_factor = 1 + inventory_mark_up_factor
+        core_price = current_price * multiplication_factor
+        bid_price = core_price - self.bid_ask_spread
+        ask_price = core_price + self.bid_ask_spread
         return bid_price, ask_price
 
     def sell(self, stock, amount, price):
