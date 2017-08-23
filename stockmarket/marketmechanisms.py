@@ -297,7 +297,7 @@ def orders_based_on_sentiment_and_fundamentals(agent, orderbook, stock):
     """Add orders to the orderbook based on stock price movement and deviation from fundamentals"""
     # 1 establish the current price
     if len(orderbook.transaction_prices):
-        current_price = (orderbook.transaction_prices[-1])[-1]
+        current_price = orderbook.transaction_prices[-1]
     elif len(orderbook.transaction_prices_history):
         current_price = (orderbook.transaction_prices_history[-1])[-1]
     else:
