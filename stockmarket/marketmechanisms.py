@@ -9,7 +9,7 @@ import numpy as np
 import copy
 
 
-def continuous_double_auction(market_maker, agentset, stock, orderbook, valuation_type_function):
+def continuous_double_auction(market_maker, agentset, stock, orderbook, valuation_type_function, agents_hold_thresholds):
     """
     Agent, bids and asks are continuously submitted to the limit-order book. The resulting trades are executed.
     """
@@ -30,15 +30,16 @@ def continuous_double_auction(market_maker, agentset, stock, orderbook, valuatio
         current_price = stock.price_history[-1]
 
     # Ask market maker to contribute initial bid and asks
-    # TODO test if adding these prices makes sense
     def add_market_maker_orders():
         market_maker_bid_price, market_maker_ask_price = market_maker.determine_spread(current_price=current_price, stock=stock)
 
         maker_bid_volume = min(market_maker.standard_order_size, int(div0(market_maker.money, market_maker_bid_price)))
-        orderbook.add_bid(market_maker_bid_price, maker_bid_volume, market_maker)
+        if maker_bid_volume > 0 and market_maker_bid_price > 0:
+            orderbook.add_bid(market_maker_bid_price, maker_bid_volume, market_maker)
 
         maker_ask_volume = min(market_maker.standard_order_size, market_maker.stocks[stock])
-        orderbook.add_ask(market_maker_ask_price, maker_ask_volume, market_maker)
+        if maker_ask_volume > 0 and market_maker_ask_price > 0:
+            orderbook.add_ask(market_maker_ask_price, maker_ask_volume, market_maker)
 
 
     add_market_maker_orders()
@@ -46,7 +47,7 @@ def continuous_double_auction(market_maker, agentset, stock, orderbook, valuatio
 
     for agent in randomized_agent_set:
         # add orders to the orderbook according to the type of valuation function
-        buy_or_sell, price, volume = valuation_type_function(agent, orderbook, stock)
+        buy_or_sell, price, volume = valuation_type_function(agent, orderbook, stock, agents_hold_thresholds)
 
         if volume > 0 and price > 0:
             if buy_or_sell == 'buy':
@@ -276,7 +277,7 @@ def selling_price(stock, supplier):
         return None
 
 
-def orders_based_on_stock_valuation(agent, orderbook, stock):
+def orders_based_on_stock_valuation(agent, orderbook, stock, agents_hold_thresholds):
     """Add orders to the orderbook based on stock valuation"""
     orderbook = copy.deepcopy(orderbook)
     price_forecast = agent.valuate_stocks(stock)
@@ -293,8 +294,10 @@ def orders_based_on_stock_valuation(agent, orderbook, stock):
     return orderbook
 
 
-def orders_based_on_sentiment_and_fundamentals(agent, orderbook, stock):
+def orders_based_on_sentiment_and_fundamentals(agent, orderbook, stock, agents_hold_thresholds):
     """Add orders to the orderbook based on stock price movement and deviation from fundamentals"""
+    price = 0
+    volume = 0
     # 1 establish the current price
     if len(orderbook.transaction_prices):
         current_price = orderbook.transaction_prices[-1]
@@ -310,7 +313,9 @@ def orders_based_on_sentiment_and_fundamentals(agent, orderbook, stock):
         buy_or_sell = 'buy'
     else:
         price_series = stock.price_history + [current_price]
-        buy_or_sell = agent.buy_sell_or_hold(price_series, shortMA=agent.ma_short, longMA=agent.ma_long, upper_threshold=1.05, lower_threshold=0.95)
+        buy_or_sell = agent.buy_sell_or_hold(price_series, shortMA=agent.ma_short, longMA=agent.ma_long,
+                                             upper_threshold=agents_hold_thresholds[1],
+                                             lower_threshold=agents_hold_thresholds[0])
     # 3 Determine price and volume of the order
     if buy_or_sell == 'buy':
         price = current_price * ((100 + agent.bid_ask_spread) / 100)

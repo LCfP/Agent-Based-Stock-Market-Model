@@ -48,10 +48,10 @@ def limitorderbooks(stock):
 
 
 def test_orders_based_on_stock_valuation(fundamentalist, chartist_two, stock, limitorderbooks):
-    new_orderbook = orders_based_on_stock_valuation(fundamentalist, limitorderbooks[1], stock)
+    new_orderbook = orders_based_on_stock_valuation(fundamentalist, limitorderbooks[1], stock, agents_hold_thresholds=1)
     assert_equal(len(new_orderbook.bids), 1)
     assert_equal(len(new_orderbook.asks), 0)
-    chart_orderbook = orders_based_on_stock_valuation(chartist_two, limitorderbooks[1], stock)
+    chart_orderbook = orders_based_on_stock_valuation(chartist_two, limitorderbooks[1], stock, agents_hold_thresholds=1)
     assert_equal(len(chart_orderbook.bids), 1)
     assert_equal(len(chart_orderbook.asks), 0)
 
@@ -67,7 +67,7 @@ def test_best_trade():
     demander.stocks[stock] = 4
     trade = find_best_trade(demander, [seller1, seller2], stock)
     assert_equal(trade[:-1], [seller2, 3])
-    assert_almost_equal(trade[-1], 30.0075)
+    assert_almost_equal(trade[-1], 13.6397727272)
 
 
 def test_selling_price(stock, fundamentalist, chartist):
@@ -94,7 +94,7 @@ def test_volume_price():
     stock = Stock(firm, 10)
     seller.stocks[stock] = 5
     demander.stocks[stock] = 5
-    assert_almost_equal(find_volume_price(demander, seller, stock), [3, 30.015])
+    assert_almost_equal(find_volume_price(demander, seller, stock), [5, 13.6431818])
     assert_equal(find_volume_price(seller, demander, stock), None)
 
 

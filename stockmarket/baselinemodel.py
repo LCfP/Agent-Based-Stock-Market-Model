@@ -31,6 +31,7 @@ def stockMarketSimulation(seed,
                           market_maker_inventory_sensitivity,
                           market_maker_inventory_buffer_of_total_target,
                           m_m_standard_order_percentage_total,
+                          agents_hold_thresholds,
                           printProgress=False):
     """Returns a set of agents at time stockMarketSimulationParameterSet['simuatlion_time'] and the values
     of their state variables for every time step in stockMarketSimulationParameterSet['simuatlion_time'].
@@ -138,7 +139,8 @@ def stockMarketSimulation(seed,
         for idx, stock in enumerate(stocks):
             agents, stock, order_books[idx] = marketmechanisms.continuous_double_auction(market_maker, agents, stock,
                                                                                          order_books[idx],
-                                                                                         marketmechanisms.orders_based_on_sentiment_and_fundamentals)
+                                                                                         marketmechanisms.orders_based_on_sentiment_and_fundamentals,
+                                                                                         agents_hold_thresholds)
             current = stock.price_history[-1]
             previous = stock.price_history[-2]
             diff = (current - previous) / previous if previous != 0 else (current - (previous + 0.00001)) / (
@@ -166,7 +168,7 @@ def stockMarketSimulation(seed,
             agent.update_strategy(av_market_return)
 
 
-    return agents, firms, stocks, order_books
+    return agents, firms, stocks, order_books, market_maker
 
 
 

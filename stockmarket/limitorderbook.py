@@ -64,7 +64,7 @@ class LimitOrderBook:
 
     def match_orders(self):
         """Return a price, volume, bid and ask and delete them from the order book if volume of either reaches zero"""
-        market_maker_orders_depleted = (False, None)
+        market_maker_orders_available = (True, None)
         # first make sure that neither the bids or asks books are empty
         if not (self.bids and self.asks):
             return None
@@ -77,11 +77,11 @@ class LimitOrderBook:
             min_index, volume = min(enumerate([winning_bid.volume, winning_ask.volume]), key=operator.itemgetter(1))
             if winning_bid.volume == winning_ask.volume:
                 # TODO check if a bid or ask was from a market_maker
-                bid_or_ask = [str(self.bids[-1].owner), str(self.bids[-1].owner)]
+                bid_or_ask = [repr(self.bids[-1].owner), repr(self.asks[-1].owner)]
                 for idx, order in enumerate(bid_or_ask):
                     legend = ['bid', 'ask']
                     if 'maker' in order:
-                        market_maker_orders_depleted = (True, legend[idx])
+                        market_maker_orders_available = (False, legend[idx])
                 # remove these elements from list
                 del self.bids[-1]
                 del self.asks[0]
@@ -91,12 +91,12 @@ class LimitOrderBook:
                 self.bids[-1].volume -= volume
                 # delete the empty bid or ask
                 if min_index == 0:
-                    if 'maker' in str(self.bids[-1].owner):
-                        market_maker_orders_depleted = (True, 'bid')
+                    if 'maker' in repr(self.bids[-1].owner):
+                        market_maker_orders_available = (False, 'bid')
                     del self.bids[-1]
                 else:
-                    if 'maker' in str(self.asks[0].owner):
-                        market_maker_orders_depleted = (True, 'ask')
+                    if 'maker' in repr(self.asks[0].owner):
+                        market_maker_orders_available = (False, 'ask')
                     del self.asks[0]
             self.transaction_prices.append(price)
             self.transaction_volumes.append(volume)
@@ -104,18 +104,20 @@ class LimitOrderBook:
 
             def find_market_maker_order(book):
                 for idx, bid in enumerate(book):
-                    if 'maker' in bid.owner:
+                    if 'maker' in repr(bid.owner):
                         return idx
 
             # if one of the market maker orders was depleted, look for the other and delete it.
-            if market_maker_orders_depleted[1] == 'bid':
+            if market_maker_orders_available[1] == 'bid':
                 i = find_market_maker_order(self.bids)
-                del self.bids[i]
-            if market_maker_orders_depleted[1] == 'ask':
+                if i is not None:
+                    del self.bids[i]
+            if market_maker_orders_available[1] == 'ask':
                 i = find_market_maker_order(self.asks)
-                del self.bids[i]
+                if i is not None:
+                    del self.asks[i]
 
-            return price, volume, winning_bid, winning_ask, market_maker_orders_depleted[0]
+            return price, volume, winning_bid, winning_ask, market_maker_orders_available[0]
 
     def __repr__(self):
         return "order_book_{}".format(self.stock)

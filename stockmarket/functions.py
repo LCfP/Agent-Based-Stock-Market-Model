@@ -3,7 +3,7 @@
 import numpy as np
 
 
-def npv_growing_perpetuity(dividend, discount_rate=0.05, growth_rate=0):
+def npv_growing_perpetuity(dividend, discount_rate=0.11, growth_rate=0):
     """Returns the present value of a growing perpetuity.
 
     Parameters
