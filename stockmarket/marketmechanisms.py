@@ -318,11 +318,15 @@ def orders_based_on_sentiment_and_fundamentals(agent, orderbook, stock, agents_h
                                              lower_threshold=agents_hold_thresholds[0])
     # 3 Determine price and volume of the order
     if buy_or_sell == 'buy':
-        price = current_price * ((100 + agent.bid_ask_spread) / 100)
-        volume = int(div0(agent.money, price))
+        # bid price is above the min(lowest ask, last_price)
+        lowest_ask_price = orderbook.lowest_ask_price
+        price = min(current_price, lowest_ask_price) * ((100 + agent.bid_ask_spread) / 100)
+        volume = int( int(div0(agent.money, price)) * agent.volume_risk_aversion)
     elif buy_or_sell == 'sell':
-        price = current_price * ((100 - agent.bid_ask_spread) / 100)
-        volume = agent.stocks[stock]
+        # ask price is below the max(highest bid or current price)
+        highest_bid_price = orderbook.highest_bid_price
+        price = max(current_price, highest_bid_price) * ((100 - agent.bid_ask_spread) / 100)
+        volume = int(agent.stocks[stock] * agent.volume_risk_aversion)
 
     return buy_or_sell, price, volume
 

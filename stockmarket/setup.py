@@ -7,7 +7,7 @@ from stockmarket.agent import Trader
 
 
 def setup_agents(init_money, init_bid_ask_spread, init_memory_size, init_ma_s, init_ma_l, init_propensity_to_switch,
-                 init_price_to_earnings_window, momentum_traders=3, reversion_traders=3):
+                 init_price_to_earnings_window, trader_volume_risk_aversion, momentum_traders=3, reversion_traders=3):
     """This returns an initialized agent set"""
     agent_set = []
     init_agent = lambda x, y: agent_set.append(
@@ -18,7 +18,11 @@ def setup_agents(init_money, init_bid_ask_spread, init_memory_size, init_ma_s, i
                                        ma_short=randomize_init_variable(init_ma_s[0], init_ma_s[1]),
                                        ma_long=randomize_init_variable(init_ma_l[0], init_ma_l[1]),
                                        valuation_function=y, propensity_to_switch=init_propensity_to_switch,
-                                       price_to_earnings_window=init_price_to_earnings_window,
+                                       price_to_earnings_window=(randomize_init_variable(init_price_to_earnings_window[0][0],
+                                                                                        init_price_to_earnings_window[0][1]),
+                                                                 randomize_init_variable(init_price_to_earnings_window[1][0],
+                                                                                         init_price_to_earnings_window[1][1])),
+                                       trader_volume_risk_aversion=trader_volume_risk_aversion,
                                        switching_strategy=switchingstrategies.adaptive_switching))
     for agent in range(momentum_traders):
         init_agent(agent, buysellfunctions.momentum)
@@ -32,6 +36,7 @@ def setup_firms(init_book_value,
                 firm_profit_mu,
                 firm_profit_delta,
                 firm_profit_sigma,
+                backward_simulated_time,
                 amount_of_firms=1):
     """This returns an initialized firm set"""
     firm_set = []
@@ -45,7 +50,7 @@ def setup_firms(init_book_value,
                                    dividend_rate=1))
     for firm in firm_set:
         # creates a profit history for the last 6 periods.
-        for _ in itertools.repeat(None, 6):
+        for _ in itertools.repeat(None, backward_simulated_time):
             firm.update_profits(firm.determine_profit())
 
     return firm_set
@@ -68,9 +73,9 @@ def distribute_initial_stocks(stocks, agents):
         amount_each = stock.amount // agent_number
         rest = int(stock.amount % agent_number)
         for x in range(0, rest):
-            agents[x].stocks[stock] = amount_each + 1
+            agents[x].stocks[stock] += amount_each + 1
             agents[x].portfolio_value_history[0] += stock.price_history[-1]
         for x in range(rest, agent_number):
-            agents[x].stocks[stock] = amount_each
+            agents[x].stocks[stock] += amount_each
             agents[x].portfolio_value_history[0] += stock.price_history[-1]
         # initialize the agents portfolio value history

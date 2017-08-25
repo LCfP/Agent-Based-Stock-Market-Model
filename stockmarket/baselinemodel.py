@@ -32,6 +32,9 @@ def stockMarketSimulation(seed,
                           market_maker_inventory_buffer_of_total_target,
                           m_m_standard_order_percentage_total,
                           agents_hold_thresholds,
+                          init_share_of_stocks_to_market_maker,
+                          init_backward_simulated_time,
+                          trader_volume_risk_aversion,
                           printProgress=False):
     """Returns a set of agents at time stockMarketSimulationParameterSet['simuatlion_time'] and the values
     of their state variables for every time step in stockMarketSimulationParameterSet['simuatlion_time'].
@@ -88,6 +91,7 @@ def stockMarketSimulation(seed,
                                 init_memory_size=initial_memory,
                                 init_ma_s=initial_ma_short,
                                 init_ma_l=initial_ma_long,
+                                trader_volume_risk_aversion=trader_volume_risk_aversion,
                                 momentum_traders=amount_momentum,
                                 reversion_traders=amount_mean_reversion,
                                 init_propensity_to_switch=init_propensity_to_switch,
@@ -98,6 +102,7 @@ def stockMarketSimulation(seed,
                               firm_profit_mu=firm_profit_mu,
                               firm_profit_delta=firm_profit_delta,
                               firm_profit_sigma=firm_profit_sigma,
+                              backward_simulated_time=init_backward_simulated_time,
                               amount_of_firms=amount_firms
                               )
 
@@ -114,7 +119,8 @@ def stockMarketSimulation(seed,
     for stock in stocks:
         order_books.append(LimitOrderBook(stock, stock.price_history[-1], order_expiration_time))
 
-    setup.distribute_initial_stocks(stocks, agents)
+    agents_and_marketmaker = agents + [market_maker for n in range(int(init_share_of_stocks_to_market_maker * len(agents)))]
+    setup.distribute_initial_stocks(stocks, agents_and_marketmaker)
 
     """
     Simulation

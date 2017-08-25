@@ -2,6 +2,7 @@
 
 import bisect
 import operator
+import numpy as np
 
 
 class LimitOrderBook:
@@ -19,14 +20,20 @@ class LimitOrderBook:
         self.transaction_prices_history = []
         self.transaction_volumes_history = []
         self.matched_bids_history = []
+        self.highest_bid_price = 0
+        self.lowest_ask_price = 0
 
     def add_bid(self, price, volume, agent):
         """Add a bid to the (price low-high, age young-old) sorted bids book"""
         bisect.insort_left(self.bids, Order(order_type='b', owner=agent, price=price, volume=volume))
+        # update the current highest bid price
+        self.highest_bid_price = self.bids[-1].price if self.bids else 0
 
     def add_ask(self, price, volume, agent):
         """Add an ask to the (price low-high, age old-young) sorted asks book"""
         bisect.insort_right(self.asks, Order(order_type='a', owner=agent, price=price, volume=volume))
+        # update the current lowest ask price
+        self.lowest_ask_price = self.asks[0].price if self.asks else np.inf
 
     def clean_book(self):
         """Increase age of orders and clean those past their expiration date"""
@@ -44,6 +51,9 @@ class LimitOrderBook:
 
         self.bids = new_bids
         self.asks = new_asks
+        # update current highest bid and lowest ask
+        self.highest_bid_price = self.bids[-1].price if self.bids else 0
+        self.lowest_ask_price = self.asks[0].price if self.asks else np.inf
 
     def cleanse_book(self):
         # store and clean unresolved orders
@@ -60,7 +70,9 @@ class LimitOrderBook:
         # store and clean matched bids
         self.matched_bids_history.append(self.matched_bids)
         self.matched_bids = []
-
+        # update current highest bid and lowest ask
+        self.highest_bid_price = 0
+        self.lowest_ask_price = np.inf
 
     def match_orders(self):
         """Return a price, volume, bid and ask and delete them from the order book if volume of either reaches zero"""
@@ -85,6 +97,9 @@ class LimitOrderBook:
                 # remove these elements from list
                 del self.bids[-1]
                 del self.asks[0]
+                # update current highest bid and lowest ask
+                self.highest_bid_price = self.bids[-1].price if self.bids else 0
+                self.lowest_ask_price = self.asks[0].price if self.asks else np.inf
             else:
                 # decrease volume for both bid and ask
                 self.asks[0].volume -= volume
@@ -94,10 +109,14 @@ class LimitOrderBook:
                     if 'maker' in repr(self.bids[-1].owner):
                         market_maker_orders_available = (False, 'bid')
                     del self.bids[-1]
+                    # update current highest bid
+                    self.highest_bid_price = self.bids[-1].price if self.bids else 0
                 else:
                     if 'maker' in repr(self.asks[0].owner):
                         market_maker_orders_available = (False, 'ask')
                     del self.asks[0]
+                    # update lowest ask
+                    self.lowest_ask_price = self.asks[0].price if self.asks else np.inf
             self.transaction_prices.append(price)
             self.transaction_volumes.append(volume)
             self.matched_bids.append((winning_bid, winning_ask))
@@ -112,10 +131,14 @@ class LimitOrderBook:
                 i = find_market_maker_order(self.bids)
                 if i is not None:
                     del self.bids[i]
+                    # update current highest bid
+                    self.highest_bid_price = self.bids[-1].price if self.bids else 0
             if market_maker_orders_available[1] == 'ask':
                 i = find_market_maker_order(self.asks)
                 if i is not None:
                     del self.asks[i]
+                    # update current lowest ask
+                    self.lowest_ask_price = self.asks[0].price if self.asks else np.inf
 
             return price, volume, winning_bid, winning_ask, market_maker_orders_available[0]
 

@@ -4,7 +4,7 @@ from stockmarket import switchingstrategies
 class Trader:
     """a base class for Traders"""
     def __init__(self, name, money, bid_ask_spread, memory, ma_short, ma_long, valuation_function,
-                 propensity_to_switch, price_to_earnings_window,
+                 propensity_to_switch, price_to_earnings_window, trader_volume_risk_aversion,
                  switching_strategy=switchingstrategies.adaptive_switching
                  ):
         """Creates a new trader"""
@@ -25,6 +25,7 @@ class Trader:
         self.propensity_to_switch = propensity_to_switch
         self.return_on_assets = []
         self.price_to_earnings_window = price_to_earnings_window
+        self.volume_risk_aversion = trader_volume_risk_aversion
 
     def valuate_stocks(self, stock):
         """
