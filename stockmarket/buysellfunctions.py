@@ -42,3 +42,10 @@ def momentum(prices, shortMA, longMA, upper_threshold, lower_threshold):
         return 'sell'
     else:
         return 'hold'
+
+def noise_trading(prices, shortMA, longMA, upper_threshold, lower_threshold):
+    """buy / sell at random"""
+    probability_to_buy = np.random.randint(0, 100)
+    probability_to_buy = probability_to_buy / 100
+
+    return np.random.choice(['buy', 'sell'], p=[probability_to_buy, (1-probability_to_buy)])

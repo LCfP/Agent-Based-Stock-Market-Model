@@ -23,6 +23,10 @@ class LimitOrderBook:
         self.highest_bid_price = 0
         self.lowest_ask_price = 0
         self.m_m_orders_available_after_cleaning = False
+        self.sell_orders_today = 0
+        self.buy_orders_today = 0
+        self.sell_orders_history = []
+        self.buy_orders_history = []
 
     def add_bid(self, price, volume, agent):
         """Add a bid to the (price low-high, age young-old) sorted bids book"""
@@ -34,7 +38,7 @@ class LimitOrderBook:
         """Add an ask to the (price low-high, age old-young) sorted asks book"""
         bisect.insort_right(self.asks, Order(order_type='a', owner=agent, price=price, volume=volume))
         # update the current lowest ask price
-        self.lowest_ask_price = self.asks[0].price if self.asks else np.inf
+        self.lowest_ask_price = self.asks[0].price if self.asks else 0
 
     def clean_book(self):
         """Increase age of orders and clean those past their expiration date"""
@@ -63,7 +67,7 @@ class LimitOrderBook:
         self.asks = new_asks
         # update current highest bid and lowest ask
         self.highest_bid_price = self.bids[-1].price if self.bids else 0
-        self.lowest_ask_price = self.asks[0].price if self.asks else np.inf
+        self.lowest_ask_price = self.asks[0].price if self.asks else 0
 
     def cleanse_book(self):
         # store and clean unresolved orders
@@ -82,7 +86,12 @@ class LimitOrderBook:
         self.matched_bids = []
         # update current highest bid and lowest ask
         self.highest_bid_price = 0
-        self.lowest_ask_price = np.inf
+        self.lowest_ask_price = 0
+        # record the total bids and asks submitted that day
+        self.buy_orders_history.append(self.buy_orders_today)
+        self.buy_orders_today = 0
+        self.sell_orders_history.append(self.sell_orders_today)
+        self.sell_orders_today = 0
 
     def match_orders(self):
         """Return a price, volume, bid and ask and delete them from the order book if volume of either reaches zero"""
@@ -108,7 +117,7 @@ class LimitOrderBook:
                 del self.asks[0]
                 # update current highest bid and lowest ask
                 self.highest_bid_price = self.bids[-1].price if self.bids else 0
-                self.lowest_ask_price = self.asks[0].price if self.asks else np.inf
+                self.lowest_ask_price = self.asks[0].price if self.asks else 0
             else:
                 # decrease volume for both bid and ask
                 self.asks[0].volume -= volume
@@ -125,7 +134,7 @@ class LimitOrderBook:
                         market_maker_orders_available = (False, 'ask')
                     del self.asks[0]
                     # update lowest ask
-                    self.lowest_ask_price = self.asks[0].price if self.asks else np.inf
+                    self.lowest_ask_price = self.asks[0].price if self.asks else 0
             self.transaction_prices.append(price)
             self.transaction_volumes.append(volume)
             self.matched_bids.append((winning_bid, winning_ask))
@@ -155,7 +164,7 @@ class LimitOrderBook:
             if i is not None:
                 del self.asks[i]
                 # update current highest ask
-                self.lowest_ask_price = self.asks[0].price if self.asks else np.inf
+                self.lowest_ask_price = self.asks[0].price if self.asks else 0
 
         if bid_or_ask == 'ask':
             bids_book = self.bids

@@ -31,6 +31,35 @@ def setup_agents(init_money, init_bid_ask_spread, init_memory_size, init_ma_s, i
     return agent_set
 
 
+def setup_agents_with_noise_traders(init_money, init_bid_ask_spread, init_memory_size, init_ma_s, init_ma_l,
+                                    init_propensity_to_switch, init_price_to_earnings_window,
+                                    trader_volume_risk_aversion,
+                                    momentum_traders=3, reversion_traders=3, noise_traders=3):
+    """This returns an initialized agent set"""
+    agent_set = []
+    init_agent = lambda x, y: agent_set.append(
+        Trader(name=x,
+               money=randomize_init_variable(init_money[0], init_money[1]),
+               bid_ask_spread=randomize_init_variable(init_bid_ask_spread[0], init_bid_ask_spread[1]),
+               memory=randomize_init_variable(init_memory_size[0], init_memory_size[1]),
+               ma_short=randomize_init_variable(init_ma_s[0], init_ma_s[1]),
+               ma_long=randomize_init_variable(init_ma_l[0], init_ma_l[1]),
+               valuation_function=y, propensity_to_switch=init_propensity_to_switch,
+               price_to_earnings_window=(randomize_init_variable(init_price_to_earnings_window[0][0],
+                                                                 init_price_to_earnings_window[0][1]),
+                                         randomize_init_variable(init_price_to_earnings_window[1][0],
+                                                                 init_price_to_earnings_window[1][1])),
+               trader_volume_risk_aversion=trader_volume_risk_aversion,
+               switching_strategy=switchingstrategies.adaptive_switching))
+    for agent in range(momentum_traders):
+        init_agent(agent, buysellfunctions.momentum)
+    for agent in range(momentum_traders, reversion_traders + momentum_traders):
+        init_agent(agent, buysellfunctions.mean_reversion)
+    for agent in range(reversion_traders + momentum_traders, reversion_traders + momentum_traders + noise_traders):
+        init_agent(agent, buysellfunctions.noise_trading)
+    return agent_set
+
+
 def setup_firms(init_book_value,
                 init_profit,
                 firm_profit_mu,

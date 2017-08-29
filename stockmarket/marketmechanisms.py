@@ -29,7 +29,7 @@ def continuous_double_auction(market_maker, agentset, stock, orderbook, valuatio
     else:
         current_price = stock.price_history[-1]
 
-    # Ask market maker to contribute initial bid and asks
+    # 2 Ask market maker to contribute initial bid and asks
     def add_market_maker_orders():
         market_maker_bid_price, market_maker_ask_price = market_maker.determine_spread(current_price=current_price, stock=stock)
 
@@ -44,6 +44,7 @@ def continuous_double_auction(market_maker, agentset, stock, orderbook, valuatio
     add_market_maker_orders()
     market_maker_orders_available = True
 
+    # 3 Continuous double auction trading
     for agent in randomized_agent_set:
         # add orders to the orderbook according to the type of valuation function
         buy_or_sell, price, volume = valuation_type_function(agent, orderbook, stock, agents_hold_thresholds)
@@ -51,8 +52,10 @@ def continuous_double_auction(market_maker, agentset, stock, orderbook, valuatio
         if volume > 0 and price > 0:
             if buy_or_sell == 'buy':
                 orderbook.add_bid(price, volume, agent)
+                orderbook.buy_orders_today += 1
             elif buy_or_sell == 'sell':
                 orderbook.add_ask(price, volume, agent)
+                orderbook.sell_orders_today += 1
 
         while True:
             matched_orders = orderbook.match_orders()
@@ -71,10 +74,10 @@ def continuous_double_auction(market_maker, agentset, stock, orderbook, valuatio
                 market_maker_orders_available = True
         # clean limit order book and check whether there are still market maker orders
         orderbook.clean_book()
-        # TODO add a mechanism so that the market maker might add new orders when they have been cleaned
         market_maker_orders_available_after_cleaning = orderbook.m_m_orders_available_after_cleaning
         if not market_maker_orders_available_after_cleaning:
             add_market_maker_orders()
+            market_maker_orders_available = True
 
     # add average price to the stock's memory
     stock.add_price(total_volume, total_money)
@@ -82,7 +85,7 @@ def continuous_double_auction(market_maker, agentset, stock, orderbook, valuatio
         print('no volume')
     # at the end of the day, cleanse the order-book
     orderbook.cleanse_book()
-    market_maker_orders_available = True
+    #market_maker_orders_available = True
 
     return agentset, stock, orderbook
 

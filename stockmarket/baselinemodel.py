@@ -10,6 +10,7 @@ def stockMarketSimulation(seed,
                           simulation_time,
                           amount_momentum,
                           amount_mean_reversion,
+                          amount_noise_traders,
                           amount_firms,
                           initial_money,
                           initial_bid_ask,
@@ -87,16 +88,17 @@ def stockMarketSimulation(seed,
     """
     Setup
     """
-    agents = setup.setup_agents(init_money=initial_money,
-                                init_bid_ask_spread=initial_bid_ask,
-                                init_memory_size=initial_memory,
-                                init_ma_s=initial_ma_short,
-                                init_ma_l=initial_ma_long,
-                                trader_volume_risk_aversion=trader_volume_risk_aversion,
-                                momentum_traders=amount_momentum,
-                                reversion_traders=amount_mean_reversion,
-                                init_propensity_to_switch=init_propensity_to_switch,
-                                init_price_to_earnings_window=init_price_to_earnings_window)
+    agents = setup.setup_agents_with_noise_traders(init_money=initial_money,
+                                                   init_bid_ask_spread=initial_bid_ask,
+                                                   init_memory_size=initial_memory,
+                                                   init_ma_s=initial_ma_short,
+                                                   init_ma_l=initial_ma_long,
+                                                   trader_volume_risk_aversion=trader_volume_risk_aversion,
+                                                   momentum_traders=amount_momentum,
+                                                   reversion_traders=amount_mean_reversion,
+                                                   noise_traders=amount_noise_traders,
+                                                   init_propensity_to_switch=init_propensity_to_switch,
+                                                   init_price_to_earnings_window=init_price_to_earnings_window)
 
     firms = setup.setup_firms(init_book_value=initial_book_value,
                               init_profit=initial_profit,
@@ -141,7 +143,7 @@ def stockMarketSimulation(seed,
             for firm in firms:
                 firm.update_profits(firm.determine_profit())
 
-        # 2 continuous double auction market mechanism
+        # 2-3 continuous double auction market mechanism - market maker quotes, traders trade
         market_returns = []
         for idx, stock in enumerate(stocks):
             agents, stock, order_books[idx] = marketmechanisms.continuous_double_auction(market_maker, agents, stock,
@@ -158,10 +160,9 @@ def stockMarketSimulation(seed,
         current_market_price = stock.price_history[-1]
         earnings_per_stock = stock.firm.profit / stock.amount
         current_price_to_earnings_ratio = current_market_price / earnings_per_stock
-        # TODO append price to equity ratio to stock history
         stock.price_to_earnings_history.append(current_price_to_earnings_ratio)
 
-        # 3 record and update variables
+        # 4 record and update variables + switching strategies
         for agent in agents:
             # record agent stocks
             agent.portfolio_history.append(agent.stocks.copy())
@@ -177,7 +178,7 @@ def stockMarketSimulation(seed,
             agent.money_history.append(money)
             agent.portfolio_value_history.append(portfolio_value)
             agent.function_history.append(agent.function)
-            # update strategies
+            # 4 update strategies
             agent.update_strategy(av_market_return, current_price_to_earnings_ratio)
 
 

@@ -7,7 +7,11 @@ def adaptive_switching(agent, propensity_to_switch, realised_returns, possibly_r
     """The agent switches strategy if its returns where below what it could have earned"""
     mean_reverter = mean_reversion
     momentum_trader = momentum
+    noise_trader = noise_trading
     agent_type = str(agent.function)
+
+    if (str(noise_trader) in agent_type):
+        return noise_trader
 
     if (str(mean_reverter) not in agent_type) and (str(momentum_trader) not in agent_type):
         raise ValueError("agent type is unknown")
