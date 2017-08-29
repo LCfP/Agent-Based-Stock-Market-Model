@@ -16,11 +16,11 @@ def stock():
 
 def test_extrapolate(stock):
     # natural number
-    assert_equal(extrapolate_average_profit(stock[0], 4), 60)
+    assert_almost_equal(extrapolate_average_profit(stock[0], 4), 27.27272727)
     # faction
-    assert_equal(int(extrapolate_average_profit(stock[1], 3)), int(55.8666666))
+    assert_equal(int(extrapolate_average_profit(stock[1], 3)), int(25))
     # memory > history
-    assert_equal(extrapolate_average_profit(stock[0], 6), 60)
+    assert_almost_equal(extrapolate_average_profit(stock[0], 6), 27.27272727)
 
 
 def test_ma_price(stock):

@@ -45,8 +45,8 @@ class Marketmaker:
         else:
             multiplication_factor = 1 + inventory_mark_up_factor
         core_price = current_price * multiplication_factor
-        bid_price = core_price - self.bid_ask_spread
-        ask_price = core_price + self.bid_ask_spread
+        bid_price = core_price * ((100 - self.bid_ask_spread) / 100)
+        ask_price = core_price * ((100 + self.bid_ask_spread) / 100)
         return bid_price, ask_price
 
     def sell(self, stock, amount, price):
@@ -104,7 +104,7 @@ class Marketmaker:
         return str(self.name)
 
     def __repr__(self):
-        return "trader_" + str(self.name)
+        return "market_maker_" + str(self.name)
 
     def show(self):
         print("Name:", self.name)

@@ -4,11 +4,13 @@ import random
 import numpy as np
 from stockmarket.limitorderbook import *
 from stockmarket import setup, marketmechanisms, marketmaker
+from stockmarket.functions import div0
 
 def stockMarketSimulation(seed,
                           simulation_time,
                           amount_momentum,
                           amount_mean_reversion,
+                          amount_noise_traders,
                           amount_firms,
                           initial_money,
                           initial_bid_ask,
@@ -31,6 +33,10 @@ def stockMarketSimulation(seed,
                           market_maker_inventory_sensitivity,
                           market_maker_inventory_buffer_of_total_target,
                           m_m_standard_order_percentage_total,
+                          agents_hold_thresholds,
+                          init_share_of_stocks_to_market_maker,
+                          init_backward_simulated_time,
+                          trader_volume_risk_aversion,
                           printProgress=False):
     """Returns a set of agents at time stockMarketSimulationParameterSet['simuatlion_time'] and the values
     of their state variables for every time step in stockMarketSimulationParameterSet['simuatlion_time'].
@@ -82,21 +88,24 @@ def stockMarketSimulation(seed,
     """
     Setup
     """
-    agents = setup.setup_agents(init_money=initial_money,
-                                init_bid_ask_spread=initial_bid_ask,
-                                init_memory_size=initial_memory,
-                                init_ma_s=initial_ma_short,
-                                init_ma_l=initial_ma_long,
-                                momentum_traders=amount_momentum,
-                                reversion_traders=amount_mean_reversion,
-                                init_propensity_to_switch=init_propensity_to_switch,
-                                init_price_to_earnings_window=init_price_to_earnings_window)
+    agents = setup.setup_agents_with_noise_traders(init_money=initial_money,
+                                                   init_bid_ask_spread=initial_bid_ask,
+                                                   init_memory_size=initial_memory,
+                                                   init_ma_s=initial_ma_short,
+                                                   init_ma_l=initial_ma_long,
+                                                   trader_volume_risk_aversion=trader_volume_risk_aversion,
+                                                   momentum_traders=amount_momentum,
+                                                   reversion_traders=amount_mean_reversion,
+                                                   noise_traders=amount_noise_traders,
+                                                   init_propensity_to_switch=init_propensity_to_switch,
+                                                   init_price_to_earnings_window=init_price_to_earnings_window)
 
     firms = setup.setup_firms(init_book_value=initial_book_value,
                               init_profit=initial_profit,
                               firm_profit_mu=firm_profit_mu,
                               firm_profit_delta=firm_profit_delta,
                               firm_profit_sigma=firm_profit_sigma,
+                              backward_simulated_time=init_backward_simulated_time,
                               amount_of_firms=amount_firms
                               )
 
@@ -113,7 +122,8 @@ def stockMarketSimulation(seed,
     for stock in stocks:
         order_books.append(LimitOrderBook(stock, stock.price_history[-1], order_expiration_time))
 
-    setup.distribute_initial_stocks(stocks, agents)
+    agents_and_marketmaker = agents + [market_maker for n in range(int(init_share_of_stocks_to_market_maker * len(agents)))]
+    setup.distribute_initial_stocks(stocks, agents_and_marketmaker)
 
     """
     Simulation
@@ -133,20 +143,26 @@ def stockMarketSimulation(seed,
             for firm in firms:
                 firm.update_profits(firm.determine_profit())
 
-        # 2 continuous double auction market mechanism
+        # 2-3 continuous double auction market mechanism - market maker quotes, traders trade
         market_returns = []
         for idx, stock in enumerate(stocks):
             agents, stock, order_books[idx] = marketmechanisms.continuous_double_auction(market_maker, agents, stock,
                                                                                          order_books[idx],
-                                                                                         marketmechanisms.orders_based_on_sentiment_and_fundamentals)
+                                                                                         marketmechanisms.orders_based_on_sentiment_and_fundamentals,
+                                                                                         agents_hold_thresholds)
             current = stock.price_history[-1]
             previous = stock.price_history[-2]
-            diff = (current - previous) / previous if previous != 0 else (current - (previous + 0.00001)) / (
-                previous + 0.00001) if current != 0 else 0.0
-            market_returns.append(diff)
-        av_market_return = np.mean(market_returns)
+            diff = div0((current - previous), previous) if current != 0 else 0.0
 
-        # 3 record and update variables
+            market_returns.append(diff)
+
+        av_market_return = np.mean(market_returns)
+        current_market_price = stock.price_history[-1]
+        earnings_per_stock = stock.firm.profit / stock.amount
+        current_price_to_earnings_ratio = current_market_price / earnings_per_stock
+        stock.price_to_earnings_history.append(current_price_to_earnings_ratio)
+
+        # 4 record and update variables + switching strategies
         for agent in agents:
             # record agent stocks
             agent.portfolio_history.append(agent.stocks.copy())
@@ -162,11 +178,11 @@ def stockMarketSimulation(seed,
             agent.money_history.append(money)
             agent.portfolio_value_history.append(portfolio_value)
             agent.function_history.append(agent.function)
-            # update strategies
-            agent.update_strategy(av_market_return)
+            # 4 update strategies
+            agent.update_strategy(av_market_return, current_price_to_earnings_ratio)
 
 
-    return agents, firms, stocks, order_books
+    return agents, firms, stocks, order_books, market_maker
 
 
 
