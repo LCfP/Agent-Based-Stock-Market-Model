@@ -41,7 +41,6 @@ def continuous_double_auction(market_maker, agentset, stock, orderbook, valuatio
         if maker_ask_volume > 0 and market_maker_ask_price > 0:
             orderbook.add_ask(market_maker_ask_price, maker_ask_volume, market_maker)
 
-
     add_market_maker_orders()
     market_maker_orders_available = True
 
@@ -68,13 +67,19 @@ def continuous_double_auction(market_maker, agentset, stock, orderbook, valuatio
             # if the market maker orders where not depleted
             market_maker_orders_available = matched_orders[4]
             if not market_maker_orders_available:
-                # TODO add new market maker orders
                 add_market_maker_orders()
-        # clean limit order book
+                market_maker_orders_available = True
+        # clean limit order book and check whether there are still market maker orders
         orderbook.clean_book()
+        # TODO add a mechanism so that the market maker might add new orders when they have been cleaned
+        market_maker_orders_available_after_cleaning = orderbook.m_m_orders_available_after_cleaning
+        if not market_maker_orders_available_after_cleaning:
+            add_market_maker_orders()
 
     # add average price to the stock's memory
     stock.add_price(total_volume, total_money)
+    if total_volume <= 0:
+        print('no volume')
     # at the end of the day, cleanse the order-book
     orderbook.cleanse_book()
     market_maker_orders_available = True
@@ -305,27 +310,22 @@ def orders_based_on_sentiment_and_fundamentals(agent, orderbook, stock, agents_h
         current_price = (orderbook.transaction_prices_history[-1])[-1]
     else:
         current_price = stock.price_history[-1]
-    # 2 Check if the P/E ratio is too high (sell) or too low (buy). Otherwise, follow chartist strategy.
-    earnings_per_stock = stock.firm.profit / stock.amount
-    if (current_price / earnings_per_stock) > agent.price_to_earnings_window[1]:
-        buy_or_sell = 'sell'
-    elif (current_price / earnings_per_stock) < agent.price_to_earnings_window[0]:
-        buy_or_sell = 'buy'
-    else:
-        price_series = stock.price_history + [current_price]
-        buy_or_sell = agent.buy_sell_or_hold(price_series, shortMA=agent.ma_short, longMA=agent.ma_long,
+
+    # determine wether to buy or sell suing the agents strategy
+    price_series = stock.price_history + [current_price]
+    buy_or_sell = agent.buy_sell_or_hold(price_series, shortMA=agent.ma_short, longMA=agent.ma_long,
                                              upper_threshold=agents_hold_thresholds[1],
                                              lower_threshold=agents_hold_thresholds[0])
     # 3 Determine price and volume of the order
     if buy_or_sell == 'buy':
-        # bid price is above the min(lowest ask, last_price)
+        # bid price is above the max(lowest ask, last_price)
         lowest_ask_price = orderbook.lowest_ask_price
-        price = min(current_price, lowest_ask_price) * ((100 + agent.bid_ask_spread) / 100)
+        price = max(current_price, lowest_ask_price) * ((100 + agent.bid_ask_spread) / 100)
         volume = int( int(div0(agent.money, price)) * agent.volume_risk_aversion)
     elif buy_or_sell == 'sell':
-        # ask price is below the max(highest bid or current price)
+        # ask price is below the min(highest bid or current price)
         highest_bid_price = orderbook.highest_bid_price
-        price = max(current_price, highest_bid_price) * ((100 - agent.bid_ask_spread) / 100)
+        price = min(current_price, highest_bid_price) * ((100 - agent.bid_ask_spread) / 100)
         volume = int(agent.stocks[stock] * agent.volume_risk_aversion)
 
     return buy_or_sell, price, volume

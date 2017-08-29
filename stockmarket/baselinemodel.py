@@ -4,6 +4,7 @@ import random
 import numpy as np
 from stockmarket.limitorderbook import *
 from stockmarket import setup, marketmechanisms, marketmaker
+from stockmarket.functions import div0
 
 def stockMarketSimulation(seed,
                           simulation_time,
@@ -149,10 +150,16 @@ def stockMarketSimulation(seed,
                                                                                          agents_hold_thresholds)
             current = stock.price_history[-1]
             previous = stock.price_history[-2]
-            diff = (current - previous) / previous if previous != 0 else (current - (previous + 0.00001)) / (
-                previous + 0.00001) if current != 0 else 0.0
+            diff = div0((current - previous), previous) if current != 0 else 0.0
+
             market_returns.append(diff)
+
         av_market_return = np.mean(market_returns)
+        current_market_price = stock.price_history[-1]
+        earnings_per_stock = stock.firm.profit / stock.amount
+        current_price_to_earnings_ratio = current_market_price / earnings_per_stock
+        # TODO append price to equity ratio to stock history
+        stock.price_to_earnings_history.append(current_price_to_earnings_ratio)
 
         # 3 record and update variables
         for agent in agents:
@@ -171,7 +178,7 @@ def stockMarketSimulation(seed,
             agent.portfolio_value_history.append(portfolio_value)
             agent.function_history.append(agent.function)
             # update strategies
-            agent.update_strategy(av_market_return)
+            agent.update_strategy(av_market_return, current_price_to_earnings_ratio)
 
 
     return agents, firms, stocks, order_books, market_maker

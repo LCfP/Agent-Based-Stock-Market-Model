@@ -115,9 +115,9 @@ class Trader:
             self.stocks[stock] = amount
         self.money -= money
 
-    def update_strategy(self, market_return):
+    def update_strategy(self, market_return, price_to_equity_ratio):
         self.function = self.switching_strategy(self, self.propensity_to_switch,
-                                                self.return_on_assets[-1], market_return)
+                                                self.return_on_assets[-1], market_return, price_to_equity_ratio)
 
     def __str__(self):
         return str(self.name)

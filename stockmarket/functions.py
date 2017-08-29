@@ -48,7 +48,7 @@ def moving_average(x, n):
 
 def div0(a, b):
     """
-    ignore / 0, div0( [-1, 0, 1], 0 ) -> [0, 0, 0]
+    ignore / 0, and return 0 div0( [-1, 0, 1], 0 ) -> [0, 0, 0]
     credits to Dennis @ https://stackoverflow.com/questions/26248654/numpy-return-0-with-divide-by-zero
     """
     #with np.errstate(divide='ignore', invalid='ignore'):

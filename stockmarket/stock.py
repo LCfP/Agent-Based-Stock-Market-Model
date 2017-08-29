@@ -14,6 +14,7 @@ class Stock:
         priceHistoryOnValue = np.array([npv_growing_perpetuity(prof_his * firm.dividend_rate) for prof_his in firm.profit_history])
         priceHistPerStock = np.divide(priceHistoryOnValue, amount)
         self.price_history = list(priceHistPerStock)
+        self.price_to_earnings_history = []
 
     def add_price(self, vol, price):
         """Adds the average stock price of the period to the price history of the stock
