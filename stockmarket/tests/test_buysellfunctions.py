@@ -28,7 +28,7 @@ def stock():
 
 def test_mean_reversion(stock):
     assert_equal(mean_reversion(stock[0].price_history, shortMA=20, longMA=200,upper_threshold=1.05, lower_threshold=0.95), 'sell')
-    assert_equal(mean_reversion(stock[1].price_history, shortMA=20, longMA=200,upper_threshold=1.0, lower_threshold=1.0), 'buy')
+    assert_equal(mean_reversion(stock[1].price_history, shortMA=20, longMA=200,upper_threshold=1.0, lower_threshold=1.0), 'sell')
 
 
 def test_momentum(stock):

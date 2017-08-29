@@ -32,8 +32,3 @@ agents, firms, stocks, order_books, market_maker = baselinemodel.stockMarketSimu
                                                                                        trader_volume_risk_aversion=0.1,
                                                                                        printProgress=True
                                                                                        )
-
-
-print(order_books[0].buy_orders_history)
-
-print(order_books[0].sell_orders_history)
