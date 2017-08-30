@@ -120,7 +120,7 @@ def stockMarketSimulation(seed,
 
     order_books = []
     for stock in stocks:
-        order_books.append(LimitOrderBook(stock, stock.price_history[-1], order_expiration_time))
+        order_books.append(LimitOrderBook(stock, stock.price_history[-1], order_expiration_time, initial_bid_ask))
 
     agents_and_marketmaker = agents + [market_maker for n in range(int(init_share_of_stocks_to_market_maker * len(agents)))]
     setup.distribute_initial_stocks(stocks, agents_and_marketmaker)

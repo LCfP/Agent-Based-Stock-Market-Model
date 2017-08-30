@@ -41,43 +41,52 @@ def continuous_double_auction(market_maker, agentset, stock, orderbook, valuatio
         if maker_ask_volume > 0 and market_maker_ask_price > 0:
             orderbook.add_ask(market_maker_ask_price, maker_ask_volume, market_maker)
 
-    add_market_maker_orders()
+    # TODO cancel the market maker orders
+    #add_market_maker_orders()
     market_maker_orders_available = True
 
     # 3 Continuous double auction trading
     for agent in randomized_agent_set:
         # add orders to the orderbook according to the type of valuation function
-        buy_or_sell, price, volume = valuation_type_function(agent, orderbook, stock, agents_hold_thresholds)
+        if not agent.order_in_market:
+            buy_or_sell, price, volume = valuation_type_function(agent, orderbook, stock, agents_hold_thresholds)
 
-        if volume > 0 and price > 0:
-            if buy_or_sell == 'buy':
-                orderbook.add_bid(price, volume, agent)
-                orderbook.buy_orders_today += 1
-            elif buy_or_sell == 'sell':
-                orderbook.add_ask(price, volume, agent)
-                orderbook.sell_orders_today += 1
+            if volume > 0 and price > 0:
+                if buy_or_sell == 'buy':
+                    agent.order_in_market = True
+                    orderbook.add_bid(price, volume, agent)
+                    orderbook.buy_orders_today += 1
+                elif buy_or_sell == 'sell':
+                    orderbook.add_ask(price, volume, agent)
+                    orderbook.sell_orders_today += 1
+                    agent.order_in_market = True
 
-        while True:
-            matched_orders = orderbook.match_orders()
-            if matched_orders is None:
-                break
-            # execute trade
-            transaction(matched_orders[2].owner, matched_orders[3].owner ,stock,
-                        matched_orders[1],
-                        matched_orders[0] * matched_orders[1])
-            total_volume += matched_orders[1]
-            total_money += matched_orders[0] * matched_orders[1]
+            while True:
+                matched_orders = orderbook.match_orders()
+                if matched_orders is None:
+                    break
+                # execute trade
+                transaction(matched_orders[2].owner, matched_orders[3].owner ,stock,
+                            matched_orders[1],
+                            matched_orders[0] * matched_orders[1])
+                total_volume += matched_orders[1]
+                total_money += matched_orders[0] * matched_orders[1]
+
+            # TODO deleted the marketmaker role
             # if the market maker orders where not depleted
-            market_maker_orders_available = matched_orders[4]
-            if not market_maker_orders_available:
-                add_market_maker_orders()
-                market_maker_orders_available = True
+            # market_maker_orders_available = matched_orders[4]
+            # if not market_maker_orders_available:
+            #     add_market_maker_orders()
+            #     market_maker_orders_available = True
+
         # clean limit order book and check whether there are still market maker orders
         orderbook.clean_book()
-        market_maker_orders_available_after_cleaning = orderbook.m_m_orders_available_after_cleaning
-        if not market_maker_orders_available_after_cleaning:
-            add_market_maker_orders()
-            market_maker_orders_available = True
+
+        # TODO Deleted market maker role
+        # market_maker_orders_available_after_cleaning = orderbook.m_m_orders_available_after_cleaning
+        # if not market_maker_orders_available_after_cleaning:
+        #     add_market_maker_orders()
+        #     market_maker_orders_available = True
 
     # add average price to the stock's memory
     stock.add_price(total_volume, total_money)
@@ -107,16 +116,23 @@ def orders_based_on_sentiment_and_fundamentals(agent, orderbook, stock, agents_h
     buy_or_sell = agent.buy_sell_or_hold(price_series, shortMA=agent.ma_short, longMA=agent.ma_long,
                                              upper_threshold=agents_hold_thresholds[1],
                                              lower_threshold=agents_hold_thresholds[0])
+    #
+    lowest_ask_price = orderbook.lowest_ask_price
+    highest_bid_price = orderbook.highest_bid_price
+    bid_ask_spread = lowest_ask_price - highest_bid_price
+    # TODO replace point5 with a parameter
+    sigma = 0.5 * bid_ask_spread if bid_ask_spread > 0 else 0.5 * agent.bid_ask_spread
+
     # 3 Determine price and volume of the order
     if buy_or_sell == 'buy':
-        # bid price is above the max(lowest ask, last_price)
-        lowest_ask_price = orderbook.lowest_ask_price
-        price = max(current_price, lowest_ask_price) * ((100 + agent.bid_ask_spread) / 100)
+        # bid price is around the max(lowest ask, last_price)
+        reference_price = max(current_price, lowest_ask_price)
+        price = np.random.normal(reference_price, sigma)
         volume = int( int(div0(agent.money, price)) * agent.volume_risk_aversion)
     elif buy_or_sell == 'sell':
-        # ask price is below the min(highest bid or current price)
-        highest_bid_price = orderbook.highest_bid_price
-        price = min(current_price, highest_bid_price) * ((100 - agent.bid_ask_spread) / 100)
+        # ask price is around the min(highest bid or current price)
+        reference_price = min(current_price, highest_bid_price)
+        price = np.random.normal(reference_price, sigma)
         volume = int(agent.stocks[stock] * agent.volume_risk_aversion)
 
     return buy_or_sell, price, volume

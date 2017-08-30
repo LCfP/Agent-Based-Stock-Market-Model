@@ -26,6 +26,7 @@ class Trader:
         self.return_on_assets = []
         self.price_to_earnings_window = price_to_earnings_window
         self.volume_risk_aversion = trader_volume_risk_aversion
+        self.order_in_market = False
 
     def valuate_stocks(self, stock):
         """
