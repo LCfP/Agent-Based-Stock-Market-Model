@@ -62,7 +62,7 @@ class Firm:
 
         """
         self.profit = next_profit
-        #self.profit_history.append(next_profit)
+        self.profit_history.append(next_profit)
 
     def __repr__(self):
         return 'firm_' + str(self.name)

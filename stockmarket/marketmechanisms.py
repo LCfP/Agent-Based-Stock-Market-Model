@@ -90,18 +90,14 @@ def orders_based_on_sentiment_and_fundamentals(agent, orderbook, stock, agents_h
     lowest_ask_price = orderbook.lowest_ask_price
     highest_bid_price = orderbook.highest_bid_price
     bid_ask_spread = lowest_ask_price - highest_bid_price
-    # TODO replace point5 with a parameter
-    sigma = order_variability * bid_ask_spread if bid_ask_spread > 0 else order_variability * agent.bid_ask_spread
+
+    sigma = order_variability * agent.bid_ask_spread
 
     # 3 Determine price and volume of the order
     if buy_or_sell == 'buy':
-        # bid price is around the max(lowest ask, last_price)
-        #reference_price = max(current_price, lowest_ask_price)
         price = np.random.normal(lowest_ask_price, sigma)
         volume = int( int(div0(agent.money, price)) * agent.volume_risk_aversion)
     elif buy_or_sell == 'sell':
-        # ask price is around the min(highest bid or current price)
-        #reference_price = min(current_price, highest_bid_price)
         price = np.random.normal(highest_bid_price, sigma)
         volume = int(agent.stocks[stock] * agent.volume_risk_aversion)
 
