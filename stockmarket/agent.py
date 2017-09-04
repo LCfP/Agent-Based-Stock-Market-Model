@@ -3,7 +3,7 @@ from stockmarket import switchingstrategies
 
 class Trader:
     """a base class for Traders"""
-    def __init__(self, name, money, bid_ask_spread, memory, ma_short, ma_long, valuation_function,
+    def __init__(self, name, money, bid_ask_spread, ma_short, ma_long, valuation_function,
                  propensity_to_switch, price_to_earnings_window, trader_volume_risk_aversion,
                  switching_strategy=switchingstrategies.adaptive_switching
                  ):
@@ -14,7 +14,6 @@ class Trader:
         self.stocks = StockDict()
         self.portfolio_history = []
         self.portfolio_value_history = [0]
-        self.memory_size = memory
         # bid ask spread is measured in basis points
         self.bid_ask_spread = bid_ask_spread / 100
         self.function = valuation_function

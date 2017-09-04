@@ -6,7 +6,7 @@ from stockmarket import firms, stock, valuationfunctions, switchingstrategies, b
 from stockmarket.agent import Trader
 
 
-def setup_agents(init_money, init_bid_ask_spread, init_memory_size, init_ma_s, init_ma_l, init_propensity_to_switch,
+def setup_agents(init_money, init_bid_ask_spread, init_ma_s, init_ma_l, init_propensity_to_switch,
                  init_price_to_earnings_window, trader_volume_risk_aversion, momentum_traders=3, reversion_traders=3):
     """This returns an initialized agent set"""
     agent_set = []
@@ -14,7 +14,6 @@ def setup_agents(init_money, init_bid_ask_spread, init_memory_size, init_ma_s, i
                                 Trader(name=x,
                                        money=randomize_init_variable(init_money[0], init_money[1]),
                                        bid_ask_spread=randomize_init_variable(init_bid_ask_spread[0], init_bid_ask_spread[1]),
-                                       memory=randomize_init_variable(init_memory_size[0], init_memory_size[1]),
                                        ma_short=randomize_init_variable(init_ma_s[0], init_ma_s[1]),
                                        ma_long=randomize_init_variable(init_ma_l[0], init_ma_l[1]),
                                        valuation_function=y, propensity_to_switch=init_propensity_to_switch,
@@ -31,7 +30,7 @@ def setup_agents(init_money, init_bid_ask_spread, init_memory_size, init_ma_s, i
     return agent_set
 
 
-def setup_agents_with_noise_traders(init_money, init_bid_ask_spread, init_memory_size, init_ma_s, init_ma_l,
+def setup_agents_with_noise_traders(init_money, init_bid_ask_spread, init_ma_s, init_ma_l,
                                     init_propensity_to_switch, init_price_to_earnings_window,
                                     trader_volume_risk_aversion,
                                     momentum_traders=3, reversion_traders=3, noise_traders=3):
@@ -41,7 +40,6 @@ def setup_agents_with_noise_traders(init_money, init_bid_ask_spread, init_memory
         Trader(name=x,
                money=randomize_init_variable(init_money[0], init_money[1]),
                bid_ask_spread=randomize_init_variable(init_bid_ask_spread[0], init_bid_ask_spread[1]),
-               memory=randomize_init_variable(init_memory_size[0], init_memory_size[1]),
                ma_short=randomize_init_variable(init_ma_s[0], init_ma_s[1]),
                ma_long=randomize_init_variable(init_ma_l[0], init_ma_l[1]),
                valuation_function=y, propensity_to_switch=init_propensity_to_switch,

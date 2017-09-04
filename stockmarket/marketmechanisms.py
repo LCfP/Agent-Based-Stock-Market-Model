@@ -9,7 +9,7 @@ import numpy as np
 import copy
 
 
-def continuous_double_auction(market_maker, agentset, stock, orderbook, valuation_type_function, agents_hold_thresholds):
+def continuous_double_auction(agentset, stock, orderbook, valuation_type_function, agents_hold_thresholds, order_variability):
     """
     Agent, bids and asks are continuously submitted to the limit-order book. The resulting trades are executed.
     """
@@ -29,27 +29,11 @@ def continuous_double_auction(market_maker, agentset, stock, orderbook, valuatio
     else:
         current_price = stock.price_history[-1]
 
-    # 2 Ask market maker to contribute initial bid and asks
-    def add_market_maker_orders():
-        market_maker_bid_price, market_maker_ask_price = market_maker.determine_spread(current_price=current_price, stock=stock)
-
-        maker_bid_volume = min(market_maker.standard_order_size, int(div0(market_maker.money, market_maker_bid_price)))
-        if maker_bid_volume > 0 and market_maker_bid_price > 0:
-            orderbook.add_bid(market_maker_bid_price, maker_bid_volume, market_maker)
-
-        maker_ask_volume = min(market_maker.standard_order_size, market_maker.stocks[stock])
-        if maker_ask_volume > 0 and market_maker_ask_price > 0:
-            orderbook.add_ask(market_maker_ask_price, maker_ask_volume, market_maker)
-
-    # TODO cancel the market maker orders
-    #add_market_maker_orders()
-    market_maker_orders_available = True
-
     # 3 Continuous double auction trading
     for agent in randomized_agent_set:
         # add orders to the orderbook according to the type of valuation function
         if not agent.order_in_market:
-            buy_or_sell, price, volume = valuation_type_function(agent, orderbook, stock, agents_hold_thresholds)
+            buy_or_sell, price, volume = valuation_type_function(agent, orderbook, stock, agents_hold_thresholds, order_variability)
 
             if volume > 0 and price > 0:
                 if buy_or_sell == 'buy':
@@ -72,21 +56,8 @@ def continuous_double_auction(market_maker, agentset, stock, orderbook, valuatio
                 total_volume += matched_orders[1]
                 total_money += matched_orders[0] * matched_orders[1]
 
-            # TODO deleted the marketmaker role
-            # if the market maker orders where not depleted
-            # market_maker_orders_available = matched_orders[4]
-            # if not market_maker_orders_available:
-            #     add_market_maker_orders()
-            #     market_maker_orders_available = True
-
         # clean limit order book and check whether there are still market maker orders
         orderbook.clean_book()
-
-        # TODO Deleted market maker role
-        # market_maker_orders_available_after_cleaning = orderbook.m_m_orders_available_after_cleaning
-        # if not market_maker_orders_available_after_cleaning:
-        #     add_market_maker_orders()
-        #     market_maker_orders_available = True
 
     # add average price to the stock's memory
     stock.add_price(total_volume, total_money)
@@ -94,12 +65,11 @@ def continuous_double_auction(market_maker, agentset, stock, orderbook, valuatio
         print('no volume')
     # at the end of the day, cleanse the order-book
     orderbook.cleanse_book()
-    #market_maker_orders_available = True
 
     return agentset, stock, orderbook
 
 
-def orders_based_on_sentiment_and_fundamentals(agent, orderbook, stock, agents_hold_thresholds):
+def orders_based_on_sentiment_and_fundamentals(agent, orderbook, stock, agents_hold_thresholds, order_variability):
     """Add orders to the orderbook based on stock price movement and deviation from fundamentals"""
     price = 0
     volume = 0
@@ -121,18 +91,18 @@ def orders_based_on_sentiment_and_fundamentals(agent, orderbook, stock, agents_h
     highest_bid_price = orderbook.highest_bid_price
     bid_ask_spread = lowest_ask_price - highest_bid_price
     # TODO replace point5 with a parameter
-    sigma = 0.5 * bid_ask_spread if bid_ask_spread > 0 else 0.5 * agent.bid_ask_spread
+    sigma = order_variability * bid_ask_spread if bid_ask_spread > 0 else order_variability * agent.bid_ask_spread
 
     # 3 Determine price and volume of the order
     if buy_or_sell == 'buy':
         # bid price is around the max(lowest ask, last_price)
-        reference_price = max(current_price, lowest_ask_price)
-        price = np.random.normal(reference_price, sigma)
+        #reference_price = max(current_price, lowest_ask_price)
+        price = np.random.normal(lowest_ask_price, sigma)
         volume = int( int(div0(agent.money, price)) * agent.volume_risk_aversion)
     elif buy_or_sell == 'sell':
         # ask price is around the min(highest bid or current price)
-        reference_price = min(current_price, highest_bid_price)
-        price = np.random.normal(reference_price, sigma)
+        #reference_price = min(current_price, highest_bid_price)
+        price = np.random.normal(highest_bid_price, sigma)
         volume = int(agent.stocks[stock] * agent.volume_risk_aversion)
 
     return buy_or_sell, price, volume
