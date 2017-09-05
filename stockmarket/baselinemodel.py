@@ -82,7 +82,7 @@ def stockMarketSimulation(seed,
     """
 
     # divide total money into (approximately) money per agent
-    initial_money = (initial_total_money[0] / number_of_agents, initial_total_money[1] / number_of_agents)
+    initial_money = (int(initial_total_money[0] / number_of_agents), int(initial_total_money[1] / number_of_agents))
     # calculate the amount of different types of traders
     amount_technical_traders = int(number_of_agents * (share_chartists))
     amount_noise_traders = number_of_agents - amount_technical_traders
@@ -159,8 +159,6 @@ def stockMarketSimulation(seed,
         current_market_price = stock.price_history[-1]
         earnings_per_stock = stock.firm.profit / stock.amount
         current_price_to_earnings_ratio = current_market_price / earnings_per_stock
-        if (day == 600) or (day == 1000):
-            print('day is ' ,day)
         stock.price_to_earnings_history.append(current_price_to_earnings_ratio)
 
         # 4 record and update variables + switching strategies

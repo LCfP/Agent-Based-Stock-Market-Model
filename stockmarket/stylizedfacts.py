@@ -40,7 +40,7 @@ def fat_tails(returns):
     results = powerlaw.Fit(returns)
     alpha = results.power_law.alpha
     print(alpha)
-    if (alpha < 5) and (alpha > 2):
+    if (alpha < 5) and (alpha > 3):
         return True
     else:
         return False
