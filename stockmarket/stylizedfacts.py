@@ -30,20 +30,20 @@ def zero_autocorrelation(returns, lags):
     # if mean autocorrelation are between -0.1 and 0.1
     average_autocorrelation = np.mean(autocorr_returns[1:])
     if (average_autocorrelation < 0.1) and (average_autocorrelation > -0.1):
-        return True
+        return True, average_autocorrelation
     else:
-        return False
+        return False, np.inf
 
 
 # Test 2
 def fat_tails(returns):
-    results = powerlaw.Fit(returns)
+    results = powerlaw.Fit(returns, verbose=False)
     alpha = results.power_law.alpha
-    print(alpha)
+    #print(alpha)
     if (alpha < 5) and (alpha > 3):
-        return True
+        return True, alpha
     else:
-        return False
+        return False, np.inf
 
 
 # Test 3
@@ -51,18 +51,18 @@ def clustered_volatility(returns, lags):
     absolute_returns = returns.abs()
     autocorr_abs_returns = [absolute_returns.autocorr(lag=lag) for lag in range(lags)]
     average_autocorrelation = np.mean(autocorr_abs_returns[1:])
-    print(average_autocorrelation)
+    #print(average_autocorrelation)
     if (average_autocorrelation < 0.1) and (average_autocorrelation > -0.1):
-        return False
+        return False, np.inf
     else:
-        return True
+        return True, average_autocorrelation
 
 
 # Test 4
 def long_memory(returns, hurst_function, lag1, lag2):
     h = hurst_function(returns, lag1, lag2)
-    print('h = ', h)
-    return not isclose(0.5, h, abs_tol=(10 ** -1 / 2))
+    #print('h = ', h)
+    return not isclose(0.5, h, abs_tol=(10 ** -1 / 2)), h
 
 def hurst(price_series, lag1, lag2):
     """
