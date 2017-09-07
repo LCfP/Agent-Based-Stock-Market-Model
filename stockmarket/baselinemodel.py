@@ -29,6 +29,7 @@ def stockMarketSimulation(seed,
                           firm_profit_delta,
                           firm_profit_sigma,
                           profit_announcement_working_days,
+                          mean_reversion_memory_divider,
                           printProgress=False):
     """Returns a set of agents at time stockMarketSimulationParameterSet['simuatlion_time'] and the values
     of their state variables for every time step in stockMarketSimulationParameterSet['simuatlion_time'].
@@ -121,6 +122,11 @@ def stockMarketSimulation(seed,
 
     setup.distribute_initial_stocks(stocks, agents)
 
+    # TODO fill market returns history with stock market prices
+    #previous_period_stock_prices = stock.price_history[-(profit_announcement_working_days + 1):]
+    #market_returns_history = list(np.diff(previous_period_stock_prices))
+    market_returns_history = []
+
     """
     Simulation
 
@@ -144,11 +150,17 @@ def stockMarketSimulation(seed,
 
         # 2-3 continuous double auction market mechanism - market maker quotes, traders trade
         market_returns = []
+
         for idx, stock in enumerate(stocks):
+            current_market_price = stock.price_history[-1]
+            earnings_per_stock = stock.firm.profit / stock.amount
+            current_price_to_earnings_ratio = current_market_price / earnings_per_stock
+            stock.price_to_earnings_history.append(current_price_to_earnings_ratio)
             agents, stock, order_books[idx] = marketmechanisms.continuous_double_auction(agents, stock,
                                                                                          order_books[idx],
                                                                                          marketmechanisms.orders_based_on_sentiment_and_fundamentals,
-                                                                                         agents_hold_thresholds, agent_order_variability)
+                                                                                         agents_hold_thresholds, agent_order_variability,
+                                                                                         current_price_to_earnings_ratio, mean_reversion_memory_divider)
             current = stock.price_history[-1]
             previous = stock.price_history[-2]
             diff = div0((current - previous), previous) if current != 0 else 0.0
@@ -156,10 +168,8 @@ def stockMarketSimulation(seed,
             market_returns.append(diff)
 
         av_market_return = np.mean(market_returns)
-        current_market_price = stock.price_history[-1]
-        earnings_per_stock = stock.firm.profit / stock.amount
-        current_price_to_earnings_ratio = current_market_price / earnings_per_stock
-        stock.price_to_earnings_history.append(current_price_to_earnings_ratio)
+        # TODO add av market return to market_return_history
+        market_returns_history.append(av_market_return)
 
         # 4 record and update variables + switching strategies
         for agent in agents:
@@ -177,8 +187,10 @@ def stockMarketSimulation(seed,
             agent.money_history.append(money)
             agent.portfolio_value_history.append(portfolio_value)
             agent.function_history.append(agent.function)
-            # 4 update strategies
-            agent.update_strategy(av_market_return, current_price_to_earnings_ratio)
+            # 4 update strategies TODO have agents compare update their strategy every 20 days, and look at av_market return for that period
+            if (day % profit_announcement_working_days == 0) and (day != 0):
+                av_market_return_previous_period = np.mean(market_returns_history[-profit_announcement_working_days:])
+                agent.update_strategy(av_market_return_previous_period, profit_announcement_working_days)
 
 
     return agents, firms, stocks, order_books

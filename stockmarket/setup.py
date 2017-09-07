@@ -101,8 +101,9 @@ def distribute_initial_stocks(stocks, agents):
         rest = int(stock.amount % agent_number)
         for x in range(0, rest):
             agents[x].stocks[stock] += amount_each + 1
-            agents[x].portfolio_value_history[0] += stock.price_history[-1]
+            agents[x].portfolio_value_history[0] += agents[x].stocks[stock] * stock.price_history[-1]
         for x in range(rest, agent_number):
             agents[x].stocks[stock] += amount_each
-            agents[x].portfolio_value_history[0] += stock.price_history[-1]
+            agents[x].portfolio_value_history[0] += agents[x].stocks[stock] * stock.price_history[-1]
         # initialize the agents portfolio value history
+

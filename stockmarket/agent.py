@@ -1,5 +1,7 @@
 """In this file, we define the benchmark stock market model agent classes"""
 from stockmarket import switchingstrategies
+import numpy as np
+from stockmarket.buysellfunctions import noise_trading, mean_reversion
 
 class Trader:
     """a base class for Traders"""
@@ -46,9 +48,8 @@ class Trader:
         # calls valuation function currently assigned to the Trader.
         return self.function(stock=stock, memory=self.memory_size, s=self.ma_short, l=self.ma_long)
 
-    def buy_sell_or_hold(self, price_series, shortMA=20, longMA=200, upper_threshold=1.05, lower_threshold=0.95):
+    def buy_sell_or_hold(self, price_series, current_price_to_earnings_ratio, shortMA=20, longMA=200, upper_threshold=1.05, lower_threshold=0.95, mean_reversion_memory_divider=4):
         """
-
         Determine to place a buy, sell or no order for a stock
 
         Parameters
@@ -62,7 +63,24 @@ class Trader:
             buy, sell or hold
 
         """
-        return self.function(price_series, shortMA, longMA,upper_threshold, lower_threshold)
+        # Make sure that the trader is not a noise trader:
+        noise_trader = False
+        if (str(noise_trading) in str(self.function)):
+            noise_trader = True
+
+        # Check if the P/E ratio is too high or too low always switch to mean reversion strategy
+        if (current_price_to_earnings_ratio > self.price_to_earnings_window[1]) and not noise_trader:
+            buy_sell_hold = 'sell'
+        # if the price is below fundamental value buy:
+        elif current_price_to_earnings_ratio < self.price_to_earnings_window[0] and not noise_trader:
+            buy_sell_hold = 'buy'
+        # else the standard strategy
+        else:
+            if (str(mean_reversion) in str(self.function)):
+                shortMA = int(shortMA / mean_reversion_memory_divider)
+                longMA = int(longMA / mean_reversion_memory_divider)
+            buy_sell_hold = self.function(price_series, shortMA, longMA,upper_threshold, lower_threshold)
+        return buy_sell_hold
 
     def sell(self, stock, amount, price):
         """Sells stocks
@@ -115,9 +133,10 @@ class Trader:
             self.stocks[stock] = amount
         self.money -= money
 
-    def update_strategy(self, market_return, price_to_equity_ratio):
+    def update_strategy(self, market_return, window):
+        return_on_assets = np.mean(self.return_on_assets[-window:])
         self.function = self.switching_strategy(self, self.propensity_to_switch,
-                                                self.return_on_assets[-1], market_return, price_to_equity_ratio)
+                                                return_on_assets, market_return)
 
     def __str__(self):
         return str(self.name)

@@ -34,10 +34,18 @@ def zero_autocorrelation(returns, lags):
     else:
         return False, np.inf
 
+def fat_tails_kurtosis(returns):
+    series_returns = pd.Series(returns)
+    kurt = series_returns.kurtosis()
+    if kurt > 4:
+        return True, kurt
+    else:
+        return False, np.inf
+
 
 # Test 2
 def fat_tails(returns):
-    results = powerlaw.Fit(returns, verbose=False)
+    results = powerlaw.Fit(returns)
     alpha = results.power_law.alpha
     #print(alpha)
     if (alpha < 5) and (alpha > 3):

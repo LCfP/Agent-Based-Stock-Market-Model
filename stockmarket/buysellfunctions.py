@@ -20,6 +20,8 @@ import numpy as np
 
 def mean_reversion(prices, shortMA, longMA, upper_threshold, lower_threshold):
     """Buy or sell against the trend"""
+    shortMA = int(shortMA)
+    longMA = int(longMA)
     short_ma = sum(prices[len(prices) - shortMA:]) / shortMA
     long_ma = sum(prices[len(prices) - longMA:]) / longMA
     momentum = short_ma / long_ma

@@ -9,7 +9,7 @@ import numpy as np
 import copy
 
 
-def continuous_double_auction(agentset, stock, orderbook, valuation_type_function, agents_hold_thresholds, order_variability):
+def continuous_double_auction(agentset, stock, orderbook, valuation_type_function, agents_hold_thresholds, order_variability, current_price_to_earnings_ratio, mean_reversion_memory_divider):
     """
     Agent, bids and asks are continuously submitted to the limit-order book. The resulting trades are executed.
     """
@@ -33,7 +33,7 @@ def continuous_double_auction(agentset, stock, orderbook, valuation_type_functio
     for agent in randomized_agent_set:
         # add orders to the orderbook according to the type of valuation function
         if not agent.order_in_market:
-            buy_or_sell, price, volume = valuation_type_function(agent, orderbook, stock, agents_hold_thresholds, order_variability)
+            buy_or_sell, price, volume = valuation_type_function(agent, orderbook, stock, agents_hold_thresholds, order_variability, current_price_to_earnings_ratio, mean_reversion_memory_divider)
 
             if volume > 0 and price > 0:
                 if buy_or_sell == 'buy':
@@ -69,7 +69,7 @@ def continuous_double_auction(agentset, stock, orderbook, valuation_type_functio
     return agentset, stock, orderbook
 
 
-def orders_based_on_sentiment_and_fundamentals(agent, orderbook, stock, agents_hold_thresholds, order_variability):
+def orders_based_on_sentiment_and_fundamentals(agent, orderbook, stock, agents_hold_thresholds, order_variability, current_price_to_earnings_ratio, mean_reversion_memory_divider):
     """Add orders to the orderbook based on stock price movement and deviation from fundamentals"""
     price = 0
     volume = 0
@@ -81,12 +81,12 @@ def orders_based_on_sentiment_and_fundamentals(agent, orderbook, stock, agents_h
     else:
         current_price = stock.price_history[-1]
 
-    # determine wether to buy or sell suing the agents strategy
+    # determine whether to buy or sell following the agents strategy
     price_series = stock.price_history + [current_price]
-    buy_or_sell = agent.buy_sell_or_hold(price_series, shortMA=agent.ma_short, longMA=agent.ma_long,
+    buy_or_sell = agent.buy_sell_or_hold(price_series, current_price_to_earnings_ratio, shortMA=agent.ma_short, longMA=agent.ma_long,
                                              upper_threshold=agents_hold_thresholds[1],
-                                             lower_threshold=agents_hold_thresholds[0])
-    #
+                                             lower_threshold=agents_hold_thresholds[0], mean_reversion_memory_divider=mean_reversion_memory_divider)
+
     lowest_ask_price = orderbook.lowest_ask_price
     highest_bid_price = orderbook.highest_bid_price
     bid_ask_spread = lowest_ask_price - highest_bid_price
