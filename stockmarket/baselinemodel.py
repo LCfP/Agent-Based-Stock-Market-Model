@@ -168,7 +168,6 @@ def stockMarketSimulation(seed,
             market_returns.append(diff)
 
         av_market_return = np.mean(market_returns)
-        # TODO add av market return to market_return_history
         market_returns_history.append(av_market_return)
 
         # 4 record and update variables + switching strategies
@@ -187,7 +186,7 @@ def stockMarketSimulation(seed,
             agent.money_history.append(money)
             agent.portfolio_value_history.append(portfolio_value)
             agent.function_history.append(agent.function)
-            # 4 update strategies TODO have agents compare update their strategy every 20 days, and look at av_market return for that period
+            # 4 update strategies
             if (day % profit_announcement_working_days == 0) and (day != 0):
                 av_market_return_previous_period = np.mean(market_returns_history[-profit_announcement_working_days:])
                 agent.update_strategy(av_market_return_previous_period, profit_announcement_working_days)

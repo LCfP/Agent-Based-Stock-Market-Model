@@ -16,11 +16,6 @@ def adaptive_switching(agent, propensity_to_switch, realised_returns, possibly_r
     if (str(mean_reverter) not in agent_type) and (str(momentum_trader) not in agent_type):
         raise ValueError("agent type is unknown")
 
-    # TODO remove this code Check if the P/E ratio is too high or too low always switch to mean reversion strategy
-    # if (price_to_earnings > agent.price_to_earnings_window[1]) or (
-    #     price_to_earnings < agent.price_to_earnings_window[0]):
-    #     return mean_reverter
-
     missed_returns = max((possibly_realised_returns - realised_returns), 0)
     prob_status_quo_choice = max(1 - missed_returns * propensity_to_switch, 0)
 
