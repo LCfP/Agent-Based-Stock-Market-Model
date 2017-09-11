@@ -10,8 +10,40 @@ from numpy.testing import assert_equal
 
 @pytest.fixture()
 def agents():
-    return [Trader("Agent1", 1000, 0, 2, 3, 5, lambda **x: extrapolate_average_profit(**x), propensity_to_switch=1.1),
-            Trader("Agent2", 1000, 0, 2, 3, 5, lambda **x: extrapolate_ma_price(**x), propensity_to_switch=1.1)]
+    return [Trader(name="Agent1", money=1000, bid_ask_spread=0, ma_short=2, ma_long=3,
+                   valuation_function=lambda **x: extrapolate_average_profit(**x),
+                   propensity_to_switch=1.1, price_to_earnings_window=(6,12), trader_volume_risk_aversion= 0.1),
+            Trader(name="Agent2", money=1000, bid_ask_spread=0, ma_short=2, ma_long=3,
+                   valuation_function=lambda **x: extrapolate_ma_price(**x),
+                   propensity_to_switch=1.1, price_to_earnings_window=(6,12), trader_volume_risk_aversion= 0.1),
+            Trader(name="Agent3", money=1000, bid_ask_spread=0, ma_short=2, ma_long=3,
+                   valuation_function=lambda **x: extrapolate_average_profit(**x),
+                   propensity_to_switch=1.1, price_to_earnings_window=(6, 12), trader_volume_risk_aversion=0.1),
+            Trader(name="Agent4", money=1000, bid_ask_spread=0, ma_short=2, ma_long=3,
+                   valuation_function=lambda **x: extrapolate_ma_price(**x),
+                   propensity_to_switch=1.1, price_to_earnings_window=(6, 12), trader_volume_risk_aversion=0.1),
+            Trader(name="Agent5", money=1000, bid_ask_spread=0, ma_short=2, ma_long=3,
+                   valuation_function=lambda **x: extrapolate_average_profit(**x),
+                   propensity_to_switch=1.1, price_to_earnings_window=(6, 12), trader_volume_risk_aversion=0.1),
+            Trader(name="Agent6", money=1000, bid_ask_spread=0, ma_short=2, ma_long=3,
+                   valuation_function=lambda **x: extrapolate_ma_price(**x),
+                   propensity_to_switch=1.1, price_to_earnings_window=(6, 12), trader_volume_risk_aversion=0.1),
+            Trader(name="Agent7", money=1000, bid_ask_spread=0, ma_short=2, ma_long=3,
+                   valuation_function=lambda **x: extrapolate_average_profit(**x),
+                   propensity_to_switch=1.1, price_to_earnings_window=(6, 12), trader_volume_risk_aversion=0.1),
+            Trader(name="Agent8", money=1000, bid_ask_spread=0, ma_short=2, ma_long=3,
+                   valuation_function=lambda **x: extrapolate_ma_price(**x),
+                   propensity_to_switch=1.1, price_to_earnings_window=(6, 12), trader_volume_risk_aversion=0.1),
+            Trader(name="Agent9", money=1000, bid_ask_spread=0, ma_short=2, ma_long=3,
+                   valuation_function=lambda **x: extrapolate_average_profit(**x),
+                   propensity_to_switch=1.1, price_to_earnings_window=(6, 12), trader_volume_risk_aversion=0.1),
+            Trader(name="Agent10", money=1000, bid_ask_spread=0, ma_short=2, ma_long=3,
+                   valuation_function=lambda **x: extrapolate_ma_price(**x),
+                   propensity_to_switch=1.1, price_to_earnings_window=(6, 12), trader_volume_risk_aversion=0.1)
+
+
+            ]
+
 
 @pytest.fixture()
 def limitorderbooks():
@@ -19,7 +51,7 @@ def limitorderbooks():
     firm = Firm("Firm1", 10000, [200, 300, 400, 300])
     # create a stock of that firm
     stocks = Stock(firm, 1000)
-    return [LimitOrderBook(stocks, 100, 120)]
+    return [LimitOrderBook(stocks, 100, 120, initial_bid_ask=(1, 1))]
 
 def test_add_bid(limitorderbooks):
     limitorderbooks[0].add_bid(10, 20, 'trader-1')
@@ -47,11 +79,11 @@ def test_add_ask(limitorderbooks):
     # second highest ask trader = trader-5
     assert_equal(limitorderbooks[0].asks[-2].owner, 'trader-5')
 
-def test_clean_book(limitorderbooks):
-    limitorderbooks[0].add_bid(10, 20, 'trader-1')
-    limitorderbooks[0].add_bid(5, 20, 'trader-2')
-    limitorderbooks[0].add_ask(11, 20, 'trader-1')
-    limitorderbooks[0].add_ask(5, 20, 'trader-2')
+def test_clean_book(limitorderbooks, agents):
+    limitorderbooks[0].add_bid(10, 20, agents[0])
+    limitorderbooks[0].add_bid(5, 20, agents[1])
+    limitorderbooks[0].add_ask(11, 20, agents[0])
+    limitorderbooks[0].add_ask(5, 20, agents[1])
     for n in range(119):
         limitorderbooks[0].clean_book()
     assert_equal(len(limitorderbooks[0].bids), 2)
@@ -60,16 +92,16 @@ def test_clean_book(limitorderbooks):
     assert_equal(len(limitorderbooks[0].bids), 0)
     assert_equal(len(limitorderbooks[0].asks), 0)
 
-def test_match_orders(limitorderbooks):
+def test_match_orders(limitorderbooks, agents):
     # add some asks
-    limitorderbooks[0].add_ask(5, 20, 'trader-2')
-    limitorderbooks[0].add_ask(7, 20, 'trader-3')
-    limitorderbooks[0].add_ask(7, 20, 'trader-4')
-    limitorderbooks[0].add_ask(7, 20, 'trader-5')
+    limitorderbooks[0].add_ask(5, 20, agents[0])
+    limitorderbooks[0].add_ask(7, 20, agents[1])
+    limitorderbooks[0].add_ask(7, 20, agents[2])
+    limitorderbooks[0].add_ask(7, 20, agents[3])
     # and bids
-    limitorderbooks[0].add_bid(10, 20, 'trader-1')
-    limitorderbooks[0].add_bid(4, 20, 'trader-11')
-    limitorderbooks[0].add_bid(9, 20, 'trader-11')
+    limitorderbooks[0].add_bid(10, 20, agents[4])
+    limitorderbooks[0].add_bid(4, 20, agents[5])
+    limitorderbooks[0].add_bid(9, 20, agents[6])
     matched_orders = limitorderbooks[0].match_orders()
     # after an orderbook match both order books are reduced by 1
     assert_equal(len(limitorderbooks[0].bids), 2)
@@ -87,9 +119,9 @@ def test_match_orders(limitorderbooks):
     assert_equal(matched_orders, None)
     for n in range(500):
         limitorderbooks[0].clean_book()
-    limitorderbooks[0].add_ask(5, 10, 'trader-2')
-    limitorderbooks[0].add_ask(7, 8, 'trader-3')
-    limitorderbooks[0].add_bid(10, 20, 'trader-1')
+    limitorderbooks[0].add_ask(5, 10, agents[7])
+    limitorderbooks[0].add_ask(7, 8, agents[8])
+    limitorderbooks[0].add_bid(10, 20, agents[9])
     # first match should reduce asks book by 1
     matched_orders = limitorderbooks[0].match_orders()
     assert_equal(len(limitorderbooks[0].bids), 1)
