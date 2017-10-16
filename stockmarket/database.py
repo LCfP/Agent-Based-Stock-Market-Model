@@ -52,7 +52,7 @@ def create_CDA_tables(cur, seed):
 
 
 def record_state_variables(cur, seed, agents, simulation_time, firms, stocks, order_books):
-    """records all state variables from agetns, firms, stocks and the orderbook in an SQL database"""
+    """records all state variables from agents, firms, stocks and the orderbook in an SQL database"""
     # add agents variables to the SQL database
     for agent in agents:
         # 1 store the agent and type of agent in the objects table
@@ -100,6 +100,14 @@ def record_state_variables(cur, seed, agents, simulation_time, firms, stocks, or
                 cur.execute(
                     "INSERT INTO Statevariables{} (seed, period, variable_id, owner_id, value) VALUES (?,?,?,?,?)".format(seed),
                     (seed, 0, variable_type_id, owner_id, str(variables[variable])))
+            # Mainly to store the price-to-earnings-history
+            else:
+                var = variables[variable]
+                # store the prices, volumes and unresolved orders in the state variables table
+                for idx, element in enumerate(var):
+                    cur.execute(
+                        "INSERT INTO Statevariables{} (seed, period, variable_id, owner_id, value) VALUES (?,?,?,?,?)".format(seed),
+                        (seed, idx, variable_type_id, owner_id, str(element)))
     for firm in firms:
         # 1 store the firm and type of firm in the objects table
         cur.execute("INSERT OR IGNORE INTO Objects{} (object_name, object_type) VALUES (?,?)".format(seed),

@@ -7,19 +7,16 @@ the model works. Feel free to copy or use the code under the terms of the licenc
  
 # How to use the model
 1. Download the repository to your system.
-2. Run the simulate_cdoubleauction notebook or simulation.py script and fill in the model parameters to your tase. 
+2. Run the Fundamentals-unknown-replication-notebook, (or recalibrate the model using the calibration notebook). 
 3. The results will be added to an sql lite database on your system.
-4. Use the data_notebook.ipynb (Jupyter Notebook) to analyse this data. 
+4. In the second part of Fundamentals-unknown-replication-notebook you can analyse the output data.
 
 # Repository structure
 
-* The **ODD.md** file contains (an early version of) the model description
+* The main folder contains supporting files
 * The **stockmarket** folder contains supporting scripts, classes and functions.
 
 For clarity reasons, we tried to stick to a functional programming style as much as possible. Therefore, most of the action takes 
-place in the simulation.py file. Exceptions are the functions.transaction, and datawriting functions in database.py.
+place in the baseline.py file.
 
-## To do
-- [ ] Reach 100% testing coverage
-- [ ] Calibrate the model to match stylized facts of real markets
 
