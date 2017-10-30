@@ -3,6 +3,7 @@ import pandas as pd
 import numpy as np
 from math import isclose
 import powerlaw
+from stockmarket.functions import div0
 
 # return autocorrelation close to zero after lag 1
 # calculate returns
@@ -34,15 +35,6 @@ def zero_autocorrelation(returns, lags):
     else:
         return False, np.inf
 
-def fat_tails_kurtosis(returns):
-    series_returns = pd.Series(returns)
-    kurt = series_returns.kurtosis()
-    if kurt > 4:
-        return True, kurt
-    else:
-        return False, np.inf
-
-
 # Test 2
 def fat_tails(returns):
     results = powerlaw.Fit(returns)
@@ -50,6 +42,14 @@ def fat_tails(returns):
     #print(alpha)
     if (alpha < 5) and (alpha > 3):
         return True, alpha
+    else:
+        return False, np.inf
+
+def fat_tails_kurtosis(returns):
+    series_returns = pd.Series(returns)
+    kurt = series_returns.kurtosis()
+    if kurt > 4:
+        return True, kurt
     else:
         return False, np.inf
 
@@ -82,3 +82,7 @@ def hurst(price_series, lag1, lag2):
     m = np.polyfit(np.log(lags), np.log(std_differences), 1)
     hurst = m[0]*2.0
     return hurst
+
+# Test 5
+def correlation_volume_volatility():
+    
