@@ -72,8 +72,45 @@ def long_memory(returns, hurst_function, lag1, lag2):
     #print('h = ', h)
     return not isclose(0.5, h, abs_tol=(10 ** -1 / 2)), h
 
+
+# functions to calculate stylized facts
+
+def autocorrelation_returns(returns, lags):
+    """
+    Calculate the average autocorrelation in a returns time series
+    :param returns: time series of returns
+    :param lags: the lags over which the autocorrelation is to be calculated
+    :return: average autocorrelation
+    """
+    returns = pd.Series(returns)
+    autocorr_returns = [returns.autocorr(lag=lag) for lag in range(lags)]
+    average_autocorrelation = np.mean(autocorr_returns[1:])
+    return average_autocorrelation
+
+def kurtosis(returns):
+    """
+    Calculates the kurtosis in a time series of returns
+    :param returns: time series of returns
+    :return: kurtosis
+    """
+    series_returns = pd.Series(returns)
+    return series_returns.kurtosis()
+
+def autocorrelation_abs_returns(returns, lags):
+    """
+    Calculates the average autocorrelation of absolute returns in a returns time series
+    :param returns: returns time series
+    :param lags: lags used to calculate autocorrelations
+    :return: average autocorrelation of absolute returns
+    """
+    returns = pd.Series(returns)
+    absolute_returns = returns.abs()
+    autocorr_abs_returns = [absolute_returns.autocorr(lag=lag) for lag in range(lags)]
+    return np.mean(autocorr_abs_returns[1:])
+
 def hurst(price_series, lag1, lag2):
     """
+    Calculates a measure of long memory, the hurst exponent
     This is an adaption from:
     https://robotwealth.com/demystifying-the-hurst-exponent-part-1/
     """
@@ -83,6 +120,17 @@ def hurst(price_series, lag1, lag2):
     hurst = m[0]*2.0
     return hurst
 
-# Test 5
-# TODO add this test
-def correlation_volume_volatility():
+def correlation_volume_volatility(volume, returns, window):
+    """
+    :param volume: volume time series
+    :param returns: returns time series
+    :param window: rolling window used to calculate return volatility
+    :return: correlation between returns volatility and volume
+    """
+    actual_simulated_correlation = []
+    volume = pd.Series(volume)
+    returns = pd.Series(returns)
+    roller_returns = returns.rolling(window)
+    returns_volatility = roller_returns.std(ddof=0)
+    correlation = returns_volatility.corr(volume)
+    return correlation
