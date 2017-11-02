@@ -1,7 +1,9 @@
 from stockmarket.evolutionaryalgo import *
 import pytest
+import numpy as np
+from stockmarket import baselinemodel
 from numpy.testing import assert_equal
-
+from numpy.testing import assert_raises
 
 @pytest.fixture()
 def population():
@@ -9,6 +11,19 @@ def population():
                        [-0.008, 3.6, -0.004, 0.4, 0.2], 20)
         ,Individual([0.5,0.23,1603,2,1,64,282,0.004,0.52,1.12,55,21,1.6,18,1.1,1.12,3],
                     [-0.008, 3.8, -0.004, 0.4, 0.2], 30)]
+
+
+@pytest.fixture()
+def suitable_population():
+    return [Individual([0.0,0.0,0,0,0,0,0,0.0,0.0,0.0,0,0,0,0,0,0,0],
+                       [-0.008, 3.6, -0.004, 0.4, 0.2], 40),
+            Individual([2.0, 2.0, 2, 2, 2, 2, 2, 2.0, 2.0, 2.0, 2, 2, 2.0, 2, 2.0, 2.0, 2],
+                       [-0.008, 3.6, -0.004, 0.4, 0.2], 30),
+            Individual([0.0, 0.0, 0, 0, 0, 0, 0, 0.0, 0.0, 0.0, 0, 0, 0, 0, 0, 0, 0],
+                       [-0.008, 3.6, -0.004, 0.4, 0.2], 20),
+            Individual([2.0, 2.0, 2, 2, 2, 2, 2, 2.0, 2.0, 2.0, 2, 2, 2.0, 2, 2.0, 2.0, 2],
+                       [-0.008, 3.6, -0.004, 0.4, 0.2], 10)]
+
 
 @pytest.fixture()
 def problem():
@@ -35,11 +50,16 @@ def test_cost_function(population):
     assert_equal((cost_function(population[0].stylized_facts, population[0].stylized_facts) < cost_function(population[1].stylized_facts, population[0].stylized_facts)) , True)
 
 
-def test_evolve_population():
-    pass
-
-
-def debug_ev_pop(population, problem):
-    evolve_population(population=population, fittest_to_retain=0.5, random_to_retain=0.5, parents_to_mutate=1, parameters_to_mutate=0.5, problem=problem)
-
-debug_ev_pop(population=population(), problem=problem())
+def test_evolve_population(population, suitable_population, problem):
+    # empty parents list should raise a value error
+    assert_raises(ValueError, evolve_population, population, 0.0, 0.0, 1, 0.5, problem)
+    # only two parents (so no unique parents) should raise a specific value error
+    assert_raises(ValueError, evolve_population, population, 0.5, 0.0, 1, 0.5, problem)
+    # evolve a suitable population
+    evolved_population = evolve_population(population=suitable_population, fittest_to_retain=0.5, random_to_retain=0.0, parents_to_mutate=0, parameters_to_mutate=0.5, problem=problem)
+    # the first two elements of the population should have been kept
+    assert_equal(evolved_population[0], suitable_population[0])
+    assert_equal(evolved_population[1], suitable_population[1])
+    # the second population parameters should be a mix of 2 and zero
+    assert_equal((np.mean(evolved_population[-1].parameters) > 0.9), True)
+    assert_equal((np.mean(evolved_population[-1].parameters) < 1.1), True)

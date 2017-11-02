@@ -41,6 +41,9 @@ def evolve_population(population, fittest_to_retain, random_to_retain, parents_t
     amount_random_indiv = int(len(population) * random_to_retain)
     parents.extend(random.sample(population[retain_lenght:], amount_random_indiv))
 
+    if not parents:
+        raise ValueError('There are no parents, so evolution cannot take place')
+
     # 3 mutate random parameters of random individuals
     amount_of_individuals_to_mutate = int(parents_to_mutate * len(parents))
     amount_of_params_to_mutate = int(parameters_to_mutate * len(parents[0].parameters))
@@ -57,6 +60,8 @@ def evolve_population(population, fittest_to_retain, random_to_retain, parents_t
     parents_lenght = len(parents)
     desired_lenght = len(population) - parents_lenght
     children = []
+    if parents_lenght < 2:
+        raise ValueError('There are not enough parents to breed, increase either fittest_to_retain or random_to_retain')
     while len(children) < desired_lenght:
         male = random.randint(0, parents_lenght - 1)
         female = random.randint(0, parents_lenght - 1)
