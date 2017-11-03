@@ -114,6 +114,9 @@ def hurst(price_series, lag1, lag2):
     This is an adaption from:
     https://robotwealth.com/demystifying-the-hurst-exponent-part-1/
     """
+    # first remove any missing values from the price series
+    price_series = price_series.dropna()
+
     lags = range(lag1, lag2)
     std_differences = [np.sqrt(np.std(np.subtract(price_series[lag:], price_series[:-lag]))) for lag in lags]
     m = np.polyfit(np.log(lags), np.log(std_differences), 1)
