@@ -2,7 +2,6 @@
 import pandas as pd
 import numpy as np
 from math import isclose
-import powerlaw
 from stockmarket.functions import div0
 
 # return autocorrelation close to zero after lag 1
@@ -35,15 +34,15 @@ def zero_autocorrelation(returns, lags):
     else:
         return False, np.inf
 
-# Test 2
-def fat_tails(returns):
-    results = powerlaw.Fit(returns)
-    alpha = results.power_law.alpha
-    #print(alpha)
-    if (alpha < 5) and (alpha > 3):
-        return True, alpha
-    else:
-        return False, np.inf
+# # Test 2
+# def fat_tails(returns):
+#     results = powerlaw.Fit(returns)
+#     alpha = results.power_law.alpha
+#     #print(alpha)
+#     if (alpha < 5) and (alpha > 3):
+#         return True, alpha
+#     else:
+#         return False, np.inf
 
 def fat_tails_kurtosis(returns):
     series_returns = pd.Series(returns)
