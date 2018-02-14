@@ -1,7 +1,7 @@
 from stockmarket import baselinemodel
 
 agents, firms, stocks, order_books = baselinemodel.stockMarketSimulation(seed=0,
-                                                                         simulation_time=60,
+                                                                         simulation_time=30,
                                                                          init_backward_simulated_time=200,
                                                                          number_of_agents=100,
                                                                          share_chartists=0.5,
