@@ -40,6 +40,8 @@ def stockMarketSimulation(seed,
         Seed used to set the pseudo number generator for experiment reproduction
     simulation_time : integer
         Amount of periods over which the simulation takes place
+    init_backward_simulated_time: integer
+        Amount of pre-simulated periods
     amount_fundamentalists: integer
         Sets the amount of fundamentalist type agents
     amount_chartists : integer
