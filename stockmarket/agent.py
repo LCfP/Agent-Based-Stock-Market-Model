@@ -29,39 +29,17 @@ class Trader:
         self.volume_risk_aversion = trader_volume_risk_aversion
         self.order_in_market = False
 
-    def valuate_stocks(self, stock):
-        """
-
-        Returns the value the Trader thinks `stock` has.
-
-        Parameters
-        ----------
-        stock : :obj:`stock`
-            Stock to be valuated.
-
-        Returns
-        -------
-        scalar
-            The value of `stock`.
-
-        """
-        # calls valuation function currently assigned to the Trader.
-        return self.function(stock=stock, memory=self.memory_size, s=self.ma_short, l=self.ma_long)
-
     def buy_sell_or_hold(self, price_series, current_price_to_earnings_ratio, shortMA=20, longMA=200, upper_threshold=1.05, lower_threshold=0.95, mean_reversion_memory_divider=4):
         """
         Determine to place a buy, sell or no order for a stock
-
-        Parameters
-        ----------
-        stock : :obj:`stock`
-            Stock to be valuated.
-
-        Returns
-        -------
-        string
-            buy, sell or hold
-
+        :param price_series: list of prices
+        :param current_price_to_earnings_ratio: integer
+        :param shortMA: integer short moving average
+        :param longMA: integer long moving average
+        :param upper_threshold: integer the P/E ratio at which the agent thinks the stock is overvalued
+        :param lower_threshold: integer the P/E ratio at which the agent thinks the stock is undervalued
+        :param mean_reversion_memory_divider: integer mean reversion traders trade over a shorter window
+        :return: string 'buy' or 'sell'
         """
         # Make sure that the trader is not a noise trader:
         noise_trader = False
@@ -134,6 +112,12 @@ class Trader:
         self.money -= money
 
     def update_strategy(self, market_return, window):
+        """
+        Ask the agent to update its strategy based on its performance vis à vis the market
+        :param market_return: average market return of the previous day
+        :param window: amount of backward looking days
+        :return: None
+        """
         return_on_assets = np.mean(self.return_on_assets[-window:])
         self.function = self.switching_strategy(self, self.propensity_to_switch,
                                                 return_on_assets, market_return)

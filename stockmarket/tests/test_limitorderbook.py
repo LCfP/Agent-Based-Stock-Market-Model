@@ -44,7 +44,6 @@ def agents():
 
             ]
 
-
 @pytest.fixture()
 def limitorderbooks():
     # create a firm
@@ -142,3 +141,34 @@ def test_match_orders(limitorderbooks, agents):
     # no more matches should be possible, leaving the order in the orderbook
     assert_equal(limitorderbooks[0].match_orders(), None)
 
+
+def test_cleanse_book(limitorderbooks, agents):
+    # add some asks
+    limitorderbooks[0].add_ask(5, 20, agents[0])
+    limitorderbooks[0].add_ask(7, 20, agents[1])
+    limitorderbooks[0].add_ask(7, 20, agents[2])
+    limitorderbooks[0].add_ask(7, 20, agents[3])
+    # and bids
+    limitorderbooks[0].add_bid(10, 20, agents[4])
+    limitorderbooks[0].add_bid(4, 20, agents[5])
+    limitorderbooks[0].add_bid(9, 20, agents[6])
+    matched_orders = limitorderbooks[0].match_orders()
+    # cleanse book
+    transvolhist1 = limitorderbooks[0].transaction_volumes_history
+    matched_orders_hist1 = limitorderbooks[0].matched_bids_history
+    limitorderbooks[0].cleanse_book()
+    transvolhist2 = limitorderbooks[0].transaction_volumes_history
+    matched_orders_hist2 = limitorderbooks[0].matched_bids_history
+    # test if volume history and matched orders history where updated
+    assert_equal(len(transvolhist1) < len(transvolhist2), False)
+    assert_equal(len(matched_orders_hist1) < len(matched_orders_hist2), False)
+
+def test_update_bid_ask_spread(limitorderbooks, agents):
+    # init bid-ask = 0.01 0.01
+    # add bid
+    print(limitorderbooks[0].lowest_ask_price)
+    limitorderbooks[0].add_ask(5, 20, agents[0])
+    print(limitorderbooks[0].lowest_ask_price)
+    pass
+
+test_update_bid_ask_spread(limitorderbooks(), agents())
