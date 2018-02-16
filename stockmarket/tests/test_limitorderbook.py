@@ -6,7 +6,7 @@ from stockmarket.agent import Trader
 from stockmarket.firms import Firm
 from stockmarket.stock import Stock
 from stockmarket.valuationfunctions import *
-from numpy.testing import assert_equal
+from numpy.testing import assert_equal, assert_raises
 
 @pytest.fixture()
 def agents():
@@ -43,7 +43,6 @@ def agents():
 
 
             ]
-
 
 @pytest.fixture()
 def limitorderbooks():
@@ -142,3 +141,40 @@ def test_match_orders(limitorderbooks, agents):
     # no more matches should be possible, leaving the order in the orderbook
     assert_equal(limitorderbooks[0].match_orders(), None)
 
+
+def test_cleanse_book(limitorderbooks, agents):
+    # add some asks
+    limitorderbooks[0].add_ask(5, 20, agents[0])
+    limitorderbooks[0].add_ask(7, 20, agents[1])
+    limitorderbooks[0].add_ask(7, 20, agents[2])
+    limitorderbooks[0].add_ask(7, 20, agents[3])
+    # and bids
+    limitorderbooks[0].add_bid(10, 20, agents[4])
+    limitorderbooks[0].add_bid(4, 20, agents[5])
+    limitorderbooks[0].add_bid(9, 20, agents[6])
+    matched_orders = limitorderbooks[0].match_orders()
+    # cleanse book
+    transvolhist1 = limitorderbooks[0].transaction_volumes_history
+    matched_orders_hist1 = limitorderbooks[0].matched_bids_history
+    limitorderbooks[0].cleanse_book()
+    transvolhist2 = limitorderbooks[0].transaction_volumes_history
+    matched_orders_hist2 = limitorderbooks[0].matched_bids_history
+    # test if volume history and matched orders history where updated
+    assert_equal(len(transvolhist1) < len(transvolhist2), False)
+    assert_equal(len(matched_orders_hist1) < len(matched_orders_hist2), False)
+
+
+def test_update_bid_ask_spread(limitorderbooks, agents):
+    """test if the bid_ask spread is correctly updated"""
+    # first add lower ask
+    lowest_ask1 = limitorderbooks[0].lowest_ask_price
+    limitorderbooks[0].add_ask(98, 20, agents[0])
+    lowest_ask2 = limitorderbooks[0].lowest_ask_price
+    assert_equal(lowest_ask2 < lowest_ask1, True)
+    # add higher bid and check if the highest bid is correctly updated
+    highest_bid1 = limitorderbooks[0].highest_bid_price
+    limitorderbooks[0].add_bid(102, 20, agents[1])
+    highest_bid2 = limitorderbooks[0].highest_bid_price
+    assert_equal(highest_bid2 > highest_bid1, True)
+    # check if the correct error is thrown if anything other than bid or ask is used in the method
+    assert_raises(ValueError, limitorderbooks[0].update_bid_ask_spread, 'something_else')

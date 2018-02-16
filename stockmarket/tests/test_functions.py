@@ -34,11 +34,6 @@ def test_growing_perpetuity():
     assert_raises(ValueError, npv_growing_perpetuity, 1, 0.5, 0.5)
 
 
-def test_moving_averages():
-    # TODO: write tests
-    pass
-
-
 def test_div0():
     assert_equal(div0(23, 0), 0)
     assert_equal(div0(10, 5), 2)

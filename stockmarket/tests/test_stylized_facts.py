@@ -13,7 +13,7 @@ def test_autocorrelation_returns():
 def test_kurtosis():
     """The excess kurtosis of a normal distribution should be close to zero"""
     randomdistr = np.random.normal(0, 0.1, 10000)
-    assert_almost_equal(kurtosis(randomdistr), 0, decimal=1)
+    assert_almost_equal(kurtosis(randomdistr), 0, decimal=0)
 
 def test_autocorrelation_abs_returns():
     # autocorrelation of absolute returns should be equal to 1 where the autocor was not 1

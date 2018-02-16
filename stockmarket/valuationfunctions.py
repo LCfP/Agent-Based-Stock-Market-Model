@@ -2,22 +2,15 @@
 
 import numpy as np
 from stockmarket.functions import npv_growing_perpetuity
-from stockmarket.functions import moving_average
 
 
 def extrapolate_average_profit(stock, memory, **_):
-    # TODO
     """
 
-    Parameters
-    ----------
-    stock
-    memory
-    _
-
-    Returns
-    -------
-
+    :param stock:
+    :param memory:
+    :param _:
+    :return:
     """
     prof_history = stock.firm.profit_history[-memory:]
     expected_profit = np.mean(prof_history)

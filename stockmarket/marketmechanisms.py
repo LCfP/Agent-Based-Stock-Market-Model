@@ -1,12 +1,9 @@
 """In this file, we define market matching mechanism functions.
 These functions take in agent sets and output matched pairs of agents"""
 
-import math
 import random
-from stockmarket.database import df_update_transactions
 from stockmarket.functions import div0
 import numpy as np
-import copy
 
 
 def continuous_double_auction(agentset, stock, orderbook, valuation_type_function, agents_hold_thresholds, order_variability, current_price_to_earnings_ratio, mean_reversion_memory_divider):
