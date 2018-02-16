@@ -6,7 +6,7 @@ from stockmarket.agent import Trader
 from stockmarket.firms import Firm
 from stockmarket.stock import Stock
 from stockmarket.valuationfunctions import *
-from numpy.testing import assert_equal
+from numpy.testing import assert_equal, assert_raises
 
 @pytest.fixture()
 def agents():
@@ -163,12 +163,18 @@ def test_cleanse_book(limitorderbooks, agents):
     assert_equal(len(transvolhist1) < len(transvolhist2), False)
     assert_equal(len(matched_orders_hist1) < len(matched_orders_hist2), False)
 
-def test_update_bid_ask_spread(limitorderbooks, agents):
-    # init bid-ask = 0.01 0.01
-    # add bid
-    print(limitorderbooks[0].lowest_ask_price)
-    limitorderbooks[0].add_ask(5, 20, agents[0])
-    print(limitorderbooks[0].lowest_ask_price)
-    pass
 
-test_update_bid_ask_spread(limitorderbooks(), agents())
+def test_update_bid_ask_spread(limitorderbooks, agents):
+    """test if the bid_ask spread is correctly updated"""
+    # first add lower ask
+    lowest_ask1 = limitorderbooks[0].lowest_ask_price
+    limitorderbooks[0].add_ask(98, 20, agents[0])
+    lowest_ask2 = limitorderbooks[0].lowest_ask_price
+    assert_equal(lowest_ask2 < lowest_ask1, True)
+    # add higher bid and check if the highest bid is correctly updated
+    highest_bid1 = limitorderbooks[0].highest_bid_price
+    limitorderbooks[0].add_bid(102, 20, agents[1])
+    highest_bid2 = limitorderbooks[0].highest_bid_price
+    assert_equal(highest_bid2 > highest_bid1, True)
+    # check if the correct error is thrown if anything other than bid or ask is used in the method
+    assert_raises(ValueError, limitorderbooks[0].update_bid_ask_spread, 'something_else')

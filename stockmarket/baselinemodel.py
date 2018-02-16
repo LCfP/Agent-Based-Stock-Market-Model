@@ -1,9 +1,8 @@
 """This file is our main simulation file it includes the set-up and time loop"""
 
 import random
-import numpy as np
 from stockmarket.limitorderbook import *
-from stockmarket import setup, marketmechanisms, marketmaker
+from stockmarket import setup, marketmechanisms
 from stockmarket.functions import div0
 
 def stockMarketSimulation(seed,
