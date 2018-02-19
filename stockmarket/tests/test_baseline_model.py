@@ -1,7 +1,10 @@
 from stockmarket import baselinemodel
+from numpy.testing import assert_equal
 
-agents, firms, stocks, order_books = baselinemodel.stockMarketSimulation(seed=0,
-                                                                         simulation_time=50,
+def test_baselinemodel():
+    """Check if the baseline model runs"""
+    agents, firms, stocks, order_books = baselinemodel.stockMarketSimulation(seed=0,
+                                                                         simulation_time=30,
                                                                          init_backward_simulated_time=200,
                                                                          number_of_agents=100,
                                                                          share_chartists=0.5,
@@ -26,3 +29,4 @@ agents, firms, stocks, order_books = baselinemodel.stockMarketSimulation(seed=0,
                                                                          mean_reversion_memory_divider=4,
                                                                          printProgress=False,
                                                                          )
+    assert_equal(len(agents), 100)
