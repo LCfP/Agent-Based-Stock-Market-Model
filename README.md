@@ -1,5 +1,5 @@
-[![Build Status](https://travis-ci.org/LCfP/abm.svg?branch=dev)](https://travis-ci.org/LCfP/abm)
-[![Coverage Status](https://coveralls.io/repos/github/LCfP/abm/badge.svg?branch=dev)](https://coveralls.io/github/LCfP/abm?branch=dev)
+[![Build Status](https://travis-ci.org/LCfP/Agent-Based-Stock-Market-Model.svg?branch=dev)](https://travis-ci.org/LCfP/Agent-Based-Stock-Market-Model)
+[![Coverage Status](https://coveralls.io/repos/github/LCfP/Agent-Based-Stock-Market-Model/badge.svg?branch=dev)](https://coveralls.io/github/LCfP/Agent-Based-Stock-Market-Model?branch=dev)
 
 # Basic stock market model
 This repository contains a simple agent-based stock market model. While this is a work in progress, 
